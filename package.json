@@ -1,0 +1,16 @@
+{
+  "name": "binb",
+  "dependencies": {
+    "express": "latest",
+    "socket.io": "latest",
+    "redis-url": "latest"
+  },
+  "subdomain": "binb",
+  "scripts": {
+    "start": "server.js"
+  },
+  "engine": {
+    "node": "0.6.x"
+  },
+  "version": "0.1.1"
+}

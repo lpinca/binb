@@ -1,0 +1,3 @@
+.npmignore
+node_modules/
+db/

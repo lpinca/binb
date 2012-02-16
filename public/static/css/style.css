@@ -1,0 +1,271 @@
+body {
+	background: url('/static/images/bg.jpg') repeat-x scroll 0 0 #F5F6F7;
+}
+section {
+	margin-top:30px;
+}
+.matched {
+	color: #f3a22f;
+}
+.gameover {
+	padding-left:32px;
+	height:32px;
+	line-height:32px;
+}
+.gameover .name {
+	font-weight:bold;
+}
+.relative {
+	position: relative;
+}
+#app-name {
+	display: inline-block;
+}
+#total-tracks {
+	float:right;
+	color: #BFBFBF;
+	margin-top:22px;
+}
+#cassette {
+	margin-top:17px;
+	height: 137px;
+	background: url('/static/images/cassette.png') no-repeat 0 0;
+}
+#countdown {
+	position: absolute;
+	width: 26px;
+	text-align:center;
+	top:80px;
+	left:175px;
+}
+#wheel-left, #wheel-right {
+	position:absolute;
+	width: 24px;
+	height:24px;
+	top: 49px;
+	background: url('/static/images/wheel.png') no-repeat 0 0;
+}
+#wheel-left {
+	left:51px;
+}
+#wheel-right {
+	left:145px;
+}
+#tape-left, #tape-right {
+	height:70px;
+	width:70px;
+	position:absolute;
+	top:25px;
+	background-color: black;
+	-webkit-border-radius: 70px;
+	-moz-border-radius: 70px;
+    border-radius: 70px;
+	z-index:-1;
+}
+#tape-left {
+	left: 20px;
+}
+#tape-right {
+	left: 106px;
+}
+#progress-bar, #progress {
+	height:7px;
+	-webkit-border-radius:4px;
+	-moz-border-radius:4px;
+	border-radius:4px;
+	-webkit-box-shadow: inset 0px 1px 2px 0px #333;
+ 	-moz-box-shadow: inset 0px 1px 2px 0px #333;
+  	box-shadow: inset 0px 1px 2px 0px #333;
+}
+#progress-bar {
+	position:absolute;
+	width: 148px;
+	top:85px;
+	left:20px;
+	border:1px solid #404040;
+	border:1px solid rgba(0, 0, 0, 0.5);
+}
+#progress {
+	background-color: #6184b7;
+	width:0px;
+}
+#summary {
+	text-align: center;
+	margin-bottom:18px;
+}
+#users {
+	margin-bottom: 90px;
+	max-height: 380px;
+	overflow: auto;
+}
+#users .name, #tracks .artist {
+	font-weight: bold;
+}
+#message-wrapper {
+	text-align: right;
+}
+#users li, #tracks li, #chat li {
+	color: #404040;
+}
+#users .private {
+	display: none;
+}
+#users .private, #users .name, .gameover .name {
+	margin-right: 4px;
+}
+#users .name {
+	cursor: pointer;
+}
+#users .you {
+	cursor: auto;
+}
+#users .points {
+	margin-right: 10px;
+}
+.round-rank {
+	height:16px;
+	width:16px;
+	margin-right:2px;
+}
+.stand1 {
+	background: url('/static/images/sprites.png') no-repeat 0 0;
+}
+.stand2 {
+	background: url('/static/images/sprites.png') no-repeat -16px 0;
+}
+.stand3 {
+	background: url('/static/images/sprites.png') no-repeat -32px 0;
+}
+#users .round-rank {
+	display:inline-block;
+	vertical-align: middle;
+}
+#chat-wrapper {
+	margin-bottom: 4px;
+	height: 160px;
+	background-color: white;
+}
+#chat-top, #chat-bottom {
+	background-color: white;
+	position: absolute;
+	left: 6px;
+	height: 4px;
+	width: 430px;
+	z-index: 1;
+}
+#chat-bottom {
+	bottom: 0;
+}
+#chat {
+	position:absolute;
+	height: 152px;
+	width: 446px;
+	padding: 4px 6px;
+	overflow: auto;
+	margin: 0;
+}
+.bordered {
+	border: 1px solid #ccc;
+	-webkit-border-radius: 6px;
+	-moz-border-radius: 6px;
+    border-radius: 6px;
+	-webkit-box-shadow: 0 1px 2px rgba(0,0,0,.075);
+    -moz-box-shadow: 0 1px 2px rgba(0,0,0,.075);
+    box-shadow: 0 1px 2px rgba(0,0,0,.075);
+}
+#chat .join, #chat .left {
+	font-style: italic;
+}
+#chat .private {
+	color: #a65fc3;
+}
+#feedback {
+	text-align: center;
+}
+.correct {
+	color: #46A546;
+}
+#feedback .wrong, #chat .error {
+	color: #C43C35;
+}
+#tracks {
+	margin-top: 18px;
+	max-height: 240px;
+	overflow: auto;
+}
+#tracks li {
+	margin: 0 2px 2px 0;
+	padding: 8px;
+	min-height: 40px;
+	background: -moz-linear-gradient(center top , #FBFBFB, #F5F5F5);
+	background: -webkit-linear-gradient(center top , #FBFBFB, #F5F5F5);
+	background: -o-linear-gradient(center top , #FBFBFB, #F5F5F5);
+	background: -ms-linear-gradient(center top , #FBFBFB, #F5F5F5);
+	background: linear-gradient(center top , #FBFBFB, #F5F5F5);
+}
+#tracks img.artwork, #tracks .info, #tracks .round-rank, #tracks .round-points, #copy, #facebook-button, #twitter-button {
+	float:left;
+}
+#tracks img.artwork {
+	width: 40px;
+	height: 40px;
+	margin-right:10px;
+}
+#tracks .info {
+	margin-right:15px;
+}
+#tracks .artist {
+	margin-top: 1px;
+	font-size: 14px;
+}
+#tracks .round-rank {
+	margin-top:12px;
+}
+#tracks .round-points {
+	margin-top: 11px;
+}
+#tracks a {
+	float:right;
+	display:block;
+	width:24px;
+	height:24px;
+	margin-top:8px;
+}
+#disclaimer {
+	position: absolute;
+	left: 60px; 
+	bottom: 18px;
+	color: #BFBFBF;
+	width:340px;
+}
+footer {
+	padding: 0;
+	border-top:1px solid #DDDDDD;
+	color: #BFBFBF;
+	text-shadow: 0 1px 0 #FFFFFF;
+}
+#footer-inner, #twitter-button {
+	height:20px;
+}
+#footer-inner {
+	border-top:1px solid white;
+	padding-top:5px;
+	margin-bottom:30px;
+}
+#copy {
+	margin: 0 20px 0 20px;
+}
+#facebook-button {
+	width:90px;
+	height:21px
+}
+#twitter-button {
+	width:110px;
+}
+#copy, #footer-right {
+	line-height:20px;
+}
+#footer-right {
+	float:right;
+	margin-right:20px;
+}
