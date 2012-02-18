@@ -9,7 +9,7 @@ http.set("view options", { layout: false });
 
 // Routes
 http.get("/", function(req, res) {
-    res.sendfile("index.html");
+	res.sendfile("index.html");
 });
 
 // Starting HTTP server
@@ -25,10 +25,10 @@ redis.on('error', function(err) {
 // Setting up Socket.IO
 var io = require("socket.io").listen(http);
 
-io.enable('browser client minification');  // send minified client
-io.enable('browser client etag');          // apply etag caching logic based on version number
-io.enable('browser client gzip');          // gzip the file
-io.set('log level', 1);                    // reduce logging
+io.enable('browser client minification');	// send minified client
+io.enable('browser client etag'); 			// apply etag caching logic based on version number
+io.enable('browser client gzip'); 			// gzip the file
+io.set('log level', 1); 					// reduce logging
 // enable transports
 io.set('transports', ['websocket', 'htmlfile', 'xhr-polling', 'jsonp-polling']);
 
@@ -36,11 +36,11 @@ var Game = {
 
 	sockets : Object.create(null),
 	usersData : Object.create(null),
-	playedtracks: [],	// Used to prevent the same song from playing twice in one game
+	playedtracks: [], // Used to prevent the same song from playing twice in one game
 	
 	artistName: null,
 	trackName: null,	
-    collectionName: null,
+	collectionName: null,
 	previewUrl: null,
 	artworkUrl: null,
 	trackViewUrl: null,
@@ -81,35 +81,35 @@ var Game = {
 
 	// A user is submitting a name
 	setNickName: function(socket, data) {
-        var feedback = null;
-        if (Game.userExists(data.nickname)) {
-            feedback = '<span class="label label-important">That name is alredy taken.</span>';
+	    var feedback = null;
+	    if (Game.userExists(data.nickname)) {
+	 	   feedback = '<span class="label label-important">That name is alredy taken.</span>';
 		}
-        if (feedback) {
-            return Game.invalidNickName(socket, feedback);
+	    if (feedback) {
+	 	   return Game.invalidNickName(socket, feedback);
 		}
 
-        socket.nickname = data.nickname;
+	    socket.nickname = data.nickname;
 		
 		// Add user to the list of active users and broadcast the event
 		Game.addUser(socket);
 		socket.emit('ready', {users:Game.usersData,trackscount:Game.trackscount});
 		socket.broadcast.emit('newuser', {nickname:socket.nickname,users:Game.usersData});
-    },
+	},
 
 	// A user requested an invalid name
-    invalidNickName: function(socket, feedback) {
+	invalidNickName: function(socket, feedback) {
 		socket.emit('invalidnickname', {feedback:feedback});
-    },
+	},
 
 	// A user has left (DCed, etc.)
-    userLeft: function(socket) {
+	userLeft: function(socket) {
 		if (socket.nickname !== undefined) {
 			var leftname = socket.nickname;
 			Game.removeUser(socket);
 			io.sockets.emit('userleft', {nickname:leftname,users:Game.usersData});
 		}
-    },
+	},
 	
 	sendChatMessage: function (socket, data) {
 		if (data.to) {
@@ -378,7 +378,7 @@ io.sockets.on("connection", function(socket) {
 	socket.on('guess', function(data) {
 		Game.guess(socket, data);
 	});
-    socket.on("disconnect", function() {
-        Game.userLeft(socket);
-    });
+	socket.on("disconnect", function() {
+	    Game.userLeft(socket);
+	});
 });

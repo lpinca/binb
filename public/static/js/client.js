@@ -1,7 +1,7 @@
 var App = {
 
-    nickname: null,
-    socket: null,
+	nickname: null,
+	socket: null,
 	pvtmgsto: null,
 	roundpoints: 0,
 	stopanimation: false,
@@ -9,16 +9,16 @@ var App = {
 			'Game is about to start...', 'Game is over', 'New game will start soon...'],
 	tmstrings: ['Yes, you guessed the title. Who is the artist?', 'Now tell me the artist!',
 					'Correct, do you also know the artist?'],
-    amstrings: ['Yes, that\'s the artist. What about the title?', 'Exactly, now tell me the title!',
+	amstrings: ['Yes, that\'s the artist. What about the title?', 'Exactly, now tell me the title!',
 					'Do you also know the title?'],
-    bmstrings: ['Yeah true! do you like this track?', 'Good job!', 'Great!',
+	bmstrings: ['Yeah true! do you like this track?', 'Good job!', 'Great!',
 					'Very well done!', 'Exactly!', 'Excellent!'],
 	nmstrings: ['Nope, sorry!', 'No way!', 'Fail', 'Nope', 'No', 'That\'s wrong', 'What?!',
 				'Wrong', 'Haha, what?!', 'You kidding?', 'Don\'t make me laugh', 'You mad?'],
 	
 	// Prompt for name and send it.
-    setNickName: function(msg) {
-        if (!msg) {
+	setNickName: function(msg) {
+	    if (!msg) {
 			msg = "What's your name?";
 
 			var html = '<div class="modal-header"><h3>Welcome to Binb</h3></div>';
@@ -56,12 +56,12 @@ var App = {
 			$('.modal-body p').html(msg);
 			$('#login').focus();
 		}
-    },
+	},
 
 	// Your submitted name was invalid
-    invalidNickName: function(data) {
-        App.setNickName(data.feedback+"<br/>Try again:");
-    },
+	invalidNickName: function(data) {
+	    App.setNickName(data.feedback+"<br/>Try again:");
+	},
 	
 	// You joined the game
 	ready: function(data) {
@@ -73,7 +73,7 @@ var App = {
 		App.addChatEntry(joinspan);
 		App.updateUsers(data);
 
-        var messagebox = $("#message");
+	    var messagebox = $("#message");
 		messagebox.keyup(function(event) {
 			if (event.keyCode === 13) {
 				var val = $.trim(messagebox.val());
@@ -164,9 +164,9 @@ var App = {
 	},
 
 	// Update the list of users
-    updateUsers: function(data) {
-        var elem = $("#users");
-        elem.empty();
+	updateUsers: function(data) {
+	    var elem = $("#users");
+	    elem.empty();
 		var users = [];
 		for (var key in data.users) {
 			users.push(data.users[key]);
@@ -174,16 +174,16 @@ var App = {
 		users.sort(function(a, b) {return b.points - a.points;});
 		// Flag to test if our private recipient is in the list of active users
 		var found = false;
-        for (var i=0; i<users.length; i++) {
-            var user = users[i];
-            var li = $('<li></li>');
+	    for (var i=0; i<users.length; i++) {
+	 	   var user = users[i];
+	 	   var li = $('<li></li>');
 			var pvt = $('<span class="private label label-info">P</span>');
 			var username = $('<span class="name"></span>').text(user.nickname);
 			var points = $('<span class="points">('+user.points+')</span>');
 			var roundrank = $('<span></span>');
 			var roundpoints = $('<span class="round-points"></span>');
 			li.append(pvt, username, points, roundrank, roundpoints);
-            elem.append(li);
+	 	   elem.append(li);
 			if (App.pvtmsgto === user.nickname) {
 				pvt.show();
 				username.click(App.clearPrivate);
@@ -213,7 +213,7 @@ var App = {
 					username.addClass("correct");
 				}
 			}
-        }
+	    }
 		if (!found && App.pvtmsgto) {
 			var recipient = $('#recipient');
 			var width = recipient.outerWidth(true) + 1;
@@ -223,7 +223,7 @@ var App = {
 			App.pvtmsgto = null;
 			$("#message").focus();
 		}
-    },
+	},
 	
 	addPrivate: function(nickname) {
 		if (App.pvtmsgto) {
@@ -234,32 +234,32 @@ var App = {
 		}
 		var recipient = $("#recipient");
 		recipient.css('margin-right','4px');
-        recipient.text("To "+nickname+":");
+	    recipient.text("To "+nickname+":");
 		var width = recipient.outerWidth(true) + 1;
 		recipient.hide();
 		$('#message').animate({'width':'-='+width+'px'}, "fast", function() {recipient.show();});
-        var el = $("span.name:contains("+nickname+")");
+	    var el = $("span.name:contains("+nickname+")");
 		el.prev().show();
 		el.unbind('click');
 		el.click(App.clearPrivate);
-        App.pvtmsgto = nickname;
-        $("#message").focus();
+	    App.pvtmsgto = nickname;
+	    $("#message").focus();
 	},
 
 	clearPrivate: function() {
 		var recipient = $("#recipient");
 		var width = recipient.outerWidth(true) + 1;
 		recipient.css('margin-right','0');
-        recipient.text("");
+	    recipient.text("");
 		$('#message').animate({'width':'+='+width+'px'}, "fast");
 		var el = $("span.name:contains("+App.pvtmsgto+")");
 		el.prev().hide();
 		el.unbind("click");
-        el.click(function() {
+	    el.click(function() {
 			App.addPrivate($(this).text());
 		});
 		App.pvtmsgto = null;
-        $("#message").focus();
+	    $("#message").focus();
 	},
 
 	// Receive a chat message
@@ -271,9 +271,9 @@ var App = {
 			prefix = (App.nickname === data.from) ? '(To '+data.to+')' : '(From '+prefix+')';
 			msgspan.addClass("private");
 		}
-        var msg = prefix+": "+data.chatmsg;
-        msgspan.text(msg);
-        App.addChatEntry(msgspan);
+	    var msg = prefix+": "+data.chatmsg;
+	    msgspan.text(msg);
+	    App.addChatEntry(msgspan);
 	},
 
 	loadTrack: function(data) {
@@ -407,28 +407,28 @@ var App = {
 		App.countDown(Date.now()+10000);
 	},
 
-    // Let the user know when he / she has disconnected
-    disconnect: function() {
+	// Let the user know when he / she has disconnected
+	disconnect: function() {
 		App.stopanimation = true;
 		$('#player').jPlayer("stop");
 		var errormsg = "ERROR: You have disconnected.";
-        var errorspan = $("<span class='error'></span>");
+	    var errorspan = $("<span class='error'></span>");
 		errorspan.text(errormsg);
-        App.addChatEntry(errorspan);
+	    App.addChatEntry(errorspan);
 		App.addFeedback('Something wrong happened');
-        var users = $("#users");
-        users.empty();
-    },
+	    var users = $("#users");
+	    users.empty();
+	},
 
-    // Add a chat entry, whether message, notification, etc.
-    addChatEntry: function(childNode) {
-        var li = $("<li class='entry'></li>");
-        li.append(childNode);
-        var chat = $("#chat");
-        chat.append(li);
-        var chatRaw = document.getElementById("chat");
-        chatRaw.scrollTop = chatRaw.scrollHeight;
-    },
+	// Add a chat entry, whether message, notification, etc.
+	addChatEntry: function(childNode) {
+	    var li = $("<li class='entry'></li>");
+	    li.append(childNode);
+	    var chat = $("#chat");
+	    chat.append(li);
+	    var chatRaw = document.getElementById("chat");
+	    chatRaw.scrollTop = chatRaw.scrollHeight;
+	},
 
 	addFeedback: function(txt, style) {
 		if (typeof style === 'string') {
@@ -440,8 +440,8 @@ var App = {
 		$('#feedback').text(txt);
 	},
 
-    // Set up the App object.
-    init: function() {
+	// Set up the App object.
+	init: function() {
 		$('#modal').modal({keyboard:false,show:false,backdrop:"static"});
 		if ($.browser.mozilla) {
 			// Block ESC button in firefox (it breaks all socket connection).
@@ -451,7 +451,7 @@ var App = {
 				}
 			});
 		}
-        App.socket = io.connect("http://binb.nodejitsu.com/", {'reconnect':false});
+	    App.socket = io.connect("http://binb.nodejitsu.com/", {'reconnect':false});
 		App.socket.on("connect", function() {
 			$("#player").jPlayer({
 				ready: function() {
@@ -465,6 +465,6 @@ var App = {
 		});
 		App.socket.on('invalidnickname', App.invalidNickName);
 		App.socket.on('ready', App.ready);
-        App.socket.on("disconnect", App.disconnect);
-    }
+	    App.socket.on("disconnect", App.disconnect);
+	}
 };
