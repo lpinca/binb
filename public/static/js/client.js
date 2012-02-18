@@ -25,7 +25,7 @@ var App = {
 			html += '<div class="modal-body"><p>'+msg+'</p></div>';
 			html += '<div class="modal-footer">';
 			html += '<input id="login" class="" type="text" name="nickname" />';
-			html += '<button id="join" class="btn primary">Join the game</button></div>';
+			html += '<button id="join" class="btn btn-primary">Join the game</button></div>';
 
 			$(html).appendTo($('#modal'));
 			var login = $('#login');
@@ -38,7 +38,7 @@ var App = {
 				}
 				else {
 					var txt = "Nickname can't be empty.";
-					App.invalidNickName({feedback:'<span class="label important">'+txt+'</span>'});
+					App.invalidNickName({feedback:'<span class="label label-important">'+txt+'</span>'});
 				}
 				login.val("");
 			});
@@ -48,7 +48,7 @@ var App = {
 				}
 			});
 			$('#modal').modal('show');
-			$('#modal').bind('shown', function() {
+			$('#modal').on('shown', function() {
 				login.focus();	
 			});
 		}
@@ -177,7 +177,7 @@ var App = {
         for (var i=0; i<users.length; i++) {
             var user = users[i];
             var li = $('<li></li>');
-			var pvt = $('<span class="private label notice">P</span>');
+			var pvt = $('<span class="private label label-info">P</span>');
 			var username = $('<span class="name"></span>').text(user.nickname);
 			var points = $('<span class="points">('+user.points+')</span>');
 			var roundrank = $('<span></span>');
@@ -442,7 +442,7 @@ var App = {
 
     // Set up the App object.
     init: function() {
-		$('#modal').modal({backdrop:"static"});
+		$('#modal').modal({keyboard:false,show:false,backdrop:"static"});
 		if ($.browser.mozilla) {
 			// Block ESC button in firefox (it breaks all socket connection).
 			$(document).keypress(function(event) {
@@ -451,7 +451,7 @@ var App = {
 				}
 			});
 		}
-        App.socket = io.connect("http://binb.nodejitsu.com/", {'reconnect':false});
+        App.socket = io.connect("http://http://binb.nodejitsu.com/", {'reconnect':false});
 		App.socket.on("connect", function() {
 			$("#player").jPlayer({
 				ready: function() {

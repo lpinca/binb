@@ -4,6 +4,25 @@ body {
 section {
 	margin-top:30px;
 }
+.page-header {
+	padding: 0;
+	margin: 0 0 17px 0;
+	border-bottom:1px solid #ddd;
+	-webkit-box-shadow:0 1px 0 rgba(255, 255, 255, 0.5);
+	-moz-box-shadow:0 1px 0 rgba(255, 255, 255, 0.5);
+	box-shadow:0 1px 0 rgba(255, 255, 255, 0.5);
+}
+.page-header h1 {
+	margin-bottom:8px;
+	line-height: 36px;
+}
+.page-header h1 small {
+	line-height: 1;
+	color: #BFBFBF;
+}
+input {
+	margin-bottom: 0;
+}
 .matched {
 	color: #f3a22f;
 }
@@ -113,6 +132,11 @@ section {
 #users .private, #users .name, .gameover .name {
 	margin-right: 4px;
 }
+#users .label {
+	font-size:9.75px;
+	padding: 2px 4px;
+	vertical-align: top;
+}
 #users .name {
 	cursor: pointer;
 }
@@ -189,7 +213,7 @@ section {
 	color: #C43C35;
 }
 #tracks {
-	margin-top: 18px;
+	margin: 18px 0;
 	max-height: 240px;
 	overflow: auto;
 }
@@ -240,6 +264,7 @@ section {
 }
 footer {
 	padding: 0;
+	margin-top: 17px;
 	border-top:1px solid #DDDDDD;
 	color: #BFBFBF;
 	text-shadow: 0 1px 0 #FFFFFF;

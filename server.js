@@ -83,7 +83,7 @@ var Game = {
 	setNickName: function(socket, data) {
         var feedback = null;
         if (Game.userExists(data.nickname)) {
-            feedback = '<span class="label important">That name is alredy taken.</span>';
+            feedback = '<span class="label label-important">That name is alredy taken.</span>';
 		}
         if (feedback) {
             return Game.invalidNickName(socket, feedback);
