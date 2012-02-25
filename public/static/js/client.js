@@ -18,7 +18,7 @@ var App = {
 	
 	// Prompt for name and send it.
 	setNickName: function(msg) {
-	    if (!msg) {
+		if (!msg) {
 			msg = "What's your name?";
 
 			var html = '<div class="modal-header"><h3>Welcome to Binb</h3></div>';
@@ -60,7 +60,7 @@ var App = {
 
 	// Your submitted name was invalid
 	invalidNickName: function(data) {
-	    App.setNickName(data.feedback+"<br/>Try again:");
+		App.setNickName(data.feedback+"<br/>Try again:");
 	},
 	
 	// You joined the game
@@ -73,7 +73,7 @@ var App = {
 		App.addChatEntry(joinspan);
 		App.updateUsers(data);
 
-	    var messagebox = $("#message");
+		var messagebox = $("#message");
 		messagebox.keyup(function(event) {
 			if (event.keyCode === 13) {
 				var val = $.trim(messagebox.val());
@@ -165,8 +165,8 @@ var App = {
 
 	// Update the list of users
 	updateUsers: function(data) {
-	    var elem = $("#users");
-	    elem.empty();
+		var elem = $("#users");
+		elem.empty();
 		var users = [];
 		for (var key in data.users) {
 			users.push(data.users[key]);
@@ -174,16 +174,16 @@ var App = {
 		users.sort(function(a, b) {return b.points - a.points;});
 		// Flag to test if our private recipient is in the list of active users
 		var found = false;
-	    for (var i=0; i<users.length; i++) {
-	 	   var user = users[i];
-	 	   var li = $('<li></li>');
+		for (var i=0; i<users.length; i++) {
+			var user = users[i];
+			var li = $('<li></li>');
 			var pvt = $('<span class="private label label-info">P</span>');
 			var username = $('<span class="name"></span>').text(user.nickname);
 			var points = $('<span class="points">('+user.points+')</span>');
 			var roundrank = $('<span></span>');
 			var roundpoints = $('<span class="round-points"></span>');
 			li.append(pvt, username, points, roundrank, roundpoints);
-	 	   elem.append(li);
+			elem.append(li);
 			if (App.pvtmsgto === user.nickname) {
 				pvt.show();
 				username.click(App.clearPrivate);
@@ -213,7 +213,7 @@ var App = {
 					username.addClass("correct");
 				}
 			}
-	    }
+		}
 		if (!found && App.pvtmsgto) {
 			var recipient = $('#recipient');
 			var width = recipient.outerWidth(true) + 1;
@@ -234,32 +234,32 @@ var App = {
 		}
 		var recipient = $("#recipient");
 		recipient.css('margin-right','4px');
-	    recipient.text("To "+nickname+":");
+		recipient.text("To "+nickname+":");
 		var width = recipient.outerWidth(true) + 1;
 		recipient.hide();
 		$('#message').animate({'width':'-='+width+'px'}, "fast", function() {recipient.show();});
-	    var el = $("span.name:contains("+nickname+")");
+		var el = $("span.name:contains("+nickname+")");
 		el.prev().show();
 		el.unbind('click');
 		el.click(App.clearPrivate);
-	    App.pvtmsgto = nickname;
-	    $("#message").focus();
+		App.pvtmsgto = nickname;
+		$("#message").focus();
 	},
 
 	clearPrivate: function() {
 		var recipient = $("#recipient");
 		var width = recipient.outerWidth(true) + 1;
 		recipient.css('margin-right','0');
-	    recipient.text("");
+		recipient.text("");
 		$('#message').animate({'width':'+='+width+'px'}, "fast");
 		var el = $("span.name:contains("+App.pvtmsgto+")");
 		el.prev().hide();
 		el.unbind("click");
-	    el.click(function() {
+		el.click(function() {
 			App.addPrivate($(this).text());
 		});
 		App.pvtmsgto = null;
-	    $("#message").focus();
+		$("#message").focus();
 	},
 
 	// Receive a chat message
@@ -271,9 +271,9 @@ var App = {
 			prefix = (App.nickname === data.from) ? '(To '+data.to+')' : '(From '+prefix+')';
 			msgspan.addClass("private");
 		}
-	    var msg = prefix+": "+data.chatmsg;
-	    msgspan.text(msg);
-	    App.addChatEntry(msgspan);
+		var msg = prefix+": "+data.chatmsg;
+		msgspan.text(msg);
+		App.addChatEntry(msgspan);
 	},
 
 	loadTrack: function(data) {
@@ -412,22 +412,22 @@ var App = {
 		App.stopanimation = true;
 		$('#player').jPlayer("stop");
 		var errormsg = "ERROR: You have disconnected.";
-	    var errorspan = $("<span class='error'></span>");
+		var errorspan = $("<span class='error'></span>");
 		errorspan.text(errormsg);
-	    App.addChatEntry(errorspan);
+		App.addChatEntry(errorspan);
 		App.addFeedback('Something wrong happened');
-	    var users = $("#users");
-	    users.empty();
+		var users = $("#users");
+		users.empty();
 	},
 
 	// Add a chat entry, whether message, notification, etc.
 	addChatEntry: function(childNode) {
-	    var li = $("<li class='entry'></li>");
-	    li.append(childNode);
-	    var chat = $("#chat");
-	    chat.append(li);
-	    var chatRaw = document.getElementById("chat");
-	    chatRaw.scrollTop = chatRaw.scrollHeight;
+		var li = $("<li class='entry'></li>");
+		li.append(childNode);
+		var chat = $("#chat");
+		chat.append(li);
+		var chatRaw = document.getElementById("chat");
+		chatRaw.scrollTop = chatRaw.scrollHeight;
 	},
 
 	addFeedback: function(txt, style) {
@@ -438,6 +438,131 @@ var App = {
 			return;
 		}
 		$('#feedback').text(txt);
+	},
+
+	addVolumeControl: function() {
+		var volumebutton = $('<div id="volume-button">'+
+								'<a class="button"><div id="icon" class="volume-high"></div></a>'+           
+								'<div id="volume-slider">'+ // Outer background
+									'<div id="volume-total"></div>'+ // Rail
+									'<div id="volume-current"></div>'+ // Current volume
+									'<div id="volume-handle"></div>'+ // Handle
+								'</div>'+
+							'</div>').appendTo("#volume");
+		var icon = volumebutton.find('#icon');
+		var volumeslider = volumebutton.find('#volume-slider');
+		var volumetotal = volumebutton.find('#volume-total');
+		var volumecurrent = volumebutton.find('#volume-current');
+		var volumehandle = volumebutton.find('#volume-handle');
+		var mouseisdown = false;
+		var mouseisover = false;
+		var oldvalue = 1;
+		var clicked = false;
+
+		var positionVolumeHandle = function(volume) {
+			if (!volumeslider.is(':visible')) {
+				volumeslider.show();
+				positionVolumeHandle(volume);
+				volumeslider.hide();
+				return;
+			}
+			var totalheight = volumetotal.height();
+			var totalposition = volumetotal.position();
+			var newtop = totalheight - (totalheight * volume);
+			volumehandle.css('top', totalposition.top + newtop - (volumehandle.height() / 2));
+			volumecurrent.height(totalheight - newtop );
+			volumecurrent.css('top', totalposition.top + newtop);
+		};
+
+		var handleIcon = function (volume) {
+			if (volume === 0) {
+				icon.removeClass().addClass('volume-none');
+			}
+			else if (volume <= 0.33) {
+				icon.removeClass().addClass('volume-low');
+			}
+			else if (volume <= 0.66) {
+				icon.removeClass().addClass('volume-medium');
+			}
+			else {
+				icon.removeClass().addClass('volume-high');
+			}
+		};
+
+		var handleVolumeMove = function(e) {
+			var totaloffset = volumetotal.offset();
+			var newy = e.pageY - totaloffset.top;
+			var railheight = volumetotal.height();
+			var totalTop = parseInt(volumetotal.css('top').replace(/px/,''),10);
+			var volume = (railheight - newy) / railheight;		
+
+			if (newy < 0) {
+				newy = 0;
+			}
+			else if (newy > railheight) {
+				newy = railheight;
+			}
+
+			volumehandle.css('top', totalTop + newy - (volumehandle.height() / 2));
+			volumecurrent.height(railheight - newy);
+			volumecurrent.css('top',newy+totalTop);
+
+			volume = Math.max(0,volume);
+			volume = Math.min(volume,1);
+
+			handleIcon(volume);
+			oldvalue = volume;
+			$("#player").jPlayer("volume", volume);	
+		};
+
+		volumebutton.hover(function() {
+			volumeslider.show();
+			mouseisover = true;
+		}, function() {
+			mouseisover = false;
+			if (!mouseisdown)    {
+				volumeslider.hide();
+			}
+		});
+		
+		volumeslider.on('mouseover', function() {
+			mouseisover = true;
+		}).on('mousedown', function (e) {
+			handleVolumeMove(e);
+			mouseisdown = true;
+			return false;
+		});
+
+		$(document).on('mouseup', function (e) {
+			mouseisdown = false;
+			if (!mouseisover) {
+				volumeslider.hide();
+			}
+		}).on('mousemove', function (e) {
+			if (mouseisdown) {
+				handleVolumeMove(e);
+			}
+		});
+
+		volumebutton.find('.button').click(function() {
+			if (!clicked) {
+				clicked = true;
+				if (oldvalue !== 0) {
+					$("#player").jPlayer("volume", 0);
+					positionVolumeHandle(0);
+					handleIcon(0);
+				}
+			}
+			else {
+				clicked = false;
+				if (oldvalue !== 0) {
+					$("#player").jPlayer("volume", oldvalue);
+					positionVolumeHandle(oldvalue);
+					handleIcon(oldvalue);
+				}
+			}
+		});
+		positionVolumeHandle(1);
 	},
 
 	// Set up the App object.
@@ -451,11 +576,14 @@ var App = {
 				}
 			});
 		}
-	    App.socket = io.connect("http://binb.nodejitsu.com/", {'reconnect':false});
+		App.socket = io.connect("http://binb.nodejitsu.com/", {'reconnect':false});
 		App.socket.on("connect", function() {
 			$("#player").jPlayer({
 				ready: function() {
 					App.setNickName();
+					if (!$.jPlayer.platform.mobile && !$.jPlayer.platform.tablet) {
+						App.addVolumeControl();
+					}
 				},
 				swfPath: "/static/swf/",
 				supplied: "m4a",
@@ -465,6 +593,6 @@ var App = {
 		});
 		App.socket.on('invalidnickname', App.invalidNickName);
 		App.socket.on('ready', App.ready);
-	    App.socket.on("disconnect", App.disconnect);
+		App.socket.on("disconnect", App.disconnect);
 	}
 };
