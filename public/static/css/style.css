@@ -108,6 +108,18 @@ input {
 	background-color: #6184b7;
 	width:0px;
 }
+#touch-backdrop {
+	width:220px;
+	height:137px;
+	-webkit-border-radius:5px;
+	-moz-border-radius:5px;
+	border-radius:5px;
+	background:rgba(50,50,50,0.8);
+}
+#touch-play {
+	margin-top: 54px;
+	margin-left: 77px;
+}
 #volume {
 	height:154px;
 }

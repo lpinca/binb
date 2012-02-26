@@ -1,5 +1,8 @@
 var App = {
-
+	
+	touchplay: null,
+	elapsedtime: 0,
+	jplayer: null,
 	nickname: null,
 	socket: null,
 	pvtmgsto: null,
@@ -25,7 +28,8 @@ var App = {
 			html += '<div class="modal-body"><p>'+msg+'</p></div>';
 			html += '<div class="modal-footer">';
 			html += '<input id="login" class="" type="text" name="nickname" />';
-			html += '<button id="join" class="btn btn-primary">Join the game</button></div>';
+			html += '<button id="join" class="btn btn-primary">';
+			html += '<i class="icon-user icon-white"></i> Join the game</button></div>';
 
 			$(html).appendTo($('#modal'));
 			var login = $('#login');
@@ -277,14 +281,18 @@ var App = {
 	},
 
 	loadTrack: function(data) {
-		$('#player').jPlayer("mute");
-		$('#player').jPlayer("setMedia", {m4a: data.previewUrl});
+		App.jplayer.jPlayer("mute");
+		App.jplayer.jPlayer("setMedia", {m4a: data.previewUrl});
 	},
 
 	// Play a track 
 	playTrack: function(data) {
-		$('#player').jPlayer("unmute");
-		$('#player').jPlayer("play");
+		if (App.touchplay) {
+			App.touchplay.removeClass("btn-danger disabled").addClass("btn-success");
+			App.touchplay.html('<i class="icon-play icon-white"></i> Play');
+		}
+		App.jplayer.jPlayer("unmute");
+		App.jplayer.jPlayer("play");
 		App.updateUsers(data);
 		//console.log(Date.now(), 'countdown started');
 		App.cassetteAnimation(Date.now()+30000, true);
@@ -335,7 +343,13 @@ var App = {
 			$('#tape-left').css('left', offsetleft+'px');
 			$('#tape-right').css('left', offsetright+'px');
 		}
-		$('#countdown').text((forward) ? secleft.toFixed(1) : Math.round(secleft));
+		if (forward) {
+			$('#countdown').text(secleft.toFixed(1));
+			if (App.touchplay) {App.elapsedtime = 30 - Math.round(secleft);}
+		}
+		else {
+			$('#countdown').text(Math.round(secleft));
+		}
 		if (App.stopanimation || millisleft < 50) {
 			//console.log(Date.now(), 'countdown stopped');
 			return;
@@ -345,6 +359,10 @@ var App = {
 
 	// Add track info
 	addTrackInfo: function(data) {
+		if (App.touchplay) {
+			App.touchplay.removeClass("btn-success").addClass("btn-danger disabled");
+			App.touchplay.html('<i class="icon-play icon-white"></i> Wait');
+		}
 		App.cassetteAnimation(Date.now()+5000, false);
 		var html = '<li class="bordered"><img class="artwork" src="'+data.artworkUrl+'"/>';
 		html += '<div class="info"><div class="artist">'+data.artistName+'</div>';
@@ -410,7 +428,7 @@ var App = {
 	// Let the user know when he / she has disconnected
 	disconnect: function() {
 		App.stopanimation = true;
-		$('#player').jPlayer("stop");
+		App.jplayer.jPlayer("stop");
 		var errormsg = "ERROR: You have disconnected.";
 		var errorspan = $("<span class='error'></span>");
 		errorspan.text(errormsg);
@@ -512,7 +530,7 @@ var App = {
 
 			handleIcon(volume);
 			oldvalue = volume;
-			$("#player").jPlayer("volume", volume);	
+			App.jplayer.jPlayer("volume", volume);	
 		};
 
 		volumebutton.hover(function() {
@@ -548,7 +566,7 @@ var App = {
 			if (!clicked) {
 				clicked = true;
 				if (oldvalue !== 0) {
-					$("#player").jPlayer("volume", 0);
+					App.jplayer.jPlayer("volume", 0);
 					positionVolumeHandle(0);
 					handleIcon(0);
 				}
@@ -556,7 +574,7 @@ var App = {
 			else {
 				clicked = false;
 				if (oldvalue !== 0) {
-					$("#player").jPlayer("volume", oldvalue);
+					App.jplayer.jPlayer("volume", oldvalue);
 					positionVolumeHandle(oldvalue);
 					handleIcon(oldvalue);
 				}
@@ -578,11 +596,25 @@ var App = {
 		}
 		App.socket = io.connect("http://binb.nodejitsu.com/", {'reconnect':false});
 		App.socket.on("connect", function() {
-			$("#player").jPlayer({
+			App.jplayer = $("#player").jPlayer({
 				ready: function() {
 					App.setNickName();
 					if (!$.jPlayer.platform.mobile && !$.jPlayer.platform.tablet) {
 						App.addVolumeControl();
+					}
+					else {
+						var touchbackdrop = $('<div id="touch-backdrop">'+
+							'<button id="touch-play" class="btn btn-danger disabled">'+
+								'<i class="icon-play icon-white"></i> Wait'+
+							'</button></div>').appendTo("#cassette");
+						App.touchplay = $('#touch-play');
+						App.touchplay.click(function() {
+							if (!$(this).hasClass("btn-danger")) {
+								App.touchplay = null;
+								App.jplayer.jPlayer('play', App.elapsedtime);
+								touchbackdrop.remove();
+							}
+						});
 					}
 				},
 				swfPath: "/static/swf/",
