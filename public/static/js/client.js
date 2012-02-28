@@ -38,7 +38,7 @@ var App = {
 				var val = $.trim(login.val());
 				if (val !== "") {
 					App.nickname = val;
-					App.socket.emit('setnickname', {nickname: App.nickname});
+					App.socket.emit('setnickname', App.nickname);
 				}
 				else {
 					var txt = "Nickname can't be empty.";
@@ -82,13 +82,8 @@ var App = {
 			if (event.keyCode === 13) {
 				var val = $.trim(messagebox.val());
 				if (val !== "") {
-					if (App.pvtmsgto) {
-						var data = {from:App.nickname,to:App.pvtmsgto,chatmsg:val};
-						App.socket.emit('sendchatmsg', data);
-					}
-					else {
-						App.socket.emit('sendchatmsg', {from:App.nickname,chatmsg:val});
-					}
+					var data = (App.pvtmsgto) ? {to:App.pvtmsgto,chatmsg:val} : val;
+					App.socket.emit('sendchatmsg', data);
 				}
 				messagebox.val("");
 			}
@@ -98,7 +93,7 @@ var App = {
 			if (event.keyCode === 13) {
 				var val = $.trim(guessbox.val().toLowerCase());
 				if (val !== "") {
-					App.socket.emit('guess', {guess:val});
+					App.socket.emit('guess', val);
 				}
 				guessbox.val("");
 			}
@@ -294,7 +289,6 @@ var App = {
 		App.jplayer.jPlayer("unmute");
 		App.jplayer.jPlayer("play");
 		App.updateUsers(data);
-		//console.log(Date.now(), 'countdown started');
 		App.cassetteAnimation(Date.now()+30000, true);
 		if (data.counter === 1) {
 			$('#modal').modal('hide').empty();
@@ -351,7 +345,6 @@ var App = {
 			$('#countdown').text(Math.round(secleft));
 		}
 		if (App.stopanimation || millisleft < 50) {
-			//console.log(Date.now(), 'countdown stopped');
 			return;
 		}
 		setTimeout(function() {App.cassetteAnimation(endtime, forward);}, 50);

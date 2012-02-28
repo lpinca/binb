@@ -80,16 +80,16 @@ var Game = {
 	},
 
 	// A user is submitting a name
-	setNickName: function(socket, data) {
+	setNickName: function(socket, nickname) {
 	    var feedback = null;
-	    if (Game.userExists(data.nickname)) {
+	    if (Game.userExists(nickname)) {
 	 	   feedback = '<span class="label label-important">That name is alredy taken.</span>';
 		}
 	    if (feedback) {
 	 	   return Game.invalidNickName(socket, feedback);
 		}
 
-	    socket.nickname = data.nickname;
+	    socket.nickname = nickname;
 		
 		// Add user to the list of active users and broadcast the event
 		Game.addUser(socket);
@@ -112,14 +112,16 @@ var Game = {
 	},
 	
 	sendChatMessage: function (socket, data) {
-		if (data.to) {
-			// Private message
-			socket.emit('chatmsg', {from:data.from,to:data.to,chatmsg:data.chatmsg});
-			var recipient = Game.getUserSocket(data.to);
-			recipient.emit('chatmsg', {from:data.from,to:data.to,chatmsg:data.chatmsg});
-			return;
+		if (typeof data === "string") {
+			io.sockets.emit('chatmsg', {from:socket.nickname,chatmsg:data});
 		}
-		io.sockets.emit('chatmsg', {from:data.from,chatmsg:data.chatmsg});
+		else if (typeof data === "object" && typeof data.to === "string" && 
+				Game.userExists(data.to) && typeof data.chatmsg === "string") {
+			// Private message
+			socket.emit('chatmsg', {from:socket.nickname,to:data.to,chatmsg:data.chatmsg});
+			var recipient = Game.getUserSocket(data.to);
+			recipient.emit('chatmsg', {from:socket.nickname,to:data.to,chatmsg:data.chatmsg});
+		}
 	},
 
 	addPoints: function(socket, allinone) {
@@ -146,24 +148,24 @@ var Game = {
 		}
 	},
 	
-	guess: function(socket, data) {
+	guess: function(socket, guess) {
 		if (Game.guesstime) {
 			var artistname = Game.artistName.toLowerCase();
 			var trackname = Game.trackName.toLowerCase();
 			if (!Game.usersData[socket.nickname].matched) { // No track no artist
-				if ((artistname === trackname) && Game.amatch(trackname, data.guess, true)) {
+				if ((artistname === trackname) && Game.amatch(trackname, guess, true)) {
 					Game.addPoints(socket, true);
 					socket.emit('bothmatched');
 					io.sockets.emit('updateusers', {users:Game.usersData});
 				}
-				else if (Game.amatch(artistname, data.guess, true)) {
+				else if (Game.amatch(artistname, guess, true)) {
 					Game.usersData[socket.nickname].roundpoints++;
 					Game.usersData[socket.nickname].points++;
 					Game.usersData[socket.nickname].matched = 'artist';
 					socket.emit('artistmatched');
 					io.sockets.emit('updateusers', {users:Game.usersData});
 				}
-				else if (Game.amatch(trackname, data.guess)) {
+				else if (Game.amatch(trackname, guess)) {
 					Game.usersData[socket.nickname].roundpoints++;
 					Game.usersData[socket.nickname].points++;
 					Game.usersData[socket.nickname].matched = 'title';
@@ -176,7 +178,7 @@ var Game = {
 			}
 			else if (Game.usersData[socket.nickname].matched !== 'both') { // Track or artist
 				if (Game.usersData[socket.nickname].matched === 'artist') {
-					if (Game.amatch(trackname, data.guess)) {
+					if (Game.amatch(trackname, guess)) {
 						Game.addPoints(socket, false);
 						socket.emit('bothmatched');
 						io.sockets.emit('updateusers', {users:Game.usersData});
@@ -186,7 +188,7 @@ var Game = {
 					}
 				}
 				else {
-					if (Game.amatch(artistname, data.guess, true)) {
+					if (Game.amatch(artistname, guess, true)) {
 						Game.addPoints(socket, false);
 						socket.emit('bothmatched');
 						io.sockets.emit('updateusers', {users:Game.usersData});
@@ -367,7 +369,9 @@ Game.start();
 
 io.sockets.on("connection", function(socket) {
 	socket.on('setnickname', function(data) {
-		Game.setNickName(socket, data);
+		if (!socket.nickname && typeof data === "string") {
+			Game.setNickName(socket, data);
+		}
 	});
 	socket.on('getstatus', function() {
 		Game.sendStatus(socket);
@@ -376,7 +380,9 @@ io.sockets.on("connection", function(socket) {
 		Game.sendChatMessage(socket, data);
 	});
 	socket.on('guess', function(data) {
-		Game.guess(socket, data);
+		if (typeof data === "string") {
+			Game.guess(socket, data);
+		}
 	});
 	socket.on("disconnect", function() {
 	    Game.userLeft(socket);
