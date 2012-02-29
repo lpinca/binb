@@ -500,6 +500,12 @@ var App = {
 			}
 		};
 
+		var setVolume = function(volume) {
+			handleIcon(volume);
+			oldvalue = volume;
+			App.jplayer.jPlayer("volume", volume);
+		};
+
 		var handleVolumeMove = function(e) {
 			var totaloffset = volumetotal.offset();
 			var newy = e.pageY - totaloffset.top;
@@ -521,9 +527,20 @@ var App = {
 			volume = Math.max(0,volume);
 			volume = Math.min(volume,1);
 
-			handleIcon(volume);
-			oldvalue = volume;
-			App.jplayer.jPlayer("volume", volume);	
+			setVolume(volume);
+			document.cookie = "volume="+volume;
+		};
+
+		var loadFromCookie = function() {
+			if (/volume\s*\=/.test(document.cookie)) {
+				var value = document.cookie.replace(/.*volume\s*\=\s*([^;]*);?.*/, "$1");
+				value = parseFloat(value);
+				positionVolumeHandle(value);
+				setVolume(value);
+			}
+			else {
+				positionVolumeHandle(1);
+			}
 		};
 
 		volumebutton.hover(function() {
@@ -573,7 +590,7 @@ var App = {
 				}
 			}
 		});
-		positionVolumeHandle(1);
+		loadFromCookie();
 	},
 
 	// Set up the App object.

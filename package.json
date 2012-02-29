@@ -9,8 +9,8 @@
   "scripts": {
     "start": "server.js"
   },
-  "engine": {
+  "engines": {
     "node": "0.6.x"
   },
-  "version": "0.1.1-7"
+  "version": "0.1.1-10"
 }
