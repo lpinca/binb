@@ -39,7 +39,9 @@ var Game = {
 	playedtracks: [], // Used to prevent the same song from playing twice in one game
 	
 	artistName: null,
-	trackName: null,	
+	artistlcase: null,
+	trackName: null,
+	tracklcase: null,
 	collectionName: null,
 	previewUrl: null,
 	artworkUrl: null,
@@ -82,7 +84,10 @@ var Game = {
 	// A user is submitting a name
 	setNickName: function(socket, nickname) {
 	    var feedback = null;
-	    if (Game.userExists(nickname)) {
+		if (nickname === "Binb") {
+			feedback = '<span class="label label-important">That name is reserved.</span>';
+		}
+		else if (Game.userExists(nickname)) {
 	 	   feedback = '<span class="label label-important">That name is alredy taken.</span>';
 		}
 	    if (feedback) {
@@ -113,6 +118,13 @@ var Game = {
 	
 	sendChatMessage: function (socket, data) {
 		if (typeof data === "string") {
+			var datalcase = data.toLowerCase();
+			if (Game.guesstime && (Game.amatch(Game.artistlcase, datalcase, true) || 
+									Game.amatch(Game.tracklcase, datalcase))) {
+				var msg = "You are probably right, but you have to use the box above.";
+				socket.emit('chatmsg', {from:"Binb",to:socket.nickname,chatmsg:msg});
+				return;
+			}
 			io.sockets.emit('chatmsg', {from:socket.nickname,chatmsg:data});
 		}
 		else if (typeof data === "object" && typeof data.to === "string" && 
@@ -150,22 +162,20 @@ var Game = {
 	
 	guess: function(socket, guess) {
 		if (Game.guesstime) {
-			var artistname = Game.artistName.toLowerCase();
-			var trackname = Game.trackName.toLowerCase();
 			if (!Game.usersData[socket.nickname].matched) { // No track no artist
-				if ((artistname === trackname) && Game.amatch(trackname, guess, true)) {
+				if ((Game.artistlcase === Game.tracklcase) && Game.amatch(Game.tracklcase, guess, true)) {
 					Game.addPoints(socket, true);
 					socket.emit('bothmatched');
 					io.sockets.emit('updateusers', {users:Game.usersData});
 				}
-				else if (Game.amatch(artistname, guess, true)) {
+				else if (Game.amatch(Game.artistlcase, guess, true)) {
 					Game.usersData[socket.nickname].roundpoints++;
 					Game.usersData[socket.nickname].points++;
 					Game.usersData[socket.nickname].matched = 'artist';
 					socket.emit('artistmatched');
 					io.sockets.emit('updateusers', {users:Game.usersData});
 				}
-				else if (Game.amatch(trackname, guess)) {
+				else if (Game.amatch(Game.tracklcase, guess)) {
 					Game.usersData[socket.nickname].roundpoints++;
 					Game.usersData[socket.nickname].points++;
 					Game.usersData[socket.nickname].matched = 'title';
@@ -178,7 +188,7 @@ var Game = {
 			}
 			else if (Game.usersData[socket.nickname].matched !== 'both') { // Track or artist
 				if (Game.usersData[socket.nickname].matched === 'artist') {
-					if (Game.amatch(trackname, guess)) {
+					if (Game.amatch(Game.tracklcase, guess)) {
 						Game.addPoints(socket, false);
 						socket.emit('bothmatched');
 						io.sockets.emit('updateusers', {users:Game.usersData});
@@ -188,7 +198,7 @@ var Game = {
 					}
 				}
 				else {
-					if (Game.amatch(artistname, guess, true)) {
+					if (Game.amatch(Game.artistlcase, guess, true)) {
 						Game.addPoints(socket, false);
 						socket.emit('bothmatched');
 						io.sockets.emit('updateusers', {users:Game.usersData});
@@ -208,32 +218,36 @@ var Game = {
 	},
 
 	amatch: function(subject, guess, enableartistrules) {
-		if (Game.ld(subject,guess) <= 2) {
+		if (Game.checkDistance(subject, guess, config.threshold)) {
 			return true;
 		}
 		var splitted, trimmed;
-		if (subject.match(/\./) && (Game.ld(subject.replace(/\./g, ""), guess) <= 2)) {
+		if (subject.match(/\./) && 
+			Game.checkDistance(subject.replace(/\./g, ""), guess, config.threshold)) {
 			return true;
 		}
-		if (!enableartistrules && subject.match(/,/) && (Game.ld(subject.replace(/,/g, ""), guess) <= 2)) {
+		if (!enableartistrules && subject.match(/,/) && 
+			Game.checkDistance(subject.replace(/,/g, ""), guess, config.threshold)) {
 			return true;
 		}
-		if (subject.match(/\-/) && (Game.ld(subject.replace(/\-/g, ""), guess) <= 2)) {
+		if (subject.match(/\-/) && 
+			Game.checkDistance(subject.replace(/\-/g, ""), guess, config.threshold)) {
 			return true;
 		}
 		if (enableartistrules) {
-			if (subject.match(/^the /) && (Game.ld(subject.replace(/^the /, ""), guess) <= 2)) {
+			if (subject.match(/^the /) && 
+				Game.checkDistance(subject.replace(/^the /, ""), guess, config.threshold)) {
 				return true;
 			}
 			splitted = subject.split("&");
 			if (splitted.length !== 1) {
 				for (var i=0; i<splitted.length; i++) {
 					trimmed = splitted[i].replace(/^ +/, "").replace(/ +$/, "");
-					if (Game.ld(trimmed, guess) <= 2) {
+					if (Game.checkDistance(trimmed, guess, config.threshold)) {
 						return true;
 					}
 					if (trimmed.match(/^the /) && 
-						(Game.ld(trimmed.replace(/^the /, ""), guess) <= 2)) {
+						Game.checkDistance(trimmed.replace(/^the /, ""), guess, config.threshold)) {
 						return true;
 					}
 				}
@@ -242,15 +256,28 @@ var Game = {
 		splitted = subject.split("(");
 		if (splitted.length !== 1) {
 			trimmed = splitted[0].replace(/ +$/, "");
-			if (Game.ld(trimmed, guess) <= 2) {
+			if (Game.checkDistance(trimmed, guess, config.threshold)) {
 				return true;
 			}
 		}
 		return false;
 	},
 
-	// Compute the Levenshtein distance between two strings
-	ld: function(s1, s2) {
+	/*
+	Check if the edit distance between two strings is smaller than a threshold k.
+   	We dont need to trace back the optimal alignmen, so we can run the Levenshtein distance
+	algorithm in better than O(n*m).
+	We use only a diagonal stripe of width 2k+1 in the matrix.
+	See Algorithms on strings, trees, and sequences: computer science and computational biology.
+	Cambridge, UK: Cambridge University Press. pp 263-264. ISBN 0-521-58519-8.
+	*/
+	checkDistance: function(s1, s2, k) {
+		if (k === 0) {
+			return s1 === s2;
+		}
+		if (Math.abs(s1.length - s2.length) > k) {
+			return false;
+		}
 		var d = [];
 		for (var i=0; i <= s1.length; i++) {
 			d[i] = []; // Now d is a matrix with s1.length + 1 rows
@@ -260,16 +287,26 @@ var Game = {
 			d[0][j] = j;
 		}
 		for (i=1; i <= s1.length; i++) {
-			for (j=1; j<=s2.length; j++) {
+			var l = ((i-k) < 1) ? 1 : i-k;
+			var m = ((i+k) > s2.length) ? s2.length : i+k;
+			for (j=l; j<=m; j++) {
 				if (s1.charAt(i-1) === s2.charAt(j-1)) {
 					d[i][j] = d[i-1][j-1];
 				}
 				else {
-					d[i][j] = Math.min(d[i][j-1]+1, d[i-1][j-1]+1, d[i-1][j]+1);
+					if ((j === l) && (d[i][j-1] === undefined)) {
+						d[i][j] = Math.min(d[i-1][j-1]+1, d[i-1][j]+1);
+					}
+					else if ((j === m) && (d[i-1][j] === undefined)) {
+						d[i][j] = Math.min(d[i][j-1]+1, d[i-1][j-1]+1);
+					}
+					else {
+						d[i][j] = Math.min(d[i][j-1]+1, d[i-1][j-1]+1, d[i-1][j]+1);
+					}
 				}
 			}
 		}
-		return d[s1.length][s2.length];
+		return d[s1.length][s2.length] <= k;
 	},
 	
 	resetPoints: function(roundonly) {
@@ -291,7 +328,9 @@ var Game = {
 				}
 				Game.playedtracks[replies[0]] = true;
 				Game.artistName = replies[1];
-				Game.trackName = replies[2]; 
+				Game.artistlcase = Game.artistName.toLowerCase();
+				Game.trackName = replies[2];
+				Game.tracklcase = Game.trackName.toLowerCase();
 				Game.collectionName = replies[3];
 				Game.previewUrl = replies[4];
 				Game.artworkUrl = replies[5];
@@ -369,7 +408,7 @@ Game.start();
 
 io.sockets.on("connection", function(socket) {
 	socket.on('setnickname', function(data) {
-		if (!socket.nickname && typeof data === "string") {
+		if (!socket.nickname && typeof data === "string" && data !== "") {
 			Game.setNickName(socket, data);
 		}
 	});

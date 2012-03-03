@@ -528,7 +528,10 @@ var App = {
 			volume = Math.min(volume,1);
 
 			setVolume(volume);
-			document.cookie = "volume="+volume;
+			
+			var d = new Date();
+			d.setTime(d.getTime() + 31536000000); // One year in milliseconds
+			document.cookie = "volume="+volume+";path=/;expires="+d.toGMTString()+";";
 		};
 
 		var loadFromCookie = function() {
