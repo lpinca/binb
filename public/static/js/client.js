@@ -1,26 +1,26 @@
-var App = {
+(function() {
 	
-	touchplay: null,
-	elapsedtime: 0,
-	jplayer: null,
-	nickname: null,
-	socket: null,
-	pvtmgsto: null,
-	roundpoints: 0,
-	stopanimation: false,
-	states: ['A song is alredy playing, please wait for the next one...',
-			'Game is about to start...', 'Game is over', 'New game will start soon...'],
-	tmstrings: ['Yes, you guessed the title. Who is the artist?', 'Now tell me the artist!',
-					'Correct, do you also know the artist?'],
-	amstrings: ['Yes, that\'s the artist. What about the title?', 'Exactly, now tell me the title!',
-					'Do you also know the title?'],
-	bmstrings: ['Yeah true! do you like this track?', 'Good job!', 'Great!',
-					'Very well done!', 'Exactly!', 'Excellent!'],
-	nmstrings: ['Nope, sorry!', 'No way!', 'Fail', 'Nope', 'No', 'That\'s wrong', 'What?!',
-				'Wrong', 'Haha, what?!', 'You kidding?', 'Don\'t make me laugh', 'You mad?'],
+	var touchplay = null;
+	var elapsedtime = 0;
+	var jplayer = null;
+	var nickname = null;
+	var socket = null;
+	var pvtmsgto = null;
+	var roundpoints = 0;
+	var stopanimation = false;
+	var states = ['A song is alredy playing, please wait for the next one...',
+			'Game is about to start...', 'Game is over', 'New game will start soon...'];
+	var tmstrings = ['Yes, you guessed the title. Who is the artist?', 'Now tell me the artist!',
+					'Correct, do you also know the artist?'];
+	var amstrings = ['Yes, that\'s the artist. What about the title?', 'Exactly, now tell me the title!',
+					'Do you also know the title?'];
+	var bmstrings = ['Yeah true! do you like this track?', 'Good job!', 'Great!',
+					'Very well done!', 'Exactly!', 'Excellent!'];
+	var nmstrings = ['Nope, sorry!', 'No way!', 'Fail', 'Nope', 'No', 'That\'s wrong', 'What?!',
+				'Wrong', 'Haha, what?!', 'You kidding?', 'Don\'t make me laugh', 'You mad?'];
 	
 	// Prompt for name and send it.
-	setNickName: function(msg) {
+	var setNickName = function(msg) {
 		if (!msg) {
 			msg = "What's your name?";
 
@@ -37,12 +37,12 @@ var App = {
 			button.click(function() {
 				var val = $.trim(login.val());
 				if (val !== "") {
-					App.nickname = val;
-					App.socket.emit('setnickname', App.nickname);
+					nickname = val;
+					socket.emit('setnickname', nickname);
 				}
 				else {
 					var txt = "Nickname can't be empty.";
-					App.invalidNickName({feedback:'<span class="label label-important">'+txt+'</span>'});
+					invalidNickName({feedback:'<span class="label label-important">'+txt+'</span>'});
 				}
 				login.val("");
 			});
@@ -60,30 +60,30 @@ var App = {
 			$('.modal-body p').html(msg);
 			$('#login').focus();
 		}
-	},
+	};
 
 	// Your submitted name was invalid
-	invalidNickName: function(data) {
-		App.setNickName(data.feedback+"<br/>Try again:");
-	},
+	var invalidNickName = function(data) {
+		setNickName(data.feedback+"<br/>Try again:");
+	};
 	
 	// You joined the game
-	ready: function(data) {
+	var ready = function(data) {
 		$('#modal').modal('hide').empty();
 		$('#total-tracks span').text(data.trackscount);
-		var msg = App.nickname+" joined the game";
+		var msg = nickname+" joined the game";
 		var joinspan = $("<span class='join'></span>");
 		joinspan.text(msg);
-		App.addChatEntry(joinspan);
-		App.updateUsers(data);
+		addChatEntry(joinspan);
+		updateUsers(data);
 
 		var messagebox = $("#message");
 		messagebox.keyup(function(event) {
 			if (event.keyCode === 13) {
 				var val = $.trim(messagebox.val());
 				if (val !== "") {
-					var data = (App.pvtmsgto) ? {to:App.pvtmsgto,chatmsg:val} : val;
-					App.socket.emit('sendchatmsg', data);
+					var data = (pvtmsgto) ? {to:pvtmsgto,chatmsg:val} : val;
+					socket.emit('sendchatmsg', data);
 				}
 				messagebox.val("");
 			}
@@ -93,77 +93,77 @@ var App = {
 			if (event.keyCode === 13) {
 				var val = $.trim(guessbox.val().toLowerCase());
 				if (val !== "") {
-					App.socket.emit('guess', val);
+					socket.emit('guess', val);
 				}
 				guessbox.val("");
 			}
 		});
 		$("#guess").focus();
 		
-		App.socket.on('newuser', App.userJoin);
-		App.socket.on('userleft', App.userLeft);
-		App.socket.on('updateusers', App.updateUsers);
-		App.socket.on('chatmsg', App.getChatMessage);
-		App.socket.on('loadtrack', App.loadTrack);
-		App.socket.on('playtrack', App.playTrack);
-		App.socket.on('trackinfo', App.addTrackInfo);
-		App.socket.on('artistmatched', function() {
-			var feedback = App.amstrings[Math.floor(Math.random()*App.amstrings.length)];
-			App.addFeedback(feedback, "correct");
+		socket.on('newuser', userJoin);
+		socket.on('userleft', userLeft);
+		socket.on('updateusers', updateUsers);
+		socket.on('chatmsg', getChatMessage);
+		socket.on('loadtrack', loadTrack);
+		socket.on('playtrack', playTrack);
+		socket.on('trackinfo', addTrackInfo);
+		socket.on('artistmatched', function() {
+			var feedback = amstrings[Math.floor(Math.random()*amstrings.length)];
+			addFeedback(feedback, "correct");
 		});
-		App.socket.on('titlematched', function() {
-			var feedback = App.tmstrings[Math.floor(Math.random()*App.tmstrings.length)];
-			App.addFeedback(feedback, "correct");
+		socket.on('titlematched', function() {
+			var feedback = tmstrings[Math.floor(Math.random()*tmstrings.length)];
+			addFeedback(feedback, "correct");
 		});
-		App.socket.on('bothmatched', function() {
-			var feedback = App.bmstrings[Math.floor(Math.random()*App.bmstrings.length)];
-			App.addFeedback(feedback, "correct");
+		socket.on('bothmatched', function() {
+			var feedback = bmstrings[Math.floor(Math.random()*bmstrings.length)];
+			addFeedback(feedback, "correct");
 		});
-		App.socket.on('nomatch', function() {
-			var feedback = App.nmstrings[Math.floor(Math.random()*App.nmstrings.length)];
-			App.addFeedback(feedback, "wrong");
+		socket.on('nomatch', function() {
+			var feedback = nmstrings[Math.floor(Math.random()*nmstrings.length)];
+			addFeedback(feedback, "wrong");
 		});
-		App.socket.on('stoptrying', function() {
-			App.addFeedback('You guessed both artist and title. Please wait...');
+		socket.on('stoptrying', function() {
+			addFeedback('You guessed both artist and title. Please wait...');
 		});
-		App.socket.on('noguesstime', function() {
-			App.addFeedback('You have to wait the next song...', "wrong");
+		socket.on('noguesstime', function() {
+			addFeedback('You have to wait the next song...', "wrong");
 		});
-		App.socket.on('gameover', App.gameOver);
-		App.socket.on('status', App.setStatus);
-		App.socket.emit('getstatus');
-	},
+		socket.on('gameover', gameOver);
+		socket.on('status', setStatus);
+		socket.emit('getstatus');
+	};
 
-	setStatus: function(data) {
+	var setStatus = function(data) {
 		if (data.status === 0) {
-			App.cassetteAnimation(Date.now()+data.timeleft, true);
+			cassetteAnimation(Date.now()+data.timeleft, true);
 		}
 		if (data.status === 1) {
-			App.loadTrack(data);
+			loadTrack(data);
 		}
-		App.addFeedback(App.states[data.status]);
-	},
+		addFeedback(states[data.status]);
+	};
 
 	// A new player joined the game
-	userJoin: function(data) {
+	var userJoin = function(data) {
 		var msg = data.nickname+" joined the game";
 		var joinspan = $("<span class='join'></span>");
 		joinspan.text(msg);
-		App.addChatEntry(joinspan);
-		App.updateUsers(data);
-	},
+		addChatEntry(joinspan);
+		updateUsers(data);
+	};
 
 	// A user left the game
-	userLeft: function(data) {
+	var userLeft = function(data) {
 		var leftmsg = data.nickname+" left the game";
 		var leftspan = $("<span class='left'></span>");
 		leftspan.text(leftmsg);
-		App.addChatEntry(leftspan);
-		App.updateUsers(data);
-	},
+		addChatEntry(leftspan);
+		updateUsers(data);
+	};
 
 	// Update the list of users
-	updateUsers: function(data) {
+	var updateUsers = function(data) {
 		var elem = $("#users");
 		elem.empty();
 		var users = [];
@@ -180,27 +180,27 @@ var App = {
 			var username = $('<span class="name"></span>').text(user.nickname);
 			var points = $('<span class="points">('+user.points+')</span>');
 			var roundrank = $('<span></span>');
-			var roundpoints = $('<span class="round-points"></span>');
-			li.append(pvt, username, points, roundrank, roundpoints);
+			var roundpointsel = $('<span class="round-points"></span>');
+			li.append(pvt, username, points, roundrank, roundpointsel);
 			elem.append(li);
-			if (App.pvtmsgto === user.nickname) {
+			if (pvtmsgto === user.nickname) {
 				pvt.show();
-				username.click(App.clearPrivate);
+				username.click(clearPrivate);
 				found = true;
 			}
 			else {
 				username.click(function() {
-					App.addPrivate($(this).text());
+					addPrivate($(this).text());
 				});
 			}
-			if (App.nickname === user.nickname) {
+			if (nickname === user.nickname) {
 				username.addClass("you");
-				App.roundpoints = user.roundpoints;
+				roundpoints = user.roundpoints;
 				$('#summary .rank').text(i+1);
 				$('#summary .points').text(user.points);
 			}
 			if (user.roundpoints > 0) {
-				roundpoints.text('+'+user.roundpoints);
+				roundpointsel.text('+'+user.roundpoints);
 				if (user.roundpoints === 1) {
 					username.addClass("matched");
 				}
@@ -213,93 +213,93 @@ var App = {
 				}
 			}
 		}
-		if (!found && App.pvtmsgto) {
+		if (!found && pvtmsgto) {
 			var recipient = $('#recipient');
 			var width = recipient.outerWidth(true) + 1;
 			recipient.css('margin-right','0');
 			recipient.text("");
 			$('#message').animate({'width':'+='+width+'px'}, "fast");
-			App.pvtmsgto = null;
+			pvtmsgto = null;
 			$("#message").focus();
 		}
-	},
+	};
 	
-	addPrivate: function(nickname) {
-		if (App.pvtmsgto) {
-			App.clearPrivate();
+	var addPrivate = function(usrname) {
+		if (pvtmsgto) {
+			clearPrivate();
 		}
-		if (App.nickname === nickname) {
+		if (nickname === usrname) {
 			return;
 		}
 		var recipient = $("#recipient");
 		recipient.css('margin-right','4px');
-		recipient.text("To "+nickname+":");
+		recipient.text("To "+usrname+":");
 		var width = recipient.outerWidth(true) + 1;
 		recipient.hide();
 		$('#message').animate({'width':'-='+width+'px'}, "fast", function() {recipient.show();});
-		var el = $("span.name:contains("+nickname+")");
+		var el = $("span.name:contains("+usrname+")");
 		el.prev().show();
 		el.unbind('click');
-		el.click(App.clearPrivate);
-		App.pvtmsgto = nickname;
+		el.click(clearPrivate);
+		pvtmsgto = usrname;
 		$("#message").focus();
-	},
+	};
 
-	clearPrivate: function() {
+	var clearPrivate = function() {
 		var recipient = $("#recipient");
 		var width = recipient.outerWidth(true) + 1;
 		recipient.css('margin-right','0');
 		recipient.text("");
 		$('#message').animate({'width':'+='+width+'px'}, "fast");
-		var el = $("span.name:contains("+App.pvtmsgto+")");
+		var el = $("span.name:contains("+pvtmsgto+")");
 		el.prev().hide();
 		el.unbind("click");
 		el.click(function() {
-			App.addPrivate($(this).text());
+			addPrivate($(this).text());
 		});
-		App.pvtmsgto = null;
+		pvtmsgto = null;
 		$("#message").focus();
-	},
+	};
 
 	// Receive a chat message
-	getChatMessage: function(data) {
+	var getChatMessage = function(data) {
 		var prefix = data.from;
 		var msgspan = $("<span class='message'></span>");
 		if (data.to) {
 			// Private Message
-			prefix = (App.nickname === data.from) ? '(To '+data.to+')' : '(From '+prefix+')';
+			prefix = (nickname === data.from) ? '(To '+data.to+')' : '(From '+prefix+')';
 			msgspan.addClass("private");
 		}
 		var msg = prefix+": "+data.chatmsg;
 		msgspan.text(msg);
-		App.addChatEntry(msgspan);
-	},
+		addChatEntry(msgspan);
+	};
 
-	loadTrack: function(data) {
-		App.jplayer.jPlayer("mute");
-		App.jplayer.jPlayer("setMedia", {m4a: data.previewUrl});
-	},
+	var loadTrack = function(data) {
+		jplayer.jPlayer("mute");
+		jplayer.jPlayer("setMedia", {m4a: data.previewUrl});
+	};
 
 	// Play a track 
-	playTrack: function(data) {
-		if (App.touchplay) {
-			App.touchplay.removeClass("btn-danger disabled").addClass("btn-success");
-			App.touchplay.html('<i class="icon-play icon-white"></i> Play');
+	var playTrack = function(data) {
+		if (touchplay) {
+			touchplay.removeClass("btn-danger disabled").addClass("btn-success");
+			touchplay.html('<i class="icon-play icon-white"></i> Play');
 		}
-		App.jplayer.jPlayer("unmute");
-		App.jplayer.jPlayer("play");
-		App.updateUsers(data);
-		App.cassetteAnimation(Date.now()+30000, true);
+		jplayer.jPlayer("unmute");
+		jplayer.jPlayer("play");
+		updateUsers(data);
+		cassetteAnimation(Date.now()+30000, true);
 		if (data.counter === 1) {
 			$('#modal').modal('hide').empty();
 			$('#tracks').empty();
 		}
 		$('#summary .track').text(data.counter+'/'+data.tot);
-		App.addFeedback('What is this song?');
-	},
+		addFeedback('What is this song?');
+	};
 
 	// Start cassette animation
-	cassetteAnimation: function(endtime, forward) {
+	var cassetteAnimation = function(endtime, forward) {
 		var millisleft = endtime - Date.now();
 		var secleft = millisleft / 1000;
 		var width, deg, offsetleft, offsetright, css;
@@ -339,24 +339,24 @@ var App = {
 		}
 		if (forward) {
 			$('#countdown').text(secleft.toFixed(1));
-			if (App.touchplay) {App.elapsedtime = 30 - Math.round(secleft);}
+			if (touchplay) {elapsedtime = 30 - Math.round(secleft);}
 		}
 		else {
 			$('#countdown').text(Math.round(secleft));
 		}
-		if (App.stopanimation || millisleft < 50) {
+		if (stopanimation || millisleft < 50) {
 			return;
 		}
-		setTimeout(function() {App.cassetteAnimation(endtime, forward);}, 50);
-	},
+		setTimeout(function() {cassetteAnimation(endtime, forward);}, 50);
+	};
 
 	// Add track info
-	addTrackInfo: function(data) {
-		if (App.touchplay) {
-			App.touchplay.removeClass("btn-success").addClass("btn-danger disabled");
-			App.touchplay.html('<i class="icon-play icon-white"></i> Wait');
+	var addTrackInfo = function(data) {
+		if (touchplay) {
+			touchplay.removeClass("btn-success").addClass("btn-danger disabled");
+			touchplay.html('<i class="icon-play icon-white"></i> Wait');
 		}
-		App.cassetteAnimation(Date.now()+5000, false);
+		cassetteAnimation(Date.now()+5000, false);
 		var html = '<li class="bordered"><img class="artwork" src="'+data.artworkUrl+'"/>';
 		html += '<div class="info"><div class="artist">'+data.artistName+'</div>';
 		var titleattr = '';
@@ -368,10 +368,10 @@ var App = {
 		html += '<div class="title" title="'+titleattr+'">'+trackname+'</div></div>';
 		var attrs = '';
 		var rp = '';
-		if (App.roundpoints > 0) {
-			rp = '+'+App.roundpoints;
-			if (App.roundpoints > 3) {
-				var stand = 7 - App.roundpoints;
+		if (roundpoints > 0) {
+			rp = '+'+roundpoints;
+			if (roundpoints > 3) {
+				var stand = 7 - roundpoints;
 				attrs += 'class="round-rank stand'+stand+'"';
 			}
 		}
@@ -379,20 +379,20 @@ var App = {
 		html += '<a target="_blank" href="'+data.trackViewUrl+'">';
 		html += '<img src="/static/images/itunes.png"/></a></li>';
 		$('#tracks').prepend($(html));
-	},
+	};
 
 	// Game over countdown
-	countDown: function(endtime) {
+	var countDown = function(endtime) {
 		var millisleft = endtime - Date.now();
 		var secleft = millisleft / 1000;
 		$('.modal-footer span').text(Math.round(secleft));
 		if (millisleft < 200) {
 			return;
 		}
-		setTimeout(function() {App.countDown(endtime);}, 200);
-	},
+		setTimeout(function() {countDown(endtime);}, 200);
+	};
 
-	gameOver: function(data) {
+	var gameOver = function(data) {
 		var users = [];
 		for (var key in data.users) {
 			users.push(data.users[key]);
@@ -415,33 +415,33 @@ var App = {
 		html += '<div class="modal-footer">A new game will start in <span></span> second/s</div>';
 		$('#modal').append($(html));
 		$('#modal').modal('show');
-		App.countDown(Date.now()+10000);
-	},
+		countDown(Date.now()+10000);
+	};
 
 	// Let the user know when he / she has disconnected
-	disconnect: function() {
-		App.stopanimation = true;
-		App.jplayer.jPlayer("stop");
+	var disconnect = function() {
+		stopanimation = true;
+		jplayer.jPlayer("stop");
 		var errormsg = "ERROR: You have disconnected.";
 		var errorspan = $("<span class='error'></span>");
 		errorspan.text(errormsg);
-		App.addChatEntry(errorspan);
-		App.addFeedback('Something wrong happened');
+		addChatEntry(errorspan);
+		addFeedback('Something wrong happened');
 		var users = $("#users");
 		users.empty();
-	},
+	};
 
 	// Add a chat entry, whether message, notification, etc.
-	addChatEntry: function(childNode) {
+	var addChatEntry = function(childNode) {
 		var li = $("<li class='entry'></li>");
 		li.append(childNode);
 		var chat = $("#chat");
 		chat.append(li);
 		var chatRaw = document.getElementById("chat");
 		chatRaw.scrollTop = chatRaw.scrollHeight;
-	},
+	};
 
-	addFeedback: function(txt, style) {
+	var addFeedback = function(txt, style) {
 		if (typeof style === 'string') {
 			var fbspan = $('<span class="'+style+'"></span>');
 			fbspan.text(txt);
@@ -449,9 +449,9 @@ var App = {
 			return;
 		}
 		$('#feedback').text(txt);
-	},
+	};
 
-	addVolumeControl: function() {
+	var addVolumeControl = function() {
 		var volumebutton = $('<div id="volume-button">'+
 								'<a class="button"><div id="icon" class="volume-high"></div></a>'+           
 								'<div id="volume-slider">'+ // Outer background
@@ -503,7 +503,7 @@ var App = {
 		var setVolume = function(volume) {
 			handleIcon(volume);
 			oldvalue = volume;
-			App.jplayer.jPlayer("volume", volume);
+			jplayer.jPlayer("volume", volume);
 		};
 
 		var handleVolumeMove = function(e) {
@@ -579,7 +579,7 @@ var App = {
 			if (!clicked) {
 				clicked = true;
 				if (oldvalue !== 0) {
-					App.jplayer.jPlayer("volume", 0);
+					jplayer.jPlayer("volume", 0);
 					positionVolumeHandle(0);
 					handleIcon(0);
 				}
@@ -587,17 +587,17 @@ var App = {
 			else {
 				clicked = false;
 				if (oldvalue !== 0) {
-					App.jplayer.jPlayer("volume", oldvalue);
+					jplayer.jPlayer("volume", oldvalue);
 					positionVolumeHandle(oldvalue);
 					handleIcon(oldvalue);
 				}
 			}
 		});
 		loadFromCookie();
-	},
+	};
 
-	// Set up the App object.
-	init: function() {
+	// Set up the App.
+	$(function() {
 		$('#modal').modal({keyboard:false,show:false,backdrop:"static"});
 		if ($.browser.mozilla) {
 			// Block ESC button in firefox (it breaks all socket connection).
@@ -607,24 +607,24 @@ var App = {
 				}
 			});
 		}
-		App.socket = io.connect("http://binb.nodejitsu.com/", {'reconnect':false});
-		App.socket.on("connect", function() {
-			App.jplayer = $("#player").jPlayer({
+		socket = io.connect("http://binb.nodejitsu.com/", {'reconnect':false});
+		socket.on("connect", function() {
+			jplayer = $("#player").jPlayer({
 				ready: function() {
-					App.setNickName();
+					setNickName();
 					if (!$.jPlayer.platform.mobile && !$.jPlayer.platform.tablet) {
-						App.addVolumeControl();
+						addVolumeControl();
 					}
 					else {
 						var touchbackdrop = $('<div id="touch-backdrop">'+
 							'<button id="touch-play" class="btn btn-danger disabled">'+
 								'<i class="icon-play icon-white"></i> Wait'+
 							'</button></div>').appendTo("#cassette");
-						App.touchplay = $('#touch-play');
-						App.touchplay.click(function() {
+						touchplay = $('#touch-play');
+						touchplay.click(function() {
 							if (!$(this).hasClass("btn-danger")) {
-								App.touchplay = null;
-								App.jplayer.jPlayer('play', App.elapsedtime);
+								touchplay = null;
+								jplayer.jPlayer('play', elapsedtime);
 								touchbackdrop.remove();
 							}
 						});
@@ -636,8 +636,8 @@ var App = {
 				volume: 1
 			});
 		});
-		App.socket.on('invalidnickname', App.invalidNickName);
-		App.socket.on('ready', App.ready);
-		App.socket.on("disconnect", App.disconnect);
-	}
-};
+		socket.on('invalidnickname', invalidNickName);
+		socket.on('ready', ready);
+		socket.on("disconnect", disconnect);
+	});
+})();

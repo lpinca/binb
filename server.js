@@ -265,7 +265,7 @@ var Game = {
 
 	/*
 	Check if the edit distance between two strings is smaller than a threshold k.
-   	We dont need to trace back the optimal alignmen, so we can run the Levenshtein distance
+   	We dont need to trace back the optimal alignment, so we can run the Levenshtein distance
 	algorithm in better than O(n*m).
 	We use only a diagonal stripe of width 2k+1 in the matrix.
 	See Algorithms on strings, trees, and sequences: computer science and computational biology.

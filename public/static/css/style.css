@@ -346,7 +346,7 @@ input {
 	background: -ms-linear-gradient(center top , #FBFBFB, #F5F5F5);
 	background: linear-gradient(center top , #FBFBFB, #F5F5F5);
 }
-#tracks img.artwork, #tracks .info, #tracks .round-rank, #tracks .round-points, #copy, #facebook-button, #twitter-button {
+#tracks img.artwork, #tracks .info, #tracks .round-rank, #tracks .round-points, #copy, #facebook-button, #twitter-button, #github-button {
 	float:left;
 }
 #tracks img.artwork {
@@ -388,7 +388,7 @@ footer {
 	color: #BFBFBF;
 	text-shadow: 0 1px 0 #FFFFFF;
 }
-#footer-inner, #twitter-button {
+#footer-inner, #twitter-button, #github-button {
 	height:20px;
 }
 #footer-inner {
@@ -403,8 +403,8 @@ footer {
 	width:90px;
 	height:21px
 }
-#twitter-button {
-	width:110px;
+#twitter-button, #github-button {
+	width:100px;
 }
 #copy, #footer-right {
 	line-height:20px;
