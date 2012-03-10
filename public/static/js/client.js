@@ -8,7 +8,7 @@
 	var pvtmsgto = null;
 	var roundpoints = 0;
 	var stopanimation = false;
-	var states = ['A song is alredy playing, please wait for the next one...',
+	var states = ['A song is already playing, please wait for the next one...',
 			'Game is about to start...', 'Game is over', 'New game will start soon...'];
 	var tmstrings = ['Yes, you guessed the title. Who is the artist?', 'Now tell me the artist!',
 					'Correct, do you also know the artist?'];
