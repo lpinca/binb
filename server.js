@@ -84,7 +84,10 @@ var Game = {
 	// A user is submitting a name
 	setNickName: function(socket, nickname) {
 	    var feedback = null;
-		if (nickname === "Binb") {
+		if (nickname.length > 18) {
+			feedback = '<span class="label label-important">That name is too long.</span>';
+		}
+		else if (nickname === "Binb") {
 			feedback = '<span class="label label-important">That name is reserved.</span>';
 		}
 		else if (Game.userExists(nickname)) {
@@ -226,10 +229,6 @@ var Game = {
 			Game.checkDistance(subject.replace(/\./g, ""), guess, config.threshold)) {
 			return true;
 		}
-		if (!enableartistrules && subject.match(/,/) && 
-			Game.checkDistance(subject.replace(/,/g, ""), guess, config.threshold)) {
-			return true;
-		}
 		if (subject.match(/\-/) && 
 			Game.checkDistance(subject.replace(/\-/g, ""), guess, config.threshold)) {
 			return true;
@@ -253,10 +252,18 @@ var Game = {
 				}
 			}
 		}
-		splitted = subject.split("(");
-		if (splitted.length !== 1) {
-			trimmed = splitted[0].replace(/ +$/, "");
-			if (Game.checkDistance(trimmed, guess, config.threshold)) {
+		else {
+			if (subject.match(/,/) && 
+				Game.checkDistance(subject.replace(/,/g, ""), guess, config.threshold)) {
+				return true;
+			}
+			if (subject.match(/\(.+\)\??(?: \[.+\])?/) && Game.checkDistance(
+				subject.replace(/\(.+\)\??(?: \[.+\])?/, "").replace(/^ +/, "").replace(/ +$/, ""), 
+				guess, config.threshold)) {
+				return true;
+			}
+			if (subject.match(/, [pP]t\. [0-9]$/) && 
+				Game.checkDistance(subject.replace(/, [pP]t\. [0-9]$/, ""), guess, config.threshold)) {
 				return true;
 			}
 		}
