@@ -5,5 +5,6 @@ exports.configure = function() {
 	this.redisurl = '';
 	this.songsinarun = 15;
 	this.threshold = 2; // Edit distance threshold
+	this.rooms = ["alternative", "pop", "rap", "rock", "soul", "mixed"];
 	return this;
 };

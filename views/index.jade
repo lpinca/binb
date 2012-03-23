@@ -1,0 +1,42 @@
+include header
+		title Binb
+		script(src="/static/js/home.js")
+	body
+		script(type="text/javascript")
+			var uvOptions = {};
+			(function() {
+				var uv = document.createElement('script');
+				uv.type = 'text/javascript';
+				uv.async = true;
+				uv.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + 
+					'widget.uservoice.com/LSMjFAQRifhD6BjOG2KWw.js';
+				var s = document.getElementsByTagName('script')[0];
+				s.parentNode.insertBefore(uv, s);
+			})();
+		.container
+			section
+				.page-header
+					h1#app-name Binb, 
+						small
+				.row
+					.span7
+						h3 What's this?
+						p Binb is a realtime, multiplayer, competitive music listening game.
+					.span9
+						h3 How to play?
+						p All you have to do is to guess the song that is playing. A fixed number 
+							| of songs will run and for each one correctly guessed you will earn an 
+							| amount of points. That amount depends on the number of correct guesses 
+							| (artist and/or title of the song) and on how fast you will be on 
+							| answering compared to other players. At the end a scoreboard will report
+							| the best player of the match. If you have read this far, what are you
+							| waiting? Click on a room below and prove your music knowledge!
+			section
+				.row
+					.span16
+						ul.thumbnails
+							each item in rooms
+								li.span4
+									a.thumbnail.relative(href="/#{item}")
+										.room #{item} - <span id="#{item}"></span> Players
+			include footer

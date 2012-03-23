@@ -17,14 +17,15 @@
 	var bmstrings = ['Yeah true! do you like this track?', 'Good job!', 'Great!',
 					'Very well done!', 'Exactly!', 'Excellent!'];
 	var nmstrings = ['Nope, sorry!', 'No way!', 'Fail', 'Nope', 'No', 'That\'s wrong', 'What?!',
-				'Wrong', 'Haha, what?!', 'You kidding?', 'Don\'t make me laugh', 'You mad?'];
+					'Wrong', 'Haha, what?!', 'You kidding?', 'Don\'t make me laugh', 'You mad?'];
+	var mottos = ['guess the song.', 'name that tune.', 'i know this track.'];
 	
 	// Prompt for name and send it.
-	var setNickName = function(msg) {
+	var joinRoom = function(msg) {
 		if (!msg) {
 			msg = "What's your name?";
 
-			var html = '<div class="modal-header"><h3>Welcome to Binb</h3></div>';
+			var html = '<div class="modal-header"><h3>You are joining the '+roomname+' room</h3></div>';
 			html += '<div class="modal-body"><p>'+msg+'</p></div>';
 			html += '<div class="modal-footer">';
 			html += '<input id="login" class="" type="text" name="nickname" />';
@@ -38,11 +39,11 @@
 				var val = $.trim(login.val());
 				if (val !== "") {
 					nickname = val;
-					socket.emit('setnickname', nickname);
+					socket.emit('joinroom', {nickname:nickname,roomname:roomname});
 				}
 				else {
 					var txt = "Nickname can't be empty.";
-					invalidNickName({feedback:'<span class="label label-important">'+txt+'</span>'});
+					invalidNickName('<span class="label label-important">'+txt+'</span>');
 				}
 				login.val("");
 			});
@@ -63,8 +64,8 @@
 	};
 
 	// Your submitted name was invalid
-	var invalidNickName = function(data) {
-		setNickName(data.feedback+"<br/>Try again:");
+	var invalidNickName = function(feedback) {
+		joinRoom(feedback+"<br/>Try again:");
 	};
 	
 	// You joined the game
@@ -453,7 +454,7 @@
 
 	var addVolumeControl = function() {
 		var volumebutton = $('<div id="volume-button">'+
-								'<a class="button"><div id="icon" class="volume-high"></div></a>'+           
+								'<a class="button"><div id="icon" class="volume-high"></div></a>'+
 								'<div id="volume-slider">'+ // Outer background
 									'<div id="volume-total"></div>'+ // Rail
 									'<div id="volume-current"></div>'+ // Current volume
@@ -551,7 +552,7 @@
 			mouseisover = true;
 		}, function() {
 			mouseisover = false;
-			if (!mouseisdown)    {
+			if (!mouseisdown) {
 				volumeslider.hide();
 			}
 		});
@@ -596,8 +597,10 @@
 		loadFromCookie();
 	};
 
-	// Set up the App.
+	// Set up the room.
 	$(function() {
+		var motto = mottos[Math.floor(Math.random()*mottos.length)];
+		$('#app-name small').text(motto);
 		$('#modal').modal({keyboard:false,show:false,backdrop:"static"});
 		if ($.browser.mozilla) {
 			// Block ESC button in firefox (it breaks all socket connection).
@@ -611,7 +614,7 @@
 		socket.on("connect", function() {
 			jplayer = $("#player").jPlayer({
 				ready: function() {
-					setNickName();
+					joinRoom();
 					if (!$.jPlayer.platform.mobile && !$.jPlayer.platform.tablet) {
 						addVolumeControl();
 					}

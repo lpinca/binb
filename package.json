@@ -1,9 +1,11 @@
 {
   "name": "binb",
   "dependencies": {
+    "async": "latest",
     "express": "latest",
-    "socket.io": "latest",
-    "redis-url": "latest"
+    "jade": "latest",
+    "redis-url": "latest",
+    "socket.io": "latest"
   },
   "subdomain": "binb",
   "scripts": {
@@ -12,5 +14,5 @@
   "engines": {
     "node": "0.6.x"
   },
-  "version": "0.1.1-17"
+  "version": "0.2.0-1"
 }
