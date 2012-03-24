@@ -452,7 +452,6 @@ function Room(name) {
 		redis.scard(roomname, function(err, res) {
 			trackscount = res;
 		});
-		console.log("Room "+roomname+" started");
 		sendLoadTrack();
 	};
 }
