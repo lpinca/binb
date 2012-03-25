@@ -305,6 +305,7 @@ input {
 #users .label {
 	font-size:9.75px;
 	padding: 2px 4px;
+	line-height: 18px;
 	vertical-align: top;
 }
 #users .name {
@@ -376,11 +377,27 @@ input {
 #feedback {
 	text-align: center;
 }
-.correct {
+#feedback .correct, #users .correct{
 	color: #46A546;
 }
 #feedback .wrong, #chat .error {
 	color: #C43C35;
+}
+#guess.correct {
+	border-color: #46A546;
+}
+#guess.correct:focus {
+	-webkit-box-shadow: 0 0 6px #7aba7b;
+	-moz-box-shadow: 0 0 6px #7aba7b;
+	box-shadow: 0 0 6px #7aba7b;
+}
+#guess.wrong {
+	border-color: #C43C35;
+}
+#guess.wrong:focus {
+	-webkit-box-shadow: 0 0 6px #d59392;
+	-moz-box-shadow: 0 0 6px #d59392;
+	box-shadow: 0 0 6px #d59392;
 }
 #tracks {
 	margin: 18px 0;

@@ -15,10 +15,19 @@
 	var amstrings = ['Yes, that\'s the artist. What about the title?', 'Exactly, now tell me the title!',
 					'Do you also know the title?'];
 	var bmstrings = ['Yeah true! do you like this track?', 'Good job!', 'Great!',
-					'Very well done!', 'Exactly!', 'Excellent!'];
+					'Very well done!', 'Exactly!', 'Excellent!', 'Woohoo!'];
 	var nmstrings = ['Nope, sorry!', 'No way!', 'Fail', 'Nope', 'No', 'That\'s wrong', 'What?!',
-					'Wrong', 'Haha, what?!', 'You kidding?', 'Don\'t make me laugh', 'You mad?'];
+					'Wrong', 'Haha, what?!', 'You kidding?', 'Don\'t make me laugh', 'You mad?',
+					'Try again'];
 	var mottos = ['guess the song.', 'name that tune.', 'i know this track.'];
+
+	var DOM = {};
+
+	// Exact match version of jQuery :contains selector
+	$.expr[":"].econtains = function(obj, index, meta, stack) {
+		return (obj.textContent || obj.innerText || 
+				$(obj).text() || "").toLowerCase() === meta[3].toLowerCase();
+	};
 	
 	// Prompt for name and send it.
 	var joinRoom = function(msg) {
@@ -32,7 +41,7 @@
 			html += '<button id="join" class="btn btn-primary">';
 			html += '<i class="icon-user icon-white"></i> Join the game</button></div>';
 
-			$(html).appendTo($('#modal'));
+			$(html).appendTo(DOM.modal);
 			var login = $('#login');
 			var button = $('#join');
 			button.click(function() {
@@ -52,8 +61,8 @@
 					button.click();	
 				}
 			});
-			$('#modal').modal('show');
-			$('#modal').on('shown', function() {
+			DOM.modal.modal('show');
+			DOM.modal.on('shown', function() {
 				login.focus();	
 			});
 		}
@@ -70,7 +79,7 @@
 	
 	// You joined the game
 	var ready = function(data) {
-		$('#modal').modal('hide').empty();
+		DOM.modal.modal('hide').empty();
 		$('#total-tracks span').text(data.trackscount);
 		var msg = nickname+" joined the game";
 		var joinspan = $("<span class='join'></span>");
@@ -78,28 +87,27 @@
 		addChatEntry(joinspan);
 		updateUsers(data);
 
-		var messagebox = $("#message");
-		messagebox.keyup(function(event) {
+		DOM.messagebox.keyup(function(event) {
 			if (event.keyCode === 13) {
-				var val = $.trim(messagebox.val());
+				var val = $.trim(DOM.messagebox.val());
 				if (val !== "") {
 					var data = (pvtmsgto) ? {to:pvtmsgto,chatmsg:val} : val;
 					socket.emit('sendchatmsg', data);
 				}
-				messagebox.val("");
+				DOM.messagebox.val("");
 			}
 		});
-		var guessbox = $("#guess");
-		guessbox.keyup(function(event) {
+
+		DOM.guessbox.keyup(function(event) {
 			if (event.keyCode === 13) {
-				var val = $.trim(guessbox.val().toLowerCase());
+				var val = $.trim(DOM.guessbox.val().toLowerCase());
 				if (val !== "") {
 					socket.emit('guess', val);
 				}
-				guessbox.val("");
+				DOM.guessbox.val("");
 			}
 		});
-		$("#guess").focus();
+		DOM.guessbox.focus();
 		
 		socket.on('newuser', userJoin);
 		socket.on('userleft', userLeft);
@@ -128,7 +136,7 @@
 			addFeedback('You guessed both artist and title. Please wait...');
 		});
 		socket.on('noguesstime', function() {
-			addFeedback('You have to wait the next song...', "wrong");
+			addFeedback('You have to wait the next song...');
 		});
 		socket.on('gameover', gameOver);
 		socket.on('status', setStatus);
@@ -165,8 +173,7 @@
 
 	// Update the list of users
 	var updateUsers = function(data) {
-		var elem = $("#users");
-		elem.empty();
+		DOM.users.empty();
 		var users = [];
 		for (var key in data.users) {
 			users.push(data.users[key]);
@@ -183,7 +190,7 @@
 			var roundrank = $('<span></span>');
 			var roundpointsel = $('<span class="round-points"></span>');
 			li.append(pvt, username, points, roundrank, roundpointsel);
-			elem.append(li);
+			DOM.users.append(li);
 			if (pvtmsgto === user.nickname) {
 				pvt.show();
 				username.click(clearPrivate);
@@ -197,8 +204,8 @@
 			if (nickname === user.nickname) {
 				username.addClass("you");
 				roundpoints = user.roundpoints;
-				$('#summary .rank').text(i+1);
-				$('#summary .points').text(user.points);
+				DOM.rank.text(i+1);
+				DOM.points.text(user.points);
 			}
 			if (user.roundpoints > 0) {
 				roundpointsel.text('+'+user.roundpoints);
@@ -215,13 +222,12 @@
 			}
 		}
 		if (!found && pvtmsgto) {
-			var recipient = $('#recipient');
-			var width = recipient.outerWidth(true) + 1;
-			recipient.css('margin-right','0');
-			recipient.text("");
-			$('#message').animate({'width':'+='+width+'px'}, "fast");
+			var width = DOM.recipient.outerWidth(true) + 1;
+			DOM.recipient.css('margin-right','0');
+			DOM.recipient.text("");
+			DOM.messagebox.animate({'width':'+='+width+'px'}, "fast");
 			pvtmsgto = null;
-			$("#message").focus();
+			DOM.messagebox.focus();
 		}
 	};
 	
@@ -232,34 +238,32 @@
 		if (nickname === usrname) {
 			return;
 		}
-		var recipient = $("#recipient");
-		recipient.css('margin-right','4px');
-		recipient.text("To "+usrname+":");
-		var width = recipient.outerWidth(true) + 1;
-		recipient.hide();
-		$('#message').animate({'width':'-='+width+'px'}, "fast", function() {recipient.show();});
-		var el = $("span.name:contains("+usrname+")");
+		DOM.recipient.css('margin-right','4px');
+		DOM.recipient.text("To "+usrname+":");
+		var width = DOM.recipient.outerWidth(true) + 1;
+		DOM.recipient.hide();
+		DOM.messagebox.animate({'width':'-='+width+'px'}, "fast", function() {DOM.recipient.show();});
+		var el = $("span.name:econtains("+usrname+")");
 		el.prev().show();
 		el.unbind('click');
 		el.click(clearPrivate);
 		pvtmsgto = usrname;
-		$("#message").focus();
+		DOM.messagebox.focus();
 	};
 
 	var clearPrivate = function() {
-		var recipient = $("#recipient");
-		var width = recipient.outerWidth(true) + 1;
-		recipient.css('margin-right','0');
-		recipient.text("");
-		$('#message').animate({'width':'+='+width+'px'}, "fast");
-		var el = $("span.name:contains("+pvtmsgto+")");
+		var width = DOM.recipient.outerWidth(true) + 1;
+		DOM.recipient.css('margin-right','0');
+		DOM.recipient.text("");
+		DOM.messagebox.animate({'width':'+='+width+'px'}, "fast");
+		var el = $("span.name:econtains("+pvtmsgto+")");
 		el.prev().hide();
 		el.unbind("click");
 		el.click(function() {
 			addPrivate($(this).text());
 		});
 		pvtmsgto = null;
-		$("#message").focus();
+		DOM.messagebox.focus();
 	};
 
 	// Receive a chat message
@@ -292,10 +296,10 @@
 		updateUsers(data);
 		cassetteAnimation(Date.now()+30000, true);
 		if (data.counter === 1) {
-			$('#modal').modal('hide').empty();
-			$('#tracks').empty();
+			DOM.modal.modal('hide').empty();
+			DOM.tracks.empty();
 		}
-		$('#summary .track').text(data.counter+'/'+data.tot);
+		DOM.track.text(data.counter+'/'+data.tot);
 		addFeedback('What is this song?');
 	};
 
@@ -309,7 +313,7 @@
 			deg = 360 - (360*secleft/30);
 			offsetleft = 44 - 24*secleft/30;
 			offsetright = 130 - 24*secleft/30;
-			$('#progress').width(width);
+			DOM.progress.width(width);
 			css = {
 				'-moz-transform' : 'rotate('+deg+'deg)',
 				'-webkit-transform' : 'rotate('+deg+'deg)',
@@ -317,16 +321,16 @@
 				'-ms-transform' : 'rotate('+deg+'deg)',
 				'transform' : 'rotate('+deg+'deg)'
 			};
-			$('#cassette .wheel').css(css);
-			$('#tape-left').css('left', offsetleft+'px');
-			$('#tape-right').css('left', offsetright+'px');
+			DOM.cassettewheels.css(css);
+			DOM.tapeleft.css('left', offsetleft+'px');
+			DOM.taperight.css('left', offsetright+'px');
 		}
 		else {
 			width = 148*secleft/5;
 			deg = 360*secleft/5;
 			offsetleft = 20 + 24*secleft/5;
 			offsetright = 106 + 24*secleft/5;
-			$('#progress').width(width);
+			DOM.progress.width(width);
 			css = {
 				'-moz-transform' : 'rotate('+deg+'deg)',
 				'-webkit-transform' : 'rotate('+deg+'deg)',
@@ -334,16 +338,16 @@
 				'-ms-transform' : 'rotate('+deg+'deg)',
 				'transform' : 'rotate('+deg+'deg)'
 			};
-			$('#cassette .wheel').css(css);
-			$('#tape-left').css('left', offsetleft+'px');
-			$('#tape-right').css('left', offsetright+'px');
+			DOM.cassettewheels.css(css);
+			DOM.tapeleft.css('left', offsetleft+'px');
+			DOM.taperight.css('left', offsetright+'px');
 		}
 		if (forward) {
-			$('#countdown').text(secleft.toFixed(1));
+			DOM.countdown.text(secleft.toFixed(1));
 			if (touchplay) {elapsedtime = 30 - Math.round(secleft);}
 		}
 		else {
-			$('#countdown').text(Math.round(secleft));
+			DOM.countdown.text(Math.round(secleft));
 		}
 		if (stopanimation || millisleft < 50) {
 			return;
@@ -379,7 +383,7 @@
 		html += '<div '+attrs+'></div><div class="round-points">'+rp+'</div>';
 		html += '<a target="_blank" href="'+data.trackViewUrl+'">';
 		html += '<img src="/static/images/itunes.png"/></a></li>';
-		$('#tracks').prepend($(html));
+		DOM.tracks.prepend($(html));
 	};
 
 	// Game over countdown
@@ -414,8 +418,8 @@
 		}
 		html +='</div>';
 		html += '<div class="modal-footer">A new game will start in <span></span> second/s</div>';
-		$('#modal').append($(html));
-		$('#modal').modal('show');
+		DOM.modal.append($(html));
+		DOM.modal.modal('show');
 		countDown(Date.now()+10000);
 	};
 
@@ -428,28 +432,27 @@
 		errorspan.text(errormsg);
 		addChatEntry(errorspan);
 		addFeedback('Something wrong happened');
-		var users = $("#users");
-		users.empty();
+		DOM.users.empty();
 	};
 
 	// Add a chat entry, whether message, notification, etc.
 	var addChatEntry = function(childNode) {
 		var li = $("<li class='entry'></li>");
 		li.append(childNode);
-		var chat = $("#chat");
-		chat.append(li);
-		var chatRaw = document.getElementById("chat");
-		chatRaw.scrollTop = chatRaw.scrollHeight;
+		DOM.chat.append(li);
+		DOM.chat[0].scrollTop = DOM.chat[0].scrollHeight;
 	};
 
 	var addFeedback = function(txt, style) {
 		if (typeof style === 'string') {
 			var fbspan = $('<span class="'+style+'"></span>');
 			fbspan.text(txt);
-			$('#feedback').html(fbspan);
+			DOM.feedback.html(fbspan);
+			DOM.guessbox.addClass(style);
+			setTimeout(function() {DOM.guessbox.removeClass(style);}, 350); 
 			return;
 		}
-		$('#feedback').text(txt);
+		DOM.feedback.text(txt);
 	};
 
 	var addVolumeControl = function() {
@@ -596,12 +599,32 @@
 		});
 		loadFromCookie();
 	};
+	
+	var setVariables = function() {
+		DOM.modal = $('#modal');
+		DOM.guessbox = $('#guess');
+		DOM.users = $('#users');
+		DOM.rank = $('#summary .rank');
+		DOM.points = $('#summary .points');
+		DOM.messagebox = $('#message');
+		DOM.recipient = $('#recipient');
+		DOM.tracks = $('#tracks');
+		DOM.track = $('#summary .track');
+		DOM.progress = $('#progress');
+		DOM.cassettewheels = $('#cassette .wheel');
+		DOM.tapeleft = $('#tape-left');
+		DOM.taperight = $('#tape-right');
+		DOM.countdown = $('#countdown');
+		DOM.chat = $('#chat');
+		DOM.feedback = $('#feedback');
+	};
 
 	// Set up the room.
 	$(function() {
 		var motto = mottos[Math.floor(Math.random()*mottos.length)];
 		$('#app-name small').text(motto);
-		$('#modal').modal({keyboard:false,show:false,backdrop:"static"});
+		setVariables();
+		DOM.modal.modal({keyboard:false,show:false,backdrop:"static"});
 		if ($.browser.mozilla) {
 			// Block ESC button in firefox (it breaks all socket connection).
 			$(document).keypress(function(event) {
