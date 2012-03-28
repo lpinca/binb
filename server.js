@@ -127,9 +127,15 @@ var amatch = function(subject, guess, enableartistrules) {
 		return true;
 	}
 	if (enableartistrules) {
-		if (subject.match(/^the /) && 
-			checkDistance(subject.replace(/^the /, ""), guess, config.threshold)) {
-			return true;
+		if (subject.match(/^the /)) {
+			var nothe = subject.replace(/^the /, "");
+			if (checkDistance(nothe, guess, config.threshold)) {
+				return true;
+			}
+			if (nothe.match(/jimi hendrix experience/) && 
+				checkDistance(nothe.replace(/ experience/, ""), guess, config.threshold)) {
+				return true;
+			}
 		}
 		splitted = subject.split("&");
 		if (splitted.length !== 1) {
@@ -150,10 +156,20 @@ var amatch = function(subject, guess, enableartistrules) {
 			checkDistance(subject.replace(/,/g, ""), guess, config.threshold)) {
 			return true;
 		}
-		if (subject.match(/\(.+\)\??(?: \[.+\])?/) && checkDistance(
-			subject.replace(/\(.+\)\??(?: \[.+\])?/, "").replace(/^ +/, "").replace(/ +$/, ""), 
-			guess, config.threshold)) {
+		if (subject.match(/ & /) && !subject.match(/\(/) &&
+			checkDistance(subject.replace(/ & /, " and "), guess, config.threshold)) {
 			return true;
+		}
+		if (subject.match(/\(.+\)\??(?: \[.+\])?/)) {
+			var normalized = subject.replace(/\(.+\)\??(?: \[.+\])?/, "")
+									.replace(/^ +/, "").replace(/ +$/, "");
+			if (checkDistance(normalized, guess, config.threshold)) {
+				return true;
+			}
+			if (normalized.match(/ & /) && 
+				checkDistance(normalized.replace(/ & /, " and "), guess, config.threshold)) {
+				return true;
+			}
 		}
 		if (subject.match(/, [pP]t\. [0-9]$/) && 
 			checkDistance(subject.replace(/, [pP]t\. [0-9]$/, ""), guess, config.threshold)) {
