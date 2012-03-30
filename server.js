@@ -213,7 +213,8 @@ function Room(name) {
 			nickname: socket.nickname,
 			points: 0,
 			roundpoints: 0,
-			matched: null
+			matched: null,
+			guesstime: null
 		};
 		totusers = totusers + 1;
 		io.sockets.in('home').emit('update', {room:roomname,players:totusers});
@@ -247,7 +248,7 @@ function Room(name) {
 	// A user is submitting a name
 	this.setNickName = function(socket, data) {
 		var feedback = null;
-		if (data.nickname.length > 18) {
+		if (data.nickname.length > 15) {
 			feedback = '<span class="label label-important">That name is too long.</span>';
 		}
 		else if (data.nickname === "Binb") {
@@ -302,16 +303,19 @@ function Room(name) {
 		switch (finishline) {
 			case 1:
 				finishline++;
+				usersData[socket.nickname].guesstime = 30000 - songtimeleft;
 				usersData[socket.nickname].roundpoints = 6;
 				usersData[socket.nickname].points += (allinone) ? 6 : 5;
 				break;
 			case 2:
 				finishline++;
+				usersData[socket.nickname].guesstime = 30000 - songtimeleft;
 				usersData[socket.nickname].roundpoints = 5;
 				usersData[socket.nickname].points += (allinone) ? 5 : 4;
 				break;
 			case 3:
 				finishline++;
+				usersData[socket.nickname].guesstime = 30000 - songtimeleft;
 				usersData[socket.nickname].roundpoints = 4;
 				usersData[socket.nickname].points += (allinone) ? 4 : 3;
 				break;
@@ -385,6 +389,7 @@ function Room(name) {
 			}
 			usersData[key].roundpoints = 0;
 			usersData[key].matched = null;
+			usersData[key].guesstime = null;
 		}
 	};
 

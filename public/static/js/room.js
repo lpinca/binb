@@ -189,7 +189,8 @@
 			var points = $('<span class="points">('+user.points+')</span>');
 			var roundrank = $('<span></span>');
 			var roundpointsel = $('<span class="round-points"></span>');
-			li.append(pvt, username, points, roundrank, roundpointsel);
+			var guesstime = $('<span class="guess-time"></span>');
+			li.append(pvt, username, points, roundrank, roundpointsel, guesstime);
 			DOM.users.append(li);
 			if (pvtmsgto === user.nickname) {
 				pvt.show();
@@ -216,6 +217,8 @@
 					if (user.roundpoints > 3) {
 						var stand = 7 - user.roundpoints;
 						roundrank.addClass("round-rank stand"+stand);
+						var gtime = (user.guesstime / 1000).toFixed(1);
+						guesstime.text(gtime+" s");
 					}
 					username.addClass("correct");
 				}
@@ -443,6 +446,22 @@
 		DOM.chat[0].scrollTop = DOM.chat[0].scrollHeight;
 	};
 
+	var hideChat = function() {
+		DOM.togglechat.text("Show chat").unbind('click');
+		DOM.chatwrapper.toggle(300);
+		DOM.tracks.animate({maxHeight:"434px"}, 300);
+		DOM.togglechat.click(showChat);
+	};
+
+	var showChat = function() {
+		DOM.togglechat.text("Hide chat").unbind('click');
+		DOM.chatwrapper.toggle(300);
+		DOM.tracks.animate({maxHeight:"240px"}, 300, function() {
+			DOM.chat[0].scrollTop = DOM.chat[0].scrollHeight;
+		});
+		DOM.togglechat.click(hideChat);
+	};
+
 	var addFeedback = function(txt, style) {
 		if (typeof style === 'string') {
 			var fbspan = $('<span class="'+style+'"></span>');
@@ -617,6 +636,8 @@
 		DOM.countdown = $('#countdown');
 		DOM.chat = $('#chat');
 		DOM.feedback = $('#feedback');
+		DOM.togglechat = $('#toggle-chat');
+		DOM.chatwrapper = $('#chat-outer-wrapper');
 	};
 
 	// Set up the room.
@@ -625,6 +646,7 @@
 		$('#app-name small').text(motto);
 		setVariables();
 		DOM.modal.modal({keyboard:false,show:false,backdrop:"static"});
+		DOM.togglechat.click(hideChat);
 		if ($.browser.mozilla) {
 			// Block ESC button in firefox (it breaks all socket connection).
 			$(document).keypress(function(event) {
