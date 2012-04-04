@@ -179,12 +179,17 @@ var amatch = function(subject, guess, enableartistrules) {
 	return false;
 };
 
+var sockets = Object.create(null);
+
+var getUserSocket = function(nickname) {
+	return sockets[nickname];
+};
+
 function Room(name) {
 
 	var roomname = name;
 	var totusers = 0;
 	
-	var sockets = Object.create(null);
 	var usersData = Object.create(null);
 	var playedtracks = []; // Used to prevent the same song from playing twice in one game
 	
@@ -197,7 +202,7 @@ function Room(name) {
 	var artworkUrl = null;
 	var trackViewUrl = null;
 	var finishline = 1;
-	var guesstime = false;
+	var allowedguess = false;
 	var status = null;
 	var songtimeleft = null; // Milliseconds
 	var songcounter = 0;
@@ -235,10 +240,6 @@ function Room(name) {
 		}
 		return false;
 	};
-
-	var getUserSocket = function(nickname) {
-		return sockets[nickname];
-	};
 	
 	// A user requested an invalid name
 	var invalidNickName = function(socket, feedback) {
@@ -254,8 +255,8 @@ function Room(name) {
 		else if (data.nickname === "Binb") {
 			feedback = '<span class="label label-important">That name is reserved.</span>';
 		}
-		else if (userExists(data.nickname)) {
-			feedback = '<span class="label label-important">That name is alredy taken.</span>';
+		else if (getUserSocket(data.nickname)) {
+			feedback = '<span class="label label-important">Name already taken.</span>';
 		}
 		if (feedback) {
 			return invalidNickName(socket, feedback);
@@ -281,7 +282,7 @@ function Room(name) {
 	this.sendChatMessage = function (socket, data) {
 		if (typeof data === "string") {
 			var datalcase = data.toLowerCase();
-			if (guesstime && (amatch(artistlcase, datalcase, true) || 
+			if (allowedguess && (amatch(artistlcase, datalcase, true) || 
 								amatch(tracklcase, datalcase))) {
 				var msg = "You are probably right, but you have to use the box above.";
 				socket.emit('chatmsg', {from:"Binb",to:socket.nickname,chatmsg:msg});
@@ -326,7 +327,7 @@ function Room(name) {
 	};
 	
 	this.guess = function(socket, guess) {
-		if (guesstime) {
+		if (allowedguess) {
 			if (!usersData[socket.nickname].matched) { // No track no artist
 				if ((artistlcase === tracklcase) && amatch(tracklcase, guess, true)) {
 					addPoints(socket, true);
@@ -422,7 +423,7 @@ function Room(name) {
 		io.sockets.in(roomname).emit('playtrack', {counter:songcounter,tot:config.songsinarun,
 										users:usersData});
 		songTimeLeft(Date.now()+30000, 50);
-		guesstime = true;
+		allowedguess = true;
 		setTimeout(sendTrackInfo, 30000);
 	};
 	
@@ -439,7 +440,7 @@ function Room(name) {
 										trackName:trackName,collectionName:collectionName,
 										trackViewUrl:trackViewUrl});
 		finishline = 1;
-		guesstime = false;
+		allowedguess = false;
 		if (songcounter < config.songsinarun) {
 			resetPoints(true);
 			sendLoadTrack();
@@ -458,8 +459,7 @@ function Room(name) {
 	};
 
 	this.sendStatus = function(socket) {
-		socket.emit('status', {status:status,timeleft:songtimeleft,
-								previewUrl:previewUrl});
+		socket.emit('status', {status:status,timeleft:songtimeleft,previewUrl:previewUrl});
 	};
 
 	var reset = function() {

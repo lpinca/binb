@@ -31,54 +31,61 @@
 	
 	// Prompt for name and send it.
 	var joinRoom = function(msg) {
-		if (!msg) {
-			msg = "What's your name?";
-
-			var html = '<div class="modal-header"><h3>You are joining the '+roomname+' room</h3></div>';
-			html += '<div class="modal-body"><p>'+msg+'</p></div>';
-			html += '<div class="modal-footer">';
-			html += '<input id="login" class="" type="text" name="nickname" />';
-			html += '<button id="join" class="btn btn-primary">';
-			html += '<i class="icon-user icon-white"></i> Join the game</button></div>';
-
-			$(html).appendTo(DOM.modal);
-			var login = $('#login');
-			var button = $('#join');
-			button.click(function() {
-				var val = $.trim(login.val());
-				if (val !== "") {
-					nickname = val;
-					socket.emit('joinroom', {nickname:nickname,roomname:roomname});
-				}
-				else {
-					var txt = "Nickname can't be empty.";
-					invalidNickName('<span class="label label-important">'+txt+'</span>');
-				}
-				login.val("");
-			});
-			login.keyup(function(event) {
-				if (event.keyCode === 13) {
-					button.click();	
-				}
-			});
-			DOM.modal.modal('show');
-			DOM.modal.on('shown', function() {
-				login.focus();	
-			});
+		if (/nickname\s*\=/.test(document.cookie) && !msg) {
+			nickname = unescape(document.cookie.replace(/.*nickname\s*\=\s*([^;]*);?.*/, "$1"));
+			socket.emit('joinroom', {nickname:nickname,roomname:roomname});
 		}
 		else {
-			$('.modal-body p').html(msg);
-			$('#login').focus();
+			if (!$('body').hasClass('modal-open')) {
+				var html = '<div class="modal-header"><h3>You are joining the '+roomname+' room</h3></div>';
+				html += '<div class="modal-body"><p>'+(msg || "What's your name?")+'</p></div>';
+				html += '<div class="modal-footer">';
+				html += '<input id="login" class="" type="text" name="nickname" />';
+				html += '<button id="join" class="btn btn-primary">';
+				html += '<i class="icon-user icon-white"></i> Join the game</button></div>';
+
+				$(html).appendTo(DOM.modal);
+				var login = $('#login');
+				var button = $('#join');
+				button.click(function() {
+					var val = $.trim(login.val());
+					if (val !== "") {
+						nickname = val;
+						socket.emit('joinroom', {nickname:nickname,roomname:roomname});
+					}
+					else {
+						var txt = "Nickname can't be empty.";
+						invalidNickName('<span class="label label-important">'+txt+'</span>');
+					}
+					login.val("");
+				});
+				login.keyup(function(event) {
+					if (event.keyCode === 13) {
+						button.click();	
+					}
+				});
+				DOM.modal.modal('show');
+				DOM.modal.on('shown', function() {
+					login.focus();
+				});
+			}
+			else {
+				$('.modal-body p').html(msg);
+				$('#login').focus();
+			}
 		}
 	};
 
 	// Your submitted name was invalid
 	var invalidNickName = function(feedback) {
-		joinRoom(feedback+"<br/>Try again:");
+		joinRoom(feedback+"<br/>Try with another one:");
 	};
 	
 	// You joined the game
 	var ready = function(data) {
+		if (!/nickname\s*\=/.test(document.cookie)) {
+			document.cookie = "nickname="+escape(nickname)+";path=/;";
+		}
 		DOM.modal.modal('hide').empty();
 		$('#total-tracks span').text(data.trackscount);
 		var msg = nickname+" joined the game";
@@ -679,6 +686,7 @@
 					}
 				},
 				swfPath: "/static/swf/",
+				solution: "flash, html",
 				supplied: "m4a",
 				preload: "auto",
 				volume: 1
