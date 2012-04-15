@@ -19,8 +19,6 @@
 	var nmstrings = ['Nope, sorry!', 'No way!', 'Fail', 'Nope', 'No', 'That\'s wrong', 'What?!',
 					'Wrong', 'Haha, what?!', 'You kidding?', 'Don\'t make me laugh', 'You mad?',
 					'Try again'];
-	var mottos = ['guess the song.', 'name that tune.', 'i know this track.'];
-
 	var DOM = {};
 
 	// Exact match version of jQuery :contains selector
@@ -30,10 +28,10 @@
 	};
 	
 	// Prompt for name and send it.
-	var joinRoom = function(msg) {
+	var joinAnonymously = function(msg) {
 		if (/nickname\s*\=/.test(document.cookie) && !msg) {
 			nickname = unescape(document.cookie.replace(/.*nickname\s*\=\s*([^;]*);?.*/, "$1"));
-			socket.emit('joinroom', {nickname:nickname,roomname:roomname});
+			socket.emit('joinanonymously', {nickname:nickname,roomname:roomname});
 		}
 		else {
 			if (!$('body').hasClass('modal-open')) {
@@ -51,7 +49,7 @@
 					var val = $.trim(login.val());
 					if (val !== "") {
 						nickname = val;
-						socket.emit('joinroom', {nickname:nickname,roomname:roomname});
+						socket.emit('joinanonymously', {nickname:nickname,roomname:roomname});
 					}
 					else {
 						var txt = "Nickname can't be empty.";
@@ -78,12 +76,23 @@
 
 	// Your submitted name was invalid
 	var invalidNickName = function(feedback) {
-		joinRoom(feedback+"<br/>Try with another one:");
+		joinAnonymously(feedback+"<br/>Try with another one:");
 	};
 	
-	// You joined the game
+	/* Triggered when a logged user tries to join a room from another tab or another browser
+		and he is already in a room */
+	var alreadyInARoom = function() {
+		var html = '<div class="modal-header"><h3>Already in a room</h3></div>';
+		html += '<div class="modal-body"><div class="alert alert-error alert-block">';
+		html += '<h4 class="alert-heading">Warning!</h4>You are already in a room.<br/>';
+		html += 'Leave the other room and refresh this page or close this one.</div></div>';
+		$(html).appendTo(DOM.modal);
+		DOM.modal.modal('show');
+	};
+	
+	// You joined the room
 	var ready = function(data) {
-		if (!/nickname\s*\=/.test(document.cookie)) {
+		if (!data.loggedin && !/nickname\s*\=/.test(document.cookie)) {
 			document.cookie = "nickname="+escape(nickname)+";path=/;";
 		}
 		DOM.modal.modal('hide').empty();
@@ -190,7 +199,7 @@
 		var found = false;
 		for (var i=0; i<users.length; i++) {
 			var user = users[i];
-			var li = $('<li></li>');
+			var li = $('<li class="relative"></li>');
 			var pvt = $('<span class="private label label-info">P</span>');
 			var username = $('<span class="name"></span>').text(user.nickname);
 			var points = $('<span class="points">('+user.points+')</span>');
@@ -198,6 +207,10 @@
 			var roundpointsel = $('<span class="round-points"></span>');
 			var guesstime = $('<span class="guess-time"></span>');
 			li.append(pvt, username, points, roundrank, roundpointsel, guesstime);
+			if (user.registered) {
+				var href = 'href="/user/'+username.text().replace(/"/g, "&quot;")+'"';
+				pvt.after('<a class="registered" target="_blank" '+href+'></a>');
+			}
 			DOM.users.append(li);
 			if (pvtmsgto === user.nickname) {
 				pvt.show();
@@ -254,7 +267,7 @@
 		DOM.recipient.hide();
 		DOM.messagebox.animate({'width':'-='+width+'px'}, "fast", function() {DOM.recipient.show();});
 		var el = $("span.name:econtains("+usrname+")");
-		el.prev().show();
+		el.prevAll(".private").show();
 		el.unbind('click');
 		el.click(clearPrivate);
 		pvtmsgto = usrname;
@@ -267,7 +280,7 @@
 		DOM.recipient.text("");
 		DOM.messagebox.animate({'width':'+='+width+'px'}, "fast");
 		var el = $("span.name:econtains("+pvtmsgto+")");
-		el.prev().hide();
+		el.prevAll(".private").hide();
 		el.unbind("click");
 		el.click(function() {
 			addPrivate($(this).text());
@@ -408,25 +421,29 @@
 	};
 
 	var gameOver = function(data) {
-		var users = [];
-		for (var key in data.users) {
-			users.push(data.users[key]);
-		}
-		users.sort(function(a, b) {return b.points - a.points;});
 		var html = '<div class="modal-header"><h3>Game Over</h3></div>';
-		html += '<div class="modal-body">';
+		html += '<div class="modal-body"><table class="table table-striped scoreboard">';
+		html += '<thead><tr><th>#</th><th>Name</th><th>Points</th>';
+		html += '<th><div class="cups stand1"></div></th><th><div class="cups stand2"></div></th>';
+		html += '<th><div class="cups stand3"></div></th><th>Guessed</th><th>Best time</th>';
+		html += '</thead><tbody>';
 		for(var i=0;i<3;i++) {
-			if (users[i]) {
-				var rank = i+1;
-				var offset = -16 + (-32 * i);
-				var style = ' style="background:url(/static/images/sprites.png)';
-				style += ' no-repeat 0px '+offset+'px;"';
-				html += '<div class="gameover"'+style+'>'+rank+')';
-				html += ' <span class="name">'+users[i].nickname;
-				html += '</span>('+users[i].points+')</div>';
+			if (data.users[i]) {
+				var playername = data.users[i].nickname.replace(/</g, "&lt;")
+								.replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+				html += '<tr><td><div class="medals rank'+(i+1)+'"></div></td>';
+				html += '<td class="name">'+playername+'</td>';
+				html += '<td>'+data.users[i].points+'</td>';
+				html += '<td>'+data.users[i].golds+'</td><td>'+data.users[i].silvers+'</td>';
+				html += '<td>'+data.users[i].bronzes+'</td><td>'+data.users[i].guessed+'</td>';
+				var besttime = "N/A";
+				if (data.users[i].bestguesstime !== 30000) {
+					besttime = (data.users[i].bestguesstime/1000).toFixed(1)+" s";
+				}
+				html += '<td>'+besttime+'</td></tr>';
 			}
 		}
-		html +='</div>';
+		html +='</tbody></table></div>';
 		html += '<div class="modal-footer">A new game will start in <span></span> second/s</div>';
 		DOM.modal.append($(html));
 		DOM.modal.modal('show');
@@ -649,8 +666,6 @@
 
 	// Set up the room.
 	$(function() {
-		var motto = mottos[Math.floor(Math.random()*mottos.length)];
-		$('#app-name small').text(motto);
 		setVariables();
 		DOM.modal.modal({keyboard:false,show:false,backdrop:"static"});
 		DOM.togglechat.click(hideChat);
@@ -666,7 +681,15 @@
 		socket.on("connect", function() {
 			jplayer = $("#player").jPlayer({
 				ready: function() {
-					joinRoom();
+					socket.emit('loggedin', function(data) {
+						if (data) {
+							nickname = data;
+							socket.emit('joinroom', roomname);
+						}
+						else {
+							joinAnonymously();
+						}
+					});
 					if (!$.jPlayer.platform.mobile && !$.jPlayer.platform.tablet) {
 						addVolumeControl();
 					}
@@ -692,6 +715,7 @@
 				volume: 1
 			});
 		});
+		socket.on('alreadyinaroom', alreadyInARoom);
 		socket.on('invalidnickname', invalidNickName);
 		socket.on('ready', ready);
 		socket.on("disconnect", disconnect);

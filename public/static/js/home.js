@@ -7,9 +7,6 @@ $(function() {
 			}
 		});
 	}
-	var mottos = ['guess the song.', 'name that tune.', 'i know this track.'];
-	var motto = mottos[Math.floor(Math.random()*mottos.length)];
-	$('#app-name small').text(motto);
 	$.get("/artworks", function(data) {
 		$(".thumbnail").each(function(index) {
 			var i = index * 6;

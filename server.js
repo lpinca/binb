@@ -1,17 +1,204 @@
 var async = require("async");
+var crypto = require("crypto");
+var canvas = require("canvas");
 var express = require("express");
+var form = require("express-form");
+var parseCookie = require('connect').utils.parseCookie;
+var redisstore = require('connect-redis')(express);
+var config = require("./config.js").configure();
+
+// Setting up Redis
+var songsdb = require("redis-url").createClient(config.songsdburl);
+var usersdb = require("redis-url").createClient(config.usersdburl);
+
+songsdb.on('error', function(err) {
+	console.log("Error: "+err);
+});
+
+usersdb.on('error', function(err) {
+	console.log("Error: "+err);
+});
+
+// Setting up Express
+var sessionstore = new redisstore({client:usersdb});
 var http = express.createServer();
 
 // Configuration
-var config = require("./config.js").configure();
 http.use(express.static(__dirname + '/public'));
+http.use(express.bodyParser());
+http.use(express.cookieParser());
+http.use(express.session({secret:config.sessionsecret,store:sessionstore}));
 http.set("view options", {layout:false});
 http.set('view engine', 'jade');
 
 // Routes
 http.get("/", function(req, res) {
+	if (req.session.user) {
+		res.local('loggedin', req.session.user);
+	}
 	res.render("index", {rooms:config.rooms});
 });
+
+// Captcha generator
+const CHARACTERS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+
+var Captcha = function() {
+	var code = "";
+	while (code.length < 4) {
+		code += CHARACTERS[Math.floor(Math.random() * CHARACTERS.length)];
+	}
+	var _canvas = new canvas(64, 26);
+	var ctx = _canvas.getContext('2d');
+	ctx.fillStyle = "#DDDDDD";
+	ctx.fillRect(0, 0, 64, 26);
+	ctx.font = "bold 20px Helvetica";
+	ctx.lineWidth = 1;
+	ctx.textAlign = "center";
+	ctx.strokeStyle = "#080";
+	ctx.strokeText(code, 31, 20);
+	ctx.save();
+	this.getCode = function() {
+		return code;
+	}
+	this.toDataURL = function() {
+		return _canvas.toDataURL();
+	}
+};
+
+http.get("/signup", function(req, res) {
+	var captcha = new Captcha();
+	req.session.captchacode = captcha.getCode();
+	res.render("signup", {captchaurl:captcha.toDataURL()});
+});
+
+http.post("/signup", 
+	form(
+		form.filter("username").trim().required().not(/binb/, "is reserved")
+			.is(/^[^\x00-\x1F\x7F]{1,15}$/, "1 to 15 characters required"),
+		form.filter("email").required().isEmail("is not an email address"),
+		form.filter("password").required()
+			.is(/^[A-Za-z0-9]{6,15}$/, "6 to 15 alphanumeric characters required"),
+		form.filter("captcha").required()
+	),
+	function(req, res) {
+		if (req.form.isValid) {
+			if (req.session.captchacode !== req.form.captcha) {
+				var errors = {captcha:['no match']};
+				var captcha = new Captcha();
+				req.session.captchacode = captcha.getCode();
+				return res.render("signup", {errors:errors,captchaurl:captcha.toDataURL()});
+			}
+			var userkey = "user:"+req.form.username;
+			usersdb.exists(userkey, function(err, data) {
+				if (data === 1) { // User already exists
+					var errors = {alert: "A user with name "+req.form.username+" already exists."};
+					var captcha = new Captcha();
+					req.session.captchacode = captcha.getCode();
+					return res.render("signup", {errors:errors,captchaurl:captcha.toDataURL()});
+				}
+				var mailkey = "email:"+req.form.email;
+				usersdb.exists(mailkey, function(e, d) {
+					if (d === 1) { // Email already exists
+						var errors = {alert: "A user with that email already exists."};
+						var captcha = new Captcha();
+						req.session.captchacode = captcha.getCode();
+						return res.render("signup", {errors:errors,captchaurl:captcha.toDataURL()});
+					}
+					var salt = "";
+					while (salt.length < 8) {
+						salt += CHARACTERS[Math.floor(Math.random() * CHARACTERS.length)];
+					}
+					var hash = crypto.createHash('sha256')
+								.update(salt+req.form.password).digest('hex');
+					var date = new Date();
+					var joindate = date.getDate()+"/"+(date.getMonth()+1)+"/"+date.getFullYear();
+					usersdb.hmset(userkey, "username", req.form.username,
+									"email", req.form.email,
+									"password", hash,
+									"salt", salt,
+									"joindate", joindate,
+									"totpoints", 0,
+									"bestscore", 0,
+									"golds", 0,
+									"silvers", 0,
+									"bronzes", 0,
+									"bestguesstime", 30000,
+									"worstguesstime", 0,
+									"totguesstime", 0,
+									"guessed", 0,
+									"victories", 0,
+									"secondplaces", 0,
+									"thirdplaces", 0);
+					usersdb.set(mailkey, userkey);
+					usersdb.sadd("users", userkey);
+					usersdb.sadd("emails", mailkey);
+					var msg = "You successfully created your account. You are now ready to login.";
+					res.render("login", {success:msg});
+				});
+			});
+		}
+		else {
+			var captcha = new Captcha();
+			req.session.captchacode = captcha.getCode();
+			res.render("signup", {errors:req.form.getErrors(),captchaurl:captcha.toDataURL()});
+		}
+	}
+);
+
+http.get("/login", function(req, res) {
+	res.render("login");
+});
+
+http.post("/login", 
+	form(
+		form.filter("username").trim().required(),
+		form.filter("password").trim().required()
+	),
+	function(req, res) {
+		if (req.form.isValid) {
+			var errors = {alert: "The username and/or password you specified are not correct."};
+			var key = "user:"+req.form.username;
+			usersdb.exists(key, function(err, data) {
+				if (data === 1) { // User exists
+					usersdb.hmget(key, "salt", "password", function(e, resp) {
+						var hash = crypto.createHash('sha256')
+									.update(resp[0]+req.body.password).digest('hex');
+						if (hash === resp[1]) {
+							req.session.regenerate(function() {
+								req.session.cookie.maxAge = 604800000; // One week
+								req.session.user = req.form.username;
+								res.redirect('/');
+							});
+						}
+						else {
+							res.render("login", {errors:errors});
+						}
+					});
+				}
+				else {
+					res.render("login", {errors:errors});
+				}
+			});
+		}
+		else {
+			res.render("login", {errors:req.form.getErrors()});
+		}
+	}
+);
+
+http.get("/logout", function(req, res) {
+	req.session.destroy(function() {
+		res.redirect("/");
+	});
+});
+
+var makeCallBack = function(genre) {
+	return function(callback) {
+		songsdb.srandmember(genre, function(err, res) {
+			songsdb.hget(res, "artworkUrl100", callback);
+		});
+	};
+};
 
 http.get("/artworks", function(req, res) {
 	var callitems = [];
@@ -30,24 +217,43 @@ http.get("/artworks", function(req, res) {
 	});
 });
 
-http.get("/:room", function(req, res, next) {
+http.get("/:room", function(req, res) {
 	if (config.rooms.indexOf(req.params.room) !== -1) {
+		if (req.session.user) {
+			res.local('loggedin', req.session.user);
+		}
 		res.render("room", {roomname:req.params.room,rooms:config.rooms});
 	}
 	else {
-		next();
+		res.send(404);
 	}
+});
+
+http.get("/user/*", function(req, res) {
+	var key = "user:"+req.params[0];
+	usersdb.exists(key, function(err, data) {
+		if (data === 1) {
+			usersdb.hgetall(key, function(e, obj) {
+				obj.bestguesstime = (obj.bestguesstime/1000).toFixed(1);
+				obj.worstguesstime = (obj.worstguesstime/1000).toFixed(1);
+				if (obj.guessed !== "0") {
+					obj.meanguesstime = ((obj.totguesstime/obj.guessed)/1000).toFixed(1);
+				}
+				delete obj.email;
+				delete obj.password;
+				delete obj.salt;
+				delete obj.totguesstime;
+				res.render("user", obj);
+			});
+		}
+		else {
+			res.send(404);
+		}
+	});
 });
 
 // Starting HTTP server
 http.listen(config.port);
-
-// Setting up Redis
-var redis = require("redis-url").createClient(config.redisurl);
-
-redis.on('error', function(err) {
-	console.log("Error: "+err);
-});
 
 // Setting up Socket.IO
 var io = require("socket.io").listen(http);
@@ -59,12 +265,82 @@ io.set('log level', 1);						// reduce logging
 // enable transports
 io.set('transports', ['websocket', 'htmlfile', 'xhr-polling', 'jsonp-polling']);
 
-var makeCallBack = function(genre) {
-	return function(callback) {
-		redis.srandmember(genre, function(err, res) {
-			redis.hget(res, "artworkUrl100", callback);
+io.set('authorization', function(data, accept) {
+	if(data.headers.cookie) {
+		var cookie = parseCookie(data.headers.cookie);
+		sessionstore.get(cookie['connect.sid'], function(err, session) {
+			if (err || !session) {
+				accept('Error', false);
+			}
+			else {
+				data.session = session;
+				accept(null, true);
+			}
 		});
-	};
+	}
+	else {
+		return accept('No cookie transmitted.', false);
+	}
+});
+
+io.sockets.on('connection', function(socket) {
+	var session = socket.handshake.session;
+	socket.on('getoverview', function() {
+		var data = Object.create(null);
+		for (var prop in Rooms) {
+			data[prop] = Rooms[prop].getPopulation();
+		}
+		socket.join('home');
+		socket.emit('overview', data);
+	});
+	socket.on('loggedin', function(fn) {
+		return (session.user) ? fn(session.user) : fn(false);
+	});
+	socket.on('joinroom', function(data) {
+		if (session.user && typeof data === "string" && config.rooms.indexOf(data) !== -1) {
+			if (getUserSocket(session.user)) { // User already in a room
+				socket.emit('alreadyinaroom');
+				return;
+			}
+			socket.nickname = session.user;
+			Rooms[data].joinRoom(socket);
+		}
+	}); 
+	socket.on('joinanonymously', function(data) {
+		if (!socket.nickname && typeof data === "object" && typeof data.nickname === "string" &&
+			data.nickname !== "" && typeof data.roomname === "string" && 
+			config.rooms.indexOf(data.roomname) !== -1) {
+			Rooms[data.roomname].setNickName(socket, data);
+		}
+	});
+	socket.on('getstatus', function() {
+		if (socket.roomname) {
+			Rooms[socket.roomname].sendStatus(socket);
+		}
+	});
+	socket.on('sendchatmsg', function(data) {
+		if (socket.roomname) {
+			Rooms[socket.roomname].sendChatMessage(socket, data);
+		}
+	});
+	socket.on('guess', function(data) {
+		if (socket.roomname && typeof data === "string") {
+			Rooms[socket.roomname].guess(socket, data);
+		}
+	});
+	socket.on("disconnect", function() {
+		if (socket.roomname && socket.nickname) {
+			Rooms[socket.roomname].userLeft(socket);
+		}
+	});
+});
+
+// Sockets of all rooms
+var sockets = Object.create(null);
+
+// Get the socket of a player
+var getUserSocket = function(nickname) {
+	return sockets[nickname];
 };
 
 /*
@@ -179,10 +455,51 @@ var amatch = function(subject, guess, enableartistrules) {
 	return false;
 };
 
-var sockets = Object.create(null);
-
-var getUserSocket = function(nickname) {
-	return sockets[nickname];
+var collectStats = function(username, stats) {
+	var key = "user:"+username;
+	if (stats.points) {
+		usersdb.hincrby(key, "totpoints", stats.points);
+	}
+	if (stats.userscore) {
+		// Set personal best
+		usersdb.hget(key, "bestscore", function(err, res) {
+			if (res < stats.userscore) {
+				usersdb.hset(key, "bestscore", stats.userscore);
+			}
+		});
+	}
+	if (stats.gold) {
+		usersdb.hincrby(key, "golds", 1);
+	}
+	if (stats.silver) {
+		usersdb.hincrby(key, "silvers", 1);
+	}
+	if (stats.bronze) {
+		usersdb.hincrby(key, "bronzes", 1);
+	}
+	if (stats.guesstime) {
+		usersdb.hincrby(key, "guessed", 1);
+		usersdb.hincrby(key, "totguesstime", stats.guesstime);
+		usersdb.hget(key, "bestguesstime", function(err, res) {
+			if (stats.guesstime < res) {
+				usersdb.hset(key, "bestguesstime", stats.guesstime);
+			}
+		});
+		usersdb.hget(key, "worstguesstime", function(err, res) {
+			if (stats.guesstime > res) {
+				usersdb.hset(key, "worstguesstime", stats.guesstime);
+			}
+		});
+	}
+	if (stats.firstplace) {
+		usersdb.hincrby(key, "victories", 1);
+	}
+	if (stats.secondplace) {
+		usersdb.hincrby(key, "secondplaces", 1);
+	}
+	if (stats.thirdplace) {
+		usersdb.hincrby(key, "thirdplaces", 1);
+	}
 };
 
 function Room(name) {
@@ -191,7 +508,7 @@ function Room(name) {
 	var totusers = 0;
 	
 	var usersData = Object.create(null);
-	var playedtracks = []; // Used to prevent the same song from playing twice in one game
+	var playedtracks = Object.create(null); // Used to prevent the same song from playing twice in one game
 	
 	var artistName = null;
 	var artistlcase = null;
@@ -212,17 +529,26 @@ function Room(name) {
 		return totusers;
 	};
 
-	var addUser = function(socket) {
+	var addUser = function(socket, loggedin) {
 		sockets[socket.nickname] = socket;
 		usersData[socket.nickname] = {
 			nickname: socket.nickname,
+			registered: loggedin,
 			points: 0,
 			roundpoints: 0,
 			matched: null,
-			guesstime: null
+			guessed: 0,
+			guesstime: null,
+			bestguesstime: 30000,
+			golds: 0,
+			silvers: 0,
+			bronzes: 0
 		};
 		totusers = totusers + 1;
 		io.sockets.in('home').emit('update', {room:roomname,players:totusers});
+		// Broadcast new user event
+		socket.emit('ready', {users:usersData,trackscount:trackscount,loggedin:loggedin});
+		socket.broadcast.to(roomname).emit('newuser', {nickname:socket.nickname,users:usersData});
 	};
 
 	var removeUser = function(socket) {
@@ -241,6 +567,12 @@ function Room(name) {
 		return false;
 	};
 	
+	this.joinRoom = function(socket) {
+		socket.roomname = roomname;
+		socket.join(roomname);
+		addUser(socket, true);
+	}
+	
 	// A user requested an invalid name
 	var invalidNickName = function(socket, feedback) {
 		socket.emit('invalidnickname', feedback);
@@ -252,7 +584,7 @@ function Room(name) {
 		if (data.nickname.length > 15) {
 			feedback = '<span class="label label-important">That name is too long.</span>';
 		}
-		else if (data.nickname === "Binb") {
+		else if (data.nickname === "binb") {
 			feedback = '<span class="label label-important">That name is reserved.</span>';
 		}
 		else if (getUserSocket(data.nickname)) {
@@ -261,15 +593,22 @@ function Room(name) {
 		if (feedback) {
 			return invalidNickName(socket, feedback);
 		}
-
-		socket.nickname = data.nickname;
-		socket.roomname = roomname;
-		socket.join(roomname);
 		
-		// Add user to the list of active users and broadcast the event
-		addUser(socket);
-		socket.emit('ready', {users:usersData,trackscount:trackscount});
-		socket.broadcast.to(roomname).emit('newuser', {nickname:socket.nickname,users:usersData});
+		var key = "user:"+data.nickname;
+		usersdb.exists(key, function(err, resp) {
+			if (resp === 1) { // User already exists
+				feedback = '<span class="label label-important">That name belongs '
+				feedback += 'to a registered user.</span>';
+				return invalidNickName(socket, feedback);
+			}
+			else {
+				socket.nickname = data.nickname;
+				socket.roomname = roomname;
+				socket.join(roomname);
+				// Add user to the list of active users
+				addUser(socket, false);
+			}
+		});
 	};
 
 	// A user has left (DCed, etc.)
@@ -285,7 +624,7 @@ function Room(name) {
 			if (allowedguess && (amatch(artistlcase, datalcase, true) || 
 								amatch(tracklcase, datalcase))) {
 				var msg = "You are probably right, but you have to use the box above.";
-				socket.emit('chatmsg', {from:"Binb",to:socket.nickname,chatmsg:msg});
+				socket.emit('chatmsg', {from:"binb",to:socket.nickname,chatmsg:msg});
 				return;
 			}
 			io.sockets.in(roomname).emit('chatmsg', {from:socket.nickname,chatmsg:data});
@@ -300,29 +639,71 @@ function Room(name) {
 	};
 
 	var addPoints = function(socket, allinone) {
-		usersData[socket.nickname].matched = 'both';
+		usersData[socket.nickname].guesstime = 30000 - songtimeleft;
+		var stats = {};
 		switch (finishline) {
 			case 1:
 				finishline++;
-				usersData[socket.nickname].guesstime = 30000 - songtimeleft;
 				usersData[socket.nickname].roundpoints = 6;
-				usersData[socket.nickname].points += (allinone) ? 6 : 5;
+				if (allinone) {
+					usersData[socket.nickname].points += 6;
+					stats.points = 6;
+				}
+				else {
+					usersData[socket.nickname].points += 5;
+					stats.points = 5;
+				}
+				usersData[socket.nickname].golds++;
+				stats.gold = true;
 				break;
 			case 2:
 				finishline++;
-				usersData[socket.nickname].guesstime = 30000 - songtimeleft;
 				usersData[socket.nickname].roundpoints = 5;
-				usersData[socket.nickname].points += (allinone) ? 5 : 4;
+				if (allinone) {
+					usersData[socket.nickname].points += 5;
+					stats.points = 5;
+				}
+				else {
+					usersData[socket.nickname].points += 4;
+					stats.points = 4;
+				}
+				usersData[socket.nickname].silvers++;
+				stats.silver = true;
 				break;
 			case 3:
 				finishline++;
-				usersData[socket.nickname].guesstime = 30000 - songtimeleft;
 				usersData[socket.nickname].roundpoints = 4;
-				usersData[socket.nickname].points += (allinone) ? 4 : 3;
+				if (allinone) {
+					usersData[socket.nickname].points += 4;
+					stats.points = 4;
+				}
+				else {
+					usersData[socket.nickname].points += 3;
+					stats.points = 3;
+				}
+				usersData[socket.nickname].bronzes++;
+				stats.bronze = true;
 				break;
 			default:
 				usersData[socket.nickname].roundpoints = 3;
-				usersData[socket.nickname].points += (allinone) ? 3 : 2;
+				if (allinone) {
+					usersData[socket.nickname].points += 3;
+					stats.points = 3;
+				}
+				else {
+					usersData[socket.nickname].points += 2;
+					stats.points = 2;
+				}
+		}
+		usersData[socket.nickname].matched = 'both';
+		usersData[socket.nickname].guessed++;
+		if (usersData[socket.nickname].guesstime < usersData[socket.nickname].bestguesstime) {
+			usersData[socket.nickname].bestguesstime = usersData[socket.nickname].guesstime;
+		}
+		if (usersData[socket.nickname].registered) {
+			stats.userscore = usersData[socket.nickname].points;
+			stats.guesstime = usersData[socket.nickname].guesstime;
+			collectStats(socket.nickname, stats);
 		}
 	};
 	
@@ -340,6 +721,10 @@ function Room(name) {
 					usersData[socket.nickname].matched = 'artist';
 					socket.emit('artistmatched');
 					io.sockets.in(roomname).emit('updateusers', {users:usersData});
+					if (usersData[socket.nickname].registered) {
+						var stats = {points:1,userscore:usersData[socket.nickname].points};
+						collectStats(socket.nickname, stats);
+					}
 				}
 				else if (amatch(tracklcase, guess)) {
 					usersData[socket.nickname].roundpoints++;
@@ -347,6 +732,10 @@ function Room(name) {
 					usersData[socket.nickname].matched = 'title';
 					socket.emit('titlematched');
 					io.sockets.in(roomname).emit('updateusers', {users:usersData});
+					if (usersData[socket.nickname].registered) {
+						var stats = {points:1,userscore:usersData[socket.nickname].points};
+						collectStats(socket.nickname, stats);
+					}
 				}
 				else {
 					socket.emit('nomatch');
@@ -387,6 +776,11 @@ function Room(name) {
 		for (var key in usersData) {
 			if (!roundonly) {
 				usersData[key].points = 0;
+				usersData[key].guessed = 0;
+				usersData[key].bestguesstime = 30000;
+				usersData[key].golds = 0;
+				usersData[key].silvers = 0;
+				usersData[key].bronzes = 0;
 			}
 			usersData[key].roundpoints = 0;
 			usersData[key].matched = null;
@@ -395,21 +789,21 @@ function Room(name) {
 	};
 
 	var sendLoadTrack = function() {
-		redis.srandmember(roomname, function(err, res) {
-			redis.hmget(res, "trackId", "artistName", "trackName", "collectionName", "previewUrl",
+		songsdb.srandmember(roomname, function(err, res) {
+			songsdb.hmget(res, "artistName", "trackName", "collectionName", "previewUrl",
 							"artworkUrl60", "trackViewUrl", function(e, replies) {
-				if (playedtracks[replies[0]]) {
+				if (playedtracks[res]) {
 					return sendLoadTrack();
 				}
-				playedtracks[replies[0]] = true;
-				artistName = replies[1];
+				playedtracks[res] = true;
+				artistName = replies[0];
 				artistlcase = artistName.toLowerCase();
-				trackName = replies[2];
+				trackName = replies[1];
 				tracklcase = trackName.toLowerCase();
-				collectionName = replies[3];
-				previewUrl = replies[4];
-				artworkUrl = replies[5];
-				trackViewUrl = replies[6];
+				collectionName = replies[2];
+				previewUrl = replies[3];
+				artworkUrl = replies[4];
+				trackViewUrl = replies[5];
 				io.sockets.in(roomname).emit('loadtrack', {previewUrl:previewUrl});
 				setTimeout(sendPlayTrack, 5000);
 			});
@@ -453,7 +847,22 @@ function Room(name) {
 
 	var gameOver = function() {
 		status = 3; // Game over
-		io.sockets.in(roomname).emit('gameover', {users:usersData});
+		var users = [];
+		for (var key in usersData) {
+			users.push(usersData[key]);
+		}
+		users.sort(function(a, b) {return b.points - a.points;});
+		var podium = users.slice(0,3);
+		io.sockets.in(roomname).emit('gameover', {users:podium});
+		if (podium[0] && podium[0].registered) {
+			collectStats(podium[0].nickname, {firstplace:true});
+		}
+		if (podium[1] && podium[1].registered) {
+			collectStats(podium[1].nickname, {secondplace:true});
+		}
+		if (podium[2] && podium[2].registered) {
+			collectStats(podium[2].nickname, {thirdplace:true});
+		}
 		resetPoints(false);
 		setTimeout(reset, 5000);
 	};
@@ -464,13 +873,13 @@ function Room(name) {
 
 	var reset = function() {
 		songcounter = 0;
-		playedtracks = [];
+		playedtracks = Object.create(null);
 		sendLoadTrack();
 	};
 
 	// Start the room
 	this.start = function() {
-		redis.scard(roomname, function(err, res) {
+		songsdb.scard(roomname, function(err, res) {
 			trackscount = res;
 		});
 		sendLoadTrack();
@@ -483,38 +892,4 @@ for (var i=0; i<config.rooms.length; i++) {
 	Rooms[config.rooms[i]].start();
 }
 
-console.log("Bimb started and listening on port "+config.port);
-
-io.sockets.on('connection', function(socket) {
-	socket.on('getoverview', function() {
-		var data = Object.create(null);
-		for (var prop in Rooms) {
-			data[prop] = Rooms[prop].getPopulation();
-		}
-		socket.join('home');
-		socket.emit('overview', data);
-	});
-	socket.on('joinroom', function(data) {
-		if (!socket.nickname && typeof data === "object" && typeof data.nickname === "string" &&
-			data.nickname !== "" && typeof data.roomname === "string" && 
-			config.rooms.indexOf(data.roomname) !== -1) {
-			Rooms[data.roomname].setNickName(socket, data);
-		}
-	});
-	socket.on('getstatus', function() {
-		Rooms[socket.roomname].sendStatus(socket);
-	});
-	socket.on('sendchatmsg', function(data) {
-		Rooms[socket.roomname].sendChatMessage(socket, data);
-	});
-	socket.on('guess', function(data) {
-		if (typeof data === "string") {
-			Rooms[socket.roomname].guess(socket, data);
-		}
-	});
-	socket.on("disconnect", function() {
-		if (socket.nickname !== undefined) {
-			Rooms[socket.roomname].userLeft(socket);
-		}
-	});
-});
+console.log("binb started and listening on port "+config.port);

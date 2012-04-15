@@ -2,7 +2,9 @@
 
 exports.configure = function() {
 	this.port = 80;
-	this.redisurl = '';
+	this.songsdburl = '';
+	this.usersdburl = '';
+	this.sessionsecret = '';
 	this.songsinarun = 15;
 	this.threshold = 2; // Edit distance threshold
 	this.rooms = ["pop", "rock", "mixed"];

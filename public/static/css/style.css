@@ -1,8 +1,47 @@
 body {
 	background: url('/static/images/bg.jpg') repeat-x scroll 0 0 #F5F6F7;
+	padding-top:45px;
 }
 section {
 	margin-top:30px;
+}
+.motto {
+	color: #999999;
+	font-size:13px;
+	text-shadow:0 -1px 0 rgba(0, 0, 0, 0.25);
+}
+.navbar .navbar-text {
+	line-height:19px;
+	padding: 10px 10px 11px;
+}
+.form-horizontal .control-group {
+	margin-bottom: 10px;
+}
+.form-horizontal .control-label {
+	width: 100px;
+}
+.form-horizontal .controls {
+	margin-left: 120px;
+}
+form .clearfix {
+	margin-bottom: 10px;
+}
+.well {
+	background-color: #DDDDDD;
+	margin-bottom: 18px;
+}
+.alert {
+	margin-bottom: 9px;
+}
+#signup-button {
+	margin-left: 120px;
+	margin-top: 9px;
+}
+#captcha-input {
+	width: 126px;
+}
+#captcha {
+	margin-right:20px;
 }
 .page-header {
 	padding: 0;
@@ -26,7 +65,7 @@ input {
 .modal-footer {
 	text-align: left;
 }
-#join {
+.modal-footer .btn {
 	float: right;
 }
 .thumbnails {
@@ -48,6 +87,34 @@ input {
 	width: 70px;
 	height: 70px;
 }
+.profile {
+	font-size: 24px;
+	font-weight: bold;
+	line-height: 32px;
+}
+.profile .img {
+	width: 32px;
+	height: 32px;
+	float: left;
+	margin-right: 5px;
+	background: url('/static/images/sprites.png') no-repeat 0px -56px;
+}
+.stats {
+	border: 1px solid #ccc;
+	border-left: 0;
+	margin-top:8px;
+}
+.stats td {
+	border-left: 1px solid #ccc;
+	border-top: 1px solid #ccc;
+	vertical-align: middle;
+}
+.stats tbody tr:nth-child(odd) td {
+	background-color: #ddd;
+}
+.stats tbody tr:hover td {
+	background-color: #dadada;
+}
 .room {
 	height: 25px;
 	line-height: 25px;
@@ -61,10 +128,6 @@ input {
 	text-align: center;
 	text-transform: capitalize;
 }
-.btn-group {
-	float: right;
-	margin: 21px 10px 0 0;
-}
 .dropdown-menu {
 	min-width: 140px;
 }
@@ -77,12 +140,32 @@ input {
 .matched {
 	color: #f3a22f;
 }
-.gameover {
-	padding-left:32px;
-	height:32px;
-	line-height:32px;
+.cups, .medals {
+	margin-left: auto;
+	margin-right: auto;
 }
-.gameover .name {
+.cups {
+	width: 16px;
+	height: 16px;
+}
+.medals {
+	width: 32px;
+	height: 32px;
+}
+.rank1 {
+	background: url('/static/images/sprites.png') no-repeat -32px -16px;
+}
+.rank2 {
+	background: url('/static/images/sprites.png') no-repeat -32px -48px;
+}
+.rank3 {
+	background: url('/static/images/sprites.png') no-repeat -32px -80px;
+}
+.scoreboard th, .scoreboard td {
+	vertical-align: middle;
+	text-align: center;
+}
+.scoreboard .name {
 	font-weight:bold;
 }
 .relative {
@@ -113,7 +196,7 @@ input {
 	width: 24px;
 	height:24px;
 	top: 49px;
-	background: url('/static/images/wheel.png') no-repeat 0 0;
+	background: url('/static/images/sprites.png') no-repeat 0px -32px;
 }
 #wheel-left {
 	left:51px;
@@ -282,7 +365,12 @@ input {
 	text-align: center;
 	margin-bottom:18px;
 }
+#users-wrapper {
+	margin-left: 120px;
+	width: 300px;
+}
 #users {
+	padding-left:20px;
 	margin-bottom: 90px;
 	max-height: 380px;
 	overflow: auto;
@@ -298,17 +386,30 @@ input {
 }
 #users .private {
 	display: none;
+	font-size: 9.75px;
+	padding: 2px 4px;
+	position: absolute;
+	left: -19px;
 }
 #users .private, #users .name, .gameover .name {
 	margin-right: 4px;
 }
-#users .label {
-	font-size:9.75px;
-	padding: 2px 4px;
-	line-height: 18px;
-	vertical-align: top;
+.registered, #users .round-rank {
+	display: inline-block;
+	vertical-align: middle;
 }
-#users .name {
+.registered, .round-rank {
+	height: 16px;
+	width: 16px;
+	margin-right:2px;
+}
+.registered {
+	background: url('/static/images/sprites.png') no-repeat 0px -16px;
+}
+.registered:hover {
+	background: url('/static/images/sprites.png') no-repeat -16px -16px;
+}
+#users .name, .registered {
 	cursor: pointer;
 }
 #users .you {
@@ -316,11 +417,6 @@ input {
 }
 #users .points, #users .round-points {
 	margin-right: 10px;
-}
-.round-rank {
-	height:16px;
-	width:16px;
-	margin-right:2px;
 }
 .stand1 {
 	background: url('/static/images/sprites.png') no-repeat 0 0;
@@ -331,12 +427,9 @@ input {
 .stand3 {
 	background: url('/static/images/sprites.png') no-repeat -32px 0;
 }
-#users .round-rank {
-	display:inline-block;
-	vertical-align: middle;
-}
 #users .guess-time {
 	font-size: 11px;
+	line-height: 1px;
 }
 #toggle-chat {
 	position: absolute;

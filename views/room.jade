@@ -1,22 +1,40 @@
-include header
-		title Binb - #{roomname}
+doctype html
+html
+	include header
+		title binb :: #{roomname}
+		script(src="/socket.io/socket.io.js")
 		script(src="/static/js/bootstrap.min.js")
 		script(src="/static/js/jquery.jplayer.min.js")
 		script(type='text/javascript')
 			var roomname = "#{roomname}";
 		script(src="/static/js/room.js")
 	body
-		script(type="text/javascript")
-			var uvOptions = {};
-			(function() {
-				var uv = document.createElement('script');
-				uv.type = 'text/javascript';
-				uv.async = true;
-				uv.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + 
-					'widget.uservoice.com/LSMjFAQRifhD6BjOG2KWw.js';
-				var s = document.getElementsByTagName('script')[0];
-				s.parentNode.insertBefore(uv, s);
-			})();
+		include uv.jade
+		.navbar.navbar-fixed-top
+			.navbar-inner
+				.container
+					ul.nav.pull-right
+						li
+							a(href="/") Home
+						li.active.dropdown
+							a.dropdown-toggle(data-toggle="dropdown",href="#") #{roomname} 
+								b.caret
+							ul.dropdown-menu
+								each item in rooms
+									if item != roomname
+										li
+											a(href="/#{item}") #{item}
+						if (typeof(loggedin) !== "undefined")
+							li
+								p.navbar-text Logged in as 
+									a#loggedin(href="/user/#{loggedin}",target="_blank") #{loggedin}
+							li
+								a(href="/logout") Logout
+						else	
+							li
+								a(href="/signup") Sign up
+							li
+								a(href="/login") Login
 		#player
 		#modal.modal.fade
 		.container
@@ -35,21 +53,9 @@ include header
 						#volume.relative
 					.span8
 						.page-header
-							h1#app-name Binb, 
-								small
+							h1#app-name binb, 
+								small #{motto}
 							#total-tracks <span></span> tracks.
-							.btn-group
-								button.btn.btn-mini.dropdown-toggle(data-toggle="dropdown")
-									| #{roomname}
-									span.caret
-								ul.dropdown-menu
-									each item in rooms
-										if item != roomname
-											li
-												a(href="/#{item}") #{item}
-									li.divider
-									li
-										a(href="/") home
 						#summary.row
 							.span2
 								.title Rank
@@ -61,10 +67,10 @@ include header
 								.title Track
 								.track
 						p#feedback Waiting for connection...
-						input#guess.span8(type="text")
+						input#guess.span8(type="text",placeholder="guess the artist and/or title here")
 			section.relative
 				.row
-					.span5.offset2
+					#users-wrapper.span5.offset2
 						ul#users.unstyled
 					.span8
 						a#toggle-chat Hide chat

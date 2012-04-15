@@ -1,27 +1,37 @@
-include header
-		title Binb
+doctype html
+html
+	include header
+		title binb
+		script(src="/socket.io/socket.io.js")
+		script(src="/static/js/bootstrap.min.js")
 		script(src="/static/js/home.js")
 	body
-		script(type="text/javascript")
-			var uvOptions = {};
-			(function() {
-				var uv = document.createElement('script');
-				uv.type = 'text/javascript';
-				uv.async = true;
-				uv.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + 
-					'widget.uservoice.com/LSMjFAQRifhD6BjOG2KWw.js';
-				var s = document.getElementsByTagName('script')[0];
-				s.parentNode.insertBefore(uv, s);
-			})();
+		include uv.jade
+		.navbar.navbar-fixed-top
+			.navbar-inner
+				.container
+					a.brand(href="/") binb, 
+						span.motto #{motto}
+					ul.nav.pull-right
+						li.active
+							a(href="/") Home
+						if (typeof(loggedin) !== "undefined")
+							li
+								p.navbar-text Logged in as 
+									a#loggedin(href="/user/#{loggedin}",target="_blank") #{loggedin}
+							li
+								a(href="/logout") Logout
+						else
+							li
+								a(href="/signup") Sign up
+							li
+								a(href="/login") Login
 		.container
 			section
-				.page-header
-					h1#app-name Binb, 
-						small
 				.row
 					.span7
 						h3 What's this?
-						p Binb is a realtime, multiplayer, competitive music listening game.
+						p binb is a realtime, multiplayer, competitive music listening game.
 					.span9
 						h3 How to play?
 						p All you have to do is to guess the song that is playing. A fixed number 

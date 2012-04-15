@@ -1,0 +1,89 @@
+doctype html
+html
+	include header
+		title binb :: #{username} info
+	body
+		include uv.jade
+		.navbar.navbar-fixed-top
+			.navbar-inner
+				.container
+					a.brand(href="#") binb, 
+						span.motto #{motto}
+		.container
+			section
+				.row
+					.span7.offset1
+						.profile #{username}
+							.img
+						div member since #{joindate}
+			section
+				.row
+					.span7.offset1
+						h4 Points
+						table.table.table-striped.table-bordered.stats
+							tbody
+								tr
+									td Total
+									td #{totpoints}
+								tr
+									td Best score
+									td #{bestscore}
+								tr
+									td Guessed songs
+									td #{guessed}
+						h4 Times
+						table.table.table-striped.table-bordered.stats
+							tbody
+								tr
+									td Best guess time
+									if (bestguesstime !== "30.0")
+										td #{bestguesstime} sec
+									else
+										td N/A
+								tr
+									td Worst guess time
+									if (worstguesstime !== "0.0")
+										td #{worstguesstime} sec
+									else
+										td N/A
+								tr
+									td Mean guess time
+									if (typeof meanguesstime !== "undefined")
+										td #{meanguesstime} sec
+									else
+										td N/A
+					.span7
+						h4 Awards
+						table.table.table-striped.table-bordered.stats
+							tbody
+								tr
+									td Gold cups
+									td
+										.cups.stand1
+									td #{golds}
+								tr
+									td Silver cups
+									td
+										.cups.stand2
+									td #{silvers}
+								tr
+									td Bronze cups
+									td
+										.cups.stand3
+									td #{bronzes}
+								tr
+									td Victories
+									td
+										.medals.rank1
+									td #{victories}
+								tr
+									td Second places
+									td
+										.medals.rank2
+									td #{secondplaces}
+								tr
+									td Third places
+									td
+										.medals.rank3
+									td #{thirdplaces}
+			include footer

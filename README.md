@@ -1,6 +1,6 @@
-# Binb #
+# binb #
 
-Binb is a simple, realtime, multiplayer, competitive music listening game.
+binb is a simple, realtime, multiplayer, competitive music listening game.
 
 To play the game: [http://binb.nodejitsu.com](http://binb.nodejitsu.com) 
 
@@ -8,7 +8,7 @@ To play the game: [http://binb.nodejitsu.com](http://binb.nodejitsu.com)
 
 Ideal setup is a browser with websocket support and able to decode .m4a format natively. 
 
-For this reason Binb is optimized for Google Chrome but also works in all major browsers (if version is recently enough).
+For this reason binb is optimized for Google Chrome but also works in all major browsers (if version is recently enough).
 
 ## Shout-Outs ##
 
@@ -21,4 +21,4 @@ Have a bug? Please create an [issue](https://github.com/lpinca/binb/issues) here
 
 ## Copyright and license ##
 
-Binb is released under the MIT license. See LICENSE for details.
+binb is released under the MIT license. See LICENSE for details.

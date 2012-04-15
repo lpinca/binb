@@ -2,7 +2,11 @@
   "name": "binb",
   "dependencies": {
     "async": "latest",
+    "canvas": "latest",
+    "connect": "latest",
+    "connect-redis": "latest",
     "express": "latest",
+    "express-form": "latest",
     "jade": "latest",
     "redis-url": "latest",
     "socket.io": "latest"
@@ -14,5 +18,5 @@
   "engines": {
     "node": "0.6.x"
   },
-  "version": "0.2.0-14"
+  "version": "0.3.0-1"
 }

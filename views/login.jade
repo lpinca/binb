@@ -1,0 +1,78 @@
+doctype html
+html	
+	include header
+		title binb :: login
+		script(src="/static/js/bootstrap.min.js")
+	body
+		include uv.jade
+		.navbar.navbar-fixed-top
+			.navbar-inner
+				.container
+					a.brand(href="/") binb, 
+						span.motto #{motto}
+					ul.nav.pull-right
+						li
+							a(href="/") Home
+						li
+							a(href="/signup") Sign up
+						li.active
+							a(href="/login") Login
+		.container
+			section
+				.row
+					.span3
+						h3 New user?
+						a(href="/signup") Click here to create an account.
+					.span13
+						if ((typeof(errors) !== "undefined") && (typeof(errors.alert) !== "undefined"))
+							.alert.alert-error
+								a.close(data-dismiss="alert") &times;
+								strong Oh snap!
+								|  #{errors.alert}
+						else if (typeof(success) !== "undefined")
+							.alert.alert-success
+								a.close(data-dismiss="alert") &times;
+								strong Well done!
+								|  #{success}
+						form.form-horizontal.well(method="post",action="/login")
+							fieldset
+								if (typeof(errors) !== "undefined")
+									if (typeof(errors.username) !== "undefined")
+										.control-group.error
+											label.control-label(for="username") Name
+											.controls
+												input#username(type="text",name="username",
+													value="#{username}")
+												span.help-inline #{errors.username[0]}
+									else
+										.control-group
+											label.control-label(for="username") Name
+											.controls
+												input#username(type="text",name="username",
+													value="#{username}")
+									if (typeof(errors.password) !== 'undefined')
+										.control-group.error
+											label.control-label(for="password") Password
+											.controls
+												input#password(type="password",name="password")
+												span.help-inline #{errors.password[0]}
+									else
+										.control-group
+											label.control-label(for="password") Password
+											.controls
+												input#password(type="password",name="password")
+								else
+									.control-group
+										label.control-label(for="username") Name
+										.controls
+											input#username(type="text",name="username",
+												placeholder="enter your nickname...")
+									.control-group
+										label.control-label(for="password") Password
+										.controls
+											input#password(type="password",name="password",
+												placeholder="enter your password...")
+								button#signup-button.btn.btn-primary(type="submit")
+									i.icon-user.icon-white
+									|  Login
+			include footer
