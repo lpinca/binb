@@ -1,15 +1,15 @@
 {
   "name": "binb",
   "dependencies": {
-    "async": "latest",
-    "canvas": "latest",
-    "connect": "latest",
-    "connect-redis": "latest",
-    "express": "latest",
-    "express-form": "latest",
-    "jade": "latest",
-    "redis-url": "latest",
-    "socket.io": "latest"
+    "async": "0.1.x",
+    "canvas": "0.11.x",
+    "connect": "1.8.x",
+    "connect-redis": "1.3.x",
+    "express": "2.5.x",
+    "express-form": "0.6.x",
+    "jade": "0.24.x",
+    "redis-url": "0.1.x",
+    "socket.io": "0.9.x"
   },
   "subdomain": "binb",
   "scripts": {
@@ -18,5 +18,5 @@
   "engines": {
     "node": "0.6.x"
   },
-  "version": "0.3.0-1"
+  "version": "0.3.0-3"
 }

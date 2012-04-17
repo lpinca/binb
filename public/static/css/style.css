@@ -384,6 +384,10 @@ input {
 #users li, #tracks li, #chat li {
 	color: #404040;
 }
+#users li {
+	height: 18px;
+	position: relative;
+}
 #users .private {
 	display: none;
 	font-size: 9.75px;
@@ -391,23 +395,19 @@ input {
 	position: absolute;
 	left: -19px;
 }
-#users .private, #users .name, .gameover .name {
-	margin-right: 4px;
-}
-.registered, #users .round-rank {
-	display: inline-block;
-	vertical-align: middle;
-}
 .registered, .round-rank {
 	height: 16px;
 	width: 16px;
-	margin-right:2px;
+	margin: 1px 2px 0px 0px;
 }
 .registered {
 	background: url('/static/images/sprites.png') no-repeat 0px -16px;
 }
 .registered:hover {
 	background: url('/static/images/sprites.png') no-repeat -16px -16px;
+}
+#users .name {
+	margin-right: 4px;
 }
 #users .name, .registered {
 	cursor: pointer;
@@ -429,7 +429,7 @@ input {
 }
 #users .guess-time {
 	font-size: 11px;
-	line-height: 1px;
+	line-height: 18px;
 }
 #toggle-chat {
 	position: absolute;
@@ -550,7 +550,7 @@ input {
 	background: -ms-linear-gradient(center top , #FBFBFB, #F5F5F5);
 	background: linear-gradient(center top , #FBFBFB, #F5F5F5);
 }
-#tracks img.artwork, #tracks .info, #tracks .round-rank, #tracks .round-points, #copy, #facebook-button, #twitter-button, #github-button {
+.registered, #users .name, #users .points, .round-rank, .round-points, #users .guess-time, #tracks img.artwork, #tracks .info, #copy, #facebook-button, #twitter-button, #github-button {
 	float:left;
 }
 #tracks img.artwork {

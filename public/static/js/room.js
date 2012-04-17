@@ -21,10 +21,13 @@
 					'Try again'];
 	var DOM = {};
 
+	String.prototype.encodeEntities = function() {
+		return this.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+	};
+	
 	// Exact match version of jQuery :contains selector
 	$.expr[":"].econtains = function(obj, index, meta, stack) {
-		return (obj.textContent || obj.innerText || 
-				$(obj).text() || "").toLowerCase() === meta[3].toLowerCase();
+		return $(obj).html() === meta[0].replace(/^[\s\S]+:econtains\(([\s\S]+)\)$/, "$1");
 	};
 	
 	// Prompt for name and send it.
@@ -199,7 +202,7 @@
 		var found = false;
 		for (var i=0; i<users.length; i++) {
 			var user = users[i];
-			var li = $('<li class="relative"></li>');
+			var li = $('<li></li>');
 			var pvt = $('<span class="private label label-info">P</span>');
 			var username = $('<span class="name"></span>').text(user.nickname);
 			var points = $('<span class="points">('+user.points+')</span>');
@@ -208,7 +211,7 @@
 			var guesstime = $('<span class="guess-time"></span>');
 			li.append(pvt, username, points, roundrank, roundpointsel, guesstime);
 			if (user.registered) {
-				var href = 'href="/user/'+username.text().replace(/"/g, "&quot;")+'"';
+				var href = 'href="/user/'+encodeURI(username.html())+'"';
 				pvt.after('<a class="registered" target="_blank" '+href+'></a>');
 			}
 			DOM.users.append(li);
@@ -266,7 +269,7 @@
 		var width = DOM.recipient.outerWidth(true) + 1;
 		DOM.recipient.hide();
 		DOM.messagebox.animate({'width':'-='+width+'px'}, "fast", function() {DOM.recipient.show();});
-		var el = $("span.name:econtains("+usrname+")");
+		var el = $("span.name:econtains("+usrname.encodeEntities()+")");
 		el.prevAll(".private").show();
 		el.unbind('click');
 		el.click(clearPrivate);
@@ -279,7 +282,7 @@
 		DOM.recipient.css('margin-right','0');
 		DOM.recipient.text("");
 		DOM.messagebox.animate({'width':'+='+width+'px'}, "fast");
-		var el = $("span.name:econtains("+pvtmsgto+")");
+		var el = $("span.name:econtains("+pvtmsgto.encodeEntities()+")");
 		el.prevAll(".private").hide();
 		el.unbind("click");
 		el.click(function() {
@@ -429,8 +432,7 @@
 		html += '</thead><tbody>';
 		for(var i=0;i<3;i++) {
 			if (data.users[i]) {
-				var playername = data.users[i].nickname.replace(/</g, "&lt;")
-								.replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+				var playername = data.users[i].nickname.encodeEntities();
 				html += '<tr><td><div class="medals rank'+(i+1)+'"></div></td>';
 				html += '<td class="name">'+playername+'</td>';
 				html += '<td>'+data.users[i].points+'</td>';
@@ -709,7 +711,7 @@
 					}
 				},
 				swfPath: "/static/swf/",
-				solution: "flash, html",
+				//solution: "flash, html",
 				supplied: "m4a",
 				preload: "auto",
 				volume: 1

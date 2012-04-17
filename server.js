@@ -34,7 +34,7 @@ http.set('view engine', 'jade');
 // Routes
 http.get("/", function(req, res) {
 	if (req.session.user) {
-		res.local('loggedin', req.session.user);
+		res.local('loggedin', req.session.user.replace(/&/g, "&amp;"));
 	}
 	res.render("index", {rooms:config.rooms});
 });
@@ -220,7 +220,7 @@ http.get("/artworks", function(req, res) {
 http.get("/:room", function(req, res) {
 	if (config.rooms.indexOf(req.params.room) !== -1) {
 		if (req.session.user) {
-			res.local('loggedin', req.session.user);
+			res.local('loggedin', req.session.user.replace(/&/g, "&amp;"));
 		}
 		res.render("room", {roomname:req.params.room,rooms:config.rooms});
 	}
@@ -234,6 +234,7 @@ http.get("/user/*", function(req, res) {
 	usersdb.exists(key, function(err, data) {
 		if (data === 1) {
 			usersdb.hgetall(key, function(e, obj) {
+				obj.username = obj.username.replace(/&/g, "&amp;");
 				obj.bestguesstime = (obj.bestguesstime/1000).toFixed(1);
 				obj.worstguesstime = (obj.worstguesstime/1000).toFixed(1);
 				if (obj.guessed !== "0") {
