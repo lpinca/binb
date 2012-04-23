@@ -67,7 +67,8 @@ html
 								.title Track
 								.track
 						p#feedback Waiting for connection...
-						input#guess.span8(type="text",placeholder="guess the artist and/or title here")
+						input#guess.span8(type="text",tabindex="1",
+							placeholder="guess the artist and/or title here")
 			section.relative
 				.row
 					#users-wrapper.span5.offset2
@@ -81,7 +82,7 @@ html
 								ul#chat.unstyled
 							#message-wrapper
 								span#recipient
-								input#message.span8(type="text")
+								input#message.span8(type="text",tabindex="2")
 						ul#tracks.unstyled
 				#disclaimer
 					div I do not own any right on the songs that are played here.

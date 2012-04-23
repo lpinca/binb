@@ -7,6 +7,6 @@ exports.configure = function() {
 	this.sessionsecret = '';
 	this.songsinarun = 15;
 	this.threshold = 2; // Edit distance threshold
-	this.rooms = ["pop", "rock", "mixed"];
+	this.rooms = ["pop", "rock", "rap", "80s", "mixed"];
 	return this;
 };

@@ -71,6 +71,50 @@ http.get("/signup", function(req, res) {
 	res.render("signup", {captchaurl:captcha.toDataURL()});
 });
 
+// Sign up route middlewares
+var checkCaptcha = function(req, res, next) {
+	if (req.form.isValid) {
+		if (req.session.captchacode !== req.form.captcha) {
+			var errors = {captcha:['no match']};
+			var captcha = new Captcha();
+			req.session.captchacode = captcha.getCode();
+			return res.render("signup", {errors:errors,captchaurl:captcha.toDataURL()});
+		}
+		next();
+	}
+	else {
+		var captcha = new Captcha();
+		req.session.captchacode = captcha.getCode();
+		res.render("signup", {errors:req.form.getErrors(),captchaurl:captcha.toDataURL()});
+	}
+};
+
+var checkUserExists = function(req, res, next) {
+	var userkey = "user:"+req.form.username;
+	usersdb.exists(userkey, function(err, data) {
+		if (data === 1) { // User already exists
+			var errors = {alert: "A user with name "+req.form.username+" already exists."};
+			var captcha = new Captcha();
+			req.session.captchacode = captcha.getCode();
+			return res.render("signup", {errors:errors,captchaurl:captcha.toDataURL()});
+		}
+		next();
+	});
+};
+
+var checkEmailExists = function(req, res, next) {
+	var mailkey = "email:"+req.form.email;
+	usersdb.exists(mailkey, function(err, data) {
+		if (data === 1) { // Email already exists
+			var errors = {alert: "A user with that email already exists."};
+			var captcha = new Captcha();
+			req.session.captchacode = captcha.getCode();
+			return res.render("signup", {errors:errors,captchaurl:captcha.toDataURL()});
+		}
+		next();
+	});
+};
+
 http.post("/signup", 
 	form(
 		form.filter("username").trim().required().not(/binb/, "is reserved")
@@ -80,68 +124,44 @@ http.post("/signup",
 			.is(/^[A-Za-z0-9]{6,15}$/, "6 to 15 alphanumeric characters required"),
 		form.filter("captcha").required()
 	),
-	function(req, res) {
-		if (req.form.isValid) {
-			if (req.session.captchacode !== req.form.captcha) {
-				var errors = {captcha:['no match']};
-				var captcha = new Captcha();
-				req.session.captchacode = captcha.getCode();
-				return res.render("signup", {errors:errors,captchaurl:captcha.toDataURL()});
-			}
-			var userkey = "user:"+req.form.username;
-			usersdb.exists(userkey, function(err, data) {
-				if (data === 1) { // User already exists
-					var errors = {alert: "A user with name "+req.form.username+" already exists."};
-					var captcha = new Captcha();
-					req.session.captchacode = captcha.getCode();
-					return res.render("signup", {errors:errors,captchaurl:captcha.toDataURL()});
-				}
-				var mailkey = "email:"+req.form.email;
-				usersdb.exists(mailkey, function(e, d) {
-					if (d === 1) { // Email already exists
-						var errors = {alert: "A user with that email already exists."};
-						var captcha = new Captcha();
-						req.session.captchacode = captcha.getCode();
-						return res.render("signup", {errors:errors,captchaurl:captcha.toDataURL()});
-					}
-					var salt = "";
-					while (salt.length < 8) {
-						salt += CHARACTERS[Math.floor(Math.random() * CHARACTERS.length)];
-					}
-					var hash = crypto.createHash('sha256')
-								.update(salt+req.form.password).digest('hex');
-					var date = new Date();
-					var joindate = date.getDate()+"/"+(date.getMonth()+1)+"/"+date.getFullYear();
-					usersdb.hmset(userkey, "username", req.form.username,
-									"email", req.form.email,
-									"password", hash,
-									"salt", salt,
-									"joindate", joindate,
-									"totpoints", 0,
-									"bestscore", 0,
-									"golds", 0,
-									"silvers", 0,
-									"bronzes", 0,
-									"bestguesstime", 30000,
-									"worstguesstime", 0,
-									"totguesstime", 0,
-									"guessed", 0,
-									"victories", 0,
-									"secondplaces", 0,
-									"thirdplaces", 0);
-					usersdb.set(mailkey, userkey);
-					usersdb.sadd("users", userkey);
-					usersdb.sadd("emails", mailkey);
-					var msg = "You successfully created your account. You are now ready to login.";
-					res.render("login", {success:msg});
-				});
-			});
+	checkCaptcha,
+	checkUserExists,
+	checkEmailExists,
+	function (req, res) { // Set up the account
+		var userkey = "user:"+req.form.username;
+		var mailkey = "email:"+req.form.email;
+		var salt = "";
+		while (salt.length < 8) {
+			salt += CHARACTERS[Math.floor(Math.random() * CHARACTERS.length)];
 		}
-		else {
-			var captcha = new Captcha();
-			req.session.captchacode = captcha.getCode();
-			res.render("signup", {errors:req.form.getErrors(),captchaurl:captcha.toDataURL()});
-		}
+		var hash = crypto.createHash('sha256').update(salt+req.form.password).digest('hex');
+		var date = new Date();
+		var joindate = date.getDate()+"/"+(date.getMonth()+1)+"/"+date.getFullYear();
+		usersdb.hmset(
+			userkey,
+			"username", req.form.username,
+			"email", req.form.email,
+			"password", hash,
+			"salt", salt,
+			"joindate", joindate,
+			"totpoints", 0,
+			"bestscore", 0,
+			"golds", 0,
+			"silvers", 0,
+			"bronzes", 0,
+			"bestguesstime", 30000,
+			"worstguesstime", 0,
+			"totguesstime", 0,
+			"guessed", 0,
+			"victories", 0,
+			"secondplaces", 0,
+			"thirdplaces", 0
+		);
+		usersdb.set(mailkey, userkey);
+		usersdb.sadd("users", userkey);
+		usersdb.sadd("emails", mailkey);
+		var msg = "You successfully created your account. You are now ready to login.";
+		res.render("login", {success:msg});
 	}
 );
 
@@ -154,28 +174,14 @@ http.post("/login",
 		form.filter("username").trim().required(),
 		form.filter("password").trim().required()
 	),
-	function(req, res) {
+	function(req, res, next) {
 		if (req.form.isValid) {
-			var errors = {alert: "The username and/or password you specified are not correct."};
-			var key = "user:"+req.form.username;
-			usersdb.exists(key, function(err, data) {
+			usersdb.exists("user:"+req.form.username, function(err, data) {
 				if (data === 1) { // User exists
-					usersdb.hmget(key, "salt", "password", function(e, resp) {
-						var hash = crypto.createHash('sha256')
-									.update(resp[0]+req.body.password).digest('hex');
-						if (hash === resp[1]) {
-							req.session.regenerate(function() {
-								req.session.cookie.maxAge = 604800000; // One week
-								req.session.user = req.form.username;
-								res.redirect('/');
-							});
-						}
-						else {
-							res.render("login", {errors:errors});
-						}
-					});
+					next();
 				}
 				else {
+					var errors = {alert: "The username you specified does not exists."};
 					res.render("login", {errors:errors});
 				}
 			});
@@ -183,6 +189,22 @@ http.post("/login",
 		else {
 			res.render("login", {errors:req.form.getErrors()});
 		}
+	},
+	function(req, res) { // Authenticate User
+		usersdb.hmget("user:"+req.form.username, "salt", "password", function(err, data) {
+			var hash = crypto.createHash('sha256').update(data[0]+req.body.password).digest('hex');
+			if (hash === data[1]) {
+				req.session.regenerate(function() {
+					req.session.cookie.maxAge = 604800000; // One week
+					req.session.user = req.form.username;
+					res.redirect('/');
+				});
+			}
+			else {
+				var errors = {alert: "The password you specified is not correct."};
+				res.render("login", {errors:errors});
+			}
+		});
 	}
 );
 
