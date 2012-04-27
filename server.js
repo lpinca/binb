@@ -59,10 +59,10 @@ var Captcha = function() {
 	ctx.save();
 	this.getCode = function() {
 		return code;
-	}
+	};
 	this.toDataURL = function() {
 		return _canvas.toDataURL();
-	}
+	};
 };
 
 http.get("/signup", function(req, res) {
@@ -425,6 +425,10 @@ var amatch = function(subject, guess, enableartistrules) {
 		checkDistance(subject.replace(/\-/g, ""), guess, config.threshold)) {
 		return true;
 	}
+	if (subject.match(/\+/) && 
+		checkDistance(subject.replace(/\+/, "and"), guess, config.threshold)) {
+		return true;
+	}
 	if (enableartistrules) {
 		if (subject.match(/^the /)) {
 			var nothe = subject.replace(/^the /, "");
@@ -531,7 +535,7 @@ function Room(name) {
 	var totusers = 0;
 	
 	var usersData = Object.create(null);
-	var playedtracks = Object.create(null); // Used to prevent the same song from playing twice in one game
+	var playedtracks = []; // The list of already played songs
 	
 	var artistName = null;
 	var artistlcase = null;
@@ -594,7 +598,7 @@ function Room(name) {
 		socket.roomname = roomname;
 		socket.join(roomname);
 		addUser(socket, true);
-	}
+	};
 	
 	// A user requested an invalid name
 	var invalidNickName = function(socket, feedback) {
@@ -620,7 +624,7 @@ function Room(name) {
 		var key = "user:"+data.nickname;
 		usersdb.exists(key, function(err, resp) {
 			if (resp === 1) { // User already exists
-				feedback = '<span class="label label-important">That name belongs '
+				feedback = '<span class="label label-important">That name belongs ';
 				feedback += 'to a registered user.</span>';
 				return invalidNickName(socket, feedback);
 			}
@@ -815,10 +819,10 @@ function Room(name) {
 		songsdb.srandmember(roomname, function(err, res) {
 			songsdb.hmget(res, "artistName", "trackName", "collectionName", "previewUrl",
 							"artworkUrl60", "trackViewUrl", function(e, replies) {
-				if (playedtracks[res]) {
+				if (playedtracks.indexOf(res) !== -1) {
 					return sendLoadTrack();
 				}
-				playedtracks[res] = true;
+				playedtracks.push(res);
 				artistName = replies[0];
 				artistlcase = artistName.toLowerCase();
 				trackName = replies[1];
@@ -896,7 +900,9 @@ function Room(name) {
 
 	var reset = function() {
 		songcounter = 0;
-		playedtracks = Object.create(null);
+		if (playedtracks.length === config.fifolength) {
+			playedtracks.splice(0, config.songsinarun);
+		}
 		sendLoadTrack();
 	};
 

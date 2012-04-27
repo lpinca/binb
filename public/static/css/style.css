@@ -476,24 +476,11 @@ input {
 	height: 160px;
 	background-color: white;
 }
-#chat-top, #chat-bottom {
-	background-color: white;
-	position: absolute;
-	left: 6px;
-	height: 4px;
-	width: 430px;
-	z-index: 1;
-}
-#chat-bottom {
-	bottom: 0;
-}
 #chat {
-	position:absolute;
 	height: 152px;
 	width: 446px;
-	padding: 4px 6px;
+	margin: 4px 6px;
 	overflow: auto;
-	margin: 0;
 }
 .bordered {
 	border: 1px solid #ccc;

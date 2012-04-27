@@ -19,6 +19,8 @@
 	var nmstrings = ['Nope, sorry!', 'No way!', 'Fail', 'Nope', 'No', 'That\'s wrong', 'What?!',
 					'Wrong', 'Haha, what?!', 'You kidding?', 'Don\'t make me laugh', 'You mad?',
 					'Try again'];
+	var historyvalues = [];
+	var historycursor = 0;
 	var DOM = {};
 
 	String.prototype.encodeEntities = function() {
@@ -106,7 +108,7 @@
 		addChatEntry(joinspan);
 		updateUsers(data);
 
-		DOM.messagebox.keyup(function(event) {
+		DOM.messagebox.keydown(function(event) {
 			if (event.keyCode === 13) {
 				var val = $.trim(DOM.messagebox.val());
 				if (val !== "") {
@@ -117,15 +119,36 @@
 			}
 		});
 
-		DOM.guessbox.keyup(function(event) {
-			if (event.keyCode === 13) {
-				var val = $.trim(DOM.guessbox.val().toLowerCase());
-				if (val !== "") {
-					socket.emit('guess', val);
-				}
-				DOM.guessbox.val("");
+		DOM.guessbox.keydown(function(event) {
+			switch (event.keyCode) {
+				case 13: // return
+					var guess = $.trim(DOM.guessbox.val());
+					if (guess !== "") {
+						socket.emit('guess', guess.toLowerCase());
+						historyvalues.push(guess);
+						if (historyvalues.length > 20) {
+							historyvalues.splice(0, 1);
+						}
+						historycursor = historyvalues.length;
+					}
+					DOM.guessbox.val("");
+					break;
+				case 38: // up-arrow
+					if (historycursor > 0) {
+						DOM.guessbox.val(historyvalues[--historycursor]);
+					}
+					break;
+				case 40: // down-arrow
+					if (historycursor < historyvalues.length - 1) {
+						DOM.guessbox.val(historyvalues[++historycursor]);
+					}
+					else {
+						historycursor = historyvalues.length;
+						DOM.guessbox.val("");
+					}
 			}
 		});
+
 		DOM.guessbox.focus();
 		
 		socket.on('newuser', userJoin);
