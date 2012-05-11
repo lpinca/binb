@@ -416,7 +416,7 @@
 		var titleattr = '';
 		var trackname = data.trackName;
 		if (data.trackName.length > 45) {
-			titleattr = data.trackName;
+			titleattr = data.trackName.replace(/"/g, "&quot;");
 			trackname = data.trackName.substring(0,42) + '...';
 		}
 		html += '<div class="title" title="'+titleattr+'">'+trackname+'</div></div>';

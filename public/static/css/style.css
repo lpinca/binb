@@ -537,7 +537,7 @@ input {
 	background: -ms-linear-gradient(center top , #FBFBFB, #F5F5F5);
 	background: linear-gradient(center top , #FBFBFB, #F5F5F5);
 }
-.registered, #users .name, #users .points, .round-rank, .round-points, #users .guess-time, #tracks img.artwork, #tracks .info, #copy, .fb-like, #twitter-button, #github-button {
+.registered, #users .name, #users .points, .round-rank, .round-points, #users .guess-time, #tracks img.artwork, #tracks .info, #copy, #facebook-button, #twitter-button, #github-button {
 	float:left;
 }
 #tracks img.artwork {
@@ -590,7 +590,7 @@ footer {
 #copy {
 	margin: 0 20px 0 20px;
 }
-.fb-like {
+#facebook-button {
 	width:90px;
 	height:21px
 }
