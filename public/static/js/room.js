@@ -451,7 +451,7 @@
 		html += '<div class="modal-body"><table class="table table-striped scoreboard">';
 		html += '<thead><tr><th>#</th><th>Name</th><th>Points</th>';
 		html += '<th><div class="cups stand1"></div></th><th><div class="cups stand2"></div></th>';
-		html += '<th><div class="cups stand3"></div></th><th>Guessed</th><th>Best time</th>';
+		html += '<th><div class="cups stand3"></div></th><th>Guessed</th><th>Mean time</th>';
 		html += '</thead><tbody>';
 		for(var i=0;i<3;i++) {
 			if (data.users[i]) {
@@ -461,11 +461,12 @@
 				html += '<td>'+data.users[i].points+'</td>';
 				html += '<td>'+data.users[i].golds+'</td><td>'+data.users[i].silvers+'</td>';
 				html += '<td>'+data.users[i].bronzes+'</td><td>'+data.users[i].guessed+'</td>';
-				var besttime = "N/A";
-				if (data.users[i].bestguesstime !== 30000) {
-					besttime = (data.users[i].bestguesstime/1000).toFixed(1)+" s";
+				var meantime = "N/A";
+				if (data.users[i].guessed !== 0) {
+					meantime = data.users[i].totguesstime / data.users[i].guessed;
+					meantime = (meantime / 1000).toFixed(1)+" s";
 				}
-				html += '<td>'+besttime+'</td></tr>';
+				html += '<td>'+meantime+'</td></tr>';
 			}
 		}
 		html +='</tbody></table></div>';
