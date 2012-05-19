@@ -24,25 +24,26 @@ usersdb.on('error', function(err) {
 
 // Setting up Express
 var sessionstore = new redisstore({client:usersdb});
-var http = express.createServer();
+var app = express.createServer();
 
 // Configuration
-http.use(express.static(__dirname + '/public'));
-http.use(express.bodyParser());
-http.use(express.cookieParser());
-http.use(express.session({secret:config.sessionsecret,store:sessionstore}));
-http.set("view options", {layout:false});
-http.set('view engine', 'jade');
+app.use(express.static(__dirname + '/public'), {maxAge: 2592000000});
+app.use(express.favicon(__dirname + '/public/static/images/favicon.ico', {maxAge: 2592000000}));
+app.use(express.bodyParser());
+app.use(express.cookieParser());
+app.use(express.session({secret:config.sessionsecret,store:sessionstore}));
+app.set("view options", {layout:false});
+app.set('view engine', 'jade');
 
 // Routes
-http.get("/", function(req, res) {
+app.get("/", function(req, res) {
 	if (req.session.user) {
 		res.local('loggedin', req.session.user.replace(/&/g, "&amp;"));
 	}
 	res.render("index", {rooms:config.rooms});
 });
 
-http.get("/signup", function(req, res) {
+app.get("/signup", function(req, res) {
 	var captcha = new Captcha();
 	req.session.captchacode = captcha.getCode();
 	res.render("signup", {captchaurl:captcha.toDataURL()});
@@ -92,7 +93,7 @@ var checkEmailExists = function(req, res, next) {
 	});
 };
 
-http.post("/signup", 
+app.post("/signup", 
 	form(
 		form.filter("username").trim().required().not(/binb/, "is reserved")
 			.is(/^[^\x00-\x1F\x7F]{1,15}$/, "1 to 15 characters required"),
@@ -142,11 +143,11 @@ http.post("/signup",
 	}
 );
 
-http.get("/login", function(req, res) {
+app.get("/login", function(req, res) {
 	res.render("login");
 });
 
-http.post("/login", 
+app.post("/login", 
 	form(
 		form.filter("username").trim().required(),
 		form.filter("password").trim().required()
@@ -185,7 +186,7 @@ http.post("/login",
 	}
 );
 
-http.get("/logout", function(req, res) {
+app.get("/logout", function(req, res) {
 	req.session.destroy(function() {
 		res.redirect("/");
 	});
@@ -199,7 +200,7 @@ var makeCallBack = function(genre) {
 	};
 };
 
-http.get("/artworks", function(req, res) {
+app.get("/artworks", function(req, res) {
 	var callitems = [];
 	for (var i=0; i<config.rooms.length; i++) {
 		for (var j=0; j<6; j++) {
@@ -216,7 +217,7 @@ http.get("/artworks", function(req, res) {
 	});
 });
 
-http.get("/:room", function(req, res) {
+app.get("/:room", function(req, res) {
 	if (config.rooms.indexOf(req.params.room) !== -1) {
 		if (req.session.user) {
 			res.local('loggedin', req.session.user.replace(/&/g, "&amp;"));
@@ -228,7 +229,7 @@ http.get("/:room", function(req, res) {
 	}
 });
 
-http.get("/user/*", function(req, res) {
+app.get("/user/*", function(req, res) {
 	var key = "user:"+req.params[0];
 	usersdb.exists(key, function(err, data) {
 		if (data === 1) {
@@ -253,10 +254,10 @@ http.get("/user/*", function(req, res) {
 });
 
 // Starting HTTP server
-http.listen(config.port);
+app.listen(config.port);
 
 // Setting up Socket.IO
-var io = require("socket.io").listen(http);
+var io = require("socket.io").listen(app);
 
 io.enable('browser client minification');	// send minified client
 io.enable('browser client etag');			// apply etag caching logic based on version number

@@ -1,4 +1,4 @@
-# binb #
+![binb](http://dl.dropbox.com/u/58444696/binb-logo.png)
 
 binb is a simple, realtime, multiplayer, competitive music listening game.
 
