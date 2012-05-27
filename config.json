@@ -1,0 +1,10 @@
+{
+  "port": 80,
+  "songsdburl": "",
+  "usersdburl": "",
+  "sessionsecret": "",
+  "songsinarun": 15,
+  "gameswithnorepeats": 3,
+  "allowederrors": 2,
+  "rooms": ["pop", "rock", "rap", "80s", "mixed"]
+}

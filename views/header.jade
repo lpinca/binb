@@ -1,21 +1,21 @@
 mottos = ['guess the song.', 'name that tune.', 'i know this track.']
 motto = mottos[Math.floor(Math.random()*mottos.length)]
 head
-	link(href="/static/css/bootstrap.min.css", rel="stylesheet")
-	link(href="/static/css/style.css", rel="stylesheet")
-	meta(charset="UTF-8")
-	meta(name="keywords", content="iTunes, music, quiz, binb, beatquest, realtime, multiplayer, listening, game")
-	meta(name="description", content="Simple, realtime, multiplayer, competitive music listening game. Guess the song and prove your music knowledge!")
-	meta(name="author", content="Luigi Pinca")
-	script(src="/static/js/jquery.min.js")
-	script
-		var _gaq = _gaq || [];
-		_gaq.push(['_setAccount', 'UA-29865853-1']);
-		_gaq.push(['_trackPageview']);
-		(function() {
-			var ga = document.createElement('script');
-			ga.type = 'text/javascript'; ga.async = true;
-			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') +
-				'.google-analytics.com/ga.js';
-			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-		})();
+    link(href="/static/css/bootstrap.min.css", rel="stylesheet")
+    link(href="/static/css/style.css", rel="stylesheet")
+    meta(charset="UTF-8")
+    meta(name="keywords", content="iTunes, music, quiz, binb, beatquest, realtime, multiplayer, listening, game")
+    meta(name="description", content="Simple, realtime, multiplayer, competitive music listening game. Guess the song and prove your music knowledge!")
+    meta(name="author", content="Luigi Pinca")
+    script(src="/static/js/jquery.min.js")
+    script
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-29865853-1']);
+        _gaq.push(['_trackPageview']);
+        (function() {
+            var ga = document.createElement('script');
+            ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') +
+                '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
