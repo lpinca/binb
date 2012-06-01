@@ -238,7 +238,7 @@
             var guesstime = $('<span class="guess-time"></span>');
             li.append(pvt, username, points, roundrank, roundpointsel, guesstime);
             if (user.registered) {
-                var href = 'href="/user/'+encodeURI(username.html())+'"';
+                var href = 'href="/user/'+encodeURIComponent(user.nickname)+'"';
                 pvt.after('<a class="registered" target="_blank" '+href+'></a>');
             }
             DOM.users.append(li);

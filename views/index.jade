@@ -18,7 +18,8 @@ html
                         if (typeof(loggedin) !== "undefined")
                             li
                                 p.navbar-text Logged in as 
-                                    a#loggedin(href="/user/#{loggedin}",target="_blank") #{loggedin}
+                                    a#loggedin(href="/user/#{encodeURIComponent(loggedin)}",
+                                        target="_blank") #{loggedin.replace(/&/g, '&amp;')}
                             li
                                 a(href="/logout") Logout
                         else

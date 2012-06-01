@@ -1,7 +1,7 @@
 doctype html
 html
     include header
-        title binb :: #{username} info
+        title binb :: #{username.replace(/&/g, '&amp;')} info
     body
         include uv.jade
         .navbar.navbar-fixed-top
@@ -13,7 +13,7 @@ html
             section
                 .row
                     .span7.offset1
-                        .profile #{username}
+                        .profile #{username.replace(/&/g, '&amp;')}
                             .img
                         div member since #{joindate}
             section

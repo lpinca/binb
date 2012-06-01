@@ -192,7 +192,6 @@ exports.profile = function(req, res) {
     db.exists(key, function(err, data) {
         if (data === 1) {
             db.hgetall(key, function(e, obj) {
-                obj.username = obj.username.replace(/&/g, '&amp;');
                 obj.bestguesstime = (obj.bestguesstime/1000).toFixed(1);
                 obj.worstguesstime = (obj.worstguesstime/1000).toFixed(1);
                 if (obj.guessed !== '0') {

@@ -30,7 +30,7 @@ exports.use = function(options) {
 
 exports.index = function(req, res) {
     if (req.session.user) {
-        res.local('loggedin', req.session.user.replace(/&/g, "&amp;"));
+        res.local('loggedin', req.session.user);
     }
     res.render("index", {rooms:rooms});
 };
@@ -68,7 +68,7 @@ exports.artworks = function(req, res) {
 exports.room = function(req, res) {
     if (rooms.indexOf(req.params.room) !== -1) {
         if (req.session.user) {
-            res.local('loggedin', req.session.user.replace(/&/g, "&amp;"));
+            res.local('loggedin', req.session.user);
         }
         res.render("room", {roomname:req.params.room,rooms:rooms});
     }
