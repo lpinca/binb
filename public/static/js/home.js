@@ -1,6 +1,6 @@
 $(function() {
     if ($.browser.mozilla) {
-        // Block ESC button in firefox (it breaks all socket connection).
+        // Block ESC button in firefox (breaks socket connections).
         $(document).keypress(function(event) {
             if(event.keyCode === 27) {
                 return false;

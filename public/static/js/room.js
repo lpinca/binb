@@ -1,27 +1,61 @@
 (function() {
 
-    var touchplay = null;
-    var elapsedtime = 0;
-    var jplayer = null;
-    var nickname = null;
-    var socket = null;
-    var pvtmsgto = null;
-    var roundpoints = 0;
-    var stopanimation = false;
-    var states = ['A song is already playing, please wait for the next one...',
-            'Game is about to start...', 'Game is over', 'New game will start soon...'];
-    var tmstrings = ['Yes, you guessed the title. Who is the artist?', 'Now tell me the artist!',
-                    'Correct, do you also know the artist?'];
-    var amstrings = ['Yes, that\'s the artist. What about the title?', 'Exactly, now tell me the title!',
-                    'Do you also know the title?'];
-    var bmstrings = ['Yeah true! do you like this track?', 'Good job!', 'Great!',
-                    'Very well done!', 'Exactly!', 'Excellent!', 'Woohoo!'];
-    var nmstrings = ['Nope, sorry!', 'No way!', 'Fail', 'Nope', 'No', 'That\'s wrong', 'What?!',
-                    'Wrong', 'Haha, what?!', 'You kidding?', 'Don\'t make me laugh', 'You mad?',
-                    'Try again'];
-    var historyvalues = [];
-    var historycursor = 0;
-    var DOM = {};
+    var elapsedtime = 0
+        , DOM = {}
+        , historycursor = 0
+        , historyvalues = []
+        , jplayer
+        , nickname
+        , pvtmsgto
+        , roundpoints = 0
+        , socket
+        , stopanimation = false
+        , touchplay
+        , urlregex = /(https?:\/\/[-A-Za-z0-9+&@#/%?=~_()|!:,.;]*[-A-Za-z0-9+&@#/%=~_()|])/;
+
+    var amstrings = [
+        'Yes, that\'s the artist. What about the title?'
+        , 'Exactly, now tell me the title!'
+        , 'Do you also know the title?'
+    ];
+
+    var bmstrings = [
+        'Yeah true! do you like this track?'
+        , 'Good job!'
+        , 'Great!'
+        , 'Very well done!'
+        , 'Exactly!'
+        , 'Excellent!'
+        , 'Woohoo!'
+    ];
+
+    var nmstrings = [
+        'Nope, sorry!'
+        , 'No way!'
+        , 'Fail'
+        , 'Nope'
+        , 'No'
+        , 'That\'s wrong'
+        , 'What?!'
+        , 'Wrong', 'Haha, what?!'
+        , 'You kidding?'
+        , 'Don\'t make me laugh'
+        , 'You mad?'
+        , 'Try again'
+    ];
+
+    var tmstrings = [
+        'Yes, you guessed the title. Who is the artist?'
+        , 'Now tell me the artist!'
+        , 'Correct, do you also know the artist?'
+    ];
+
+    var states = [
+        'A song is already playing, please wait for the next one...'
+        , 'Game is about to start...'
+        , 'Game is over'
+        , 'New game will start soon...'
+    ];
 
     String.prototype.encodeEntities = function() {
         return this.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -40,7 +74,8 @@
         }
         else {
             if (!$('body').hasClass('modal-open')) {
-                var html = '<div class="modal-header"><h3>You are joining the '+roomname+' room</h3></div>';
+                var html = '<div class="modal-header">';
+                html += '<h3>You are joining the '+roomname+' room</h3></div>';
                 html += '<div class="modal-body"><p>'+(msg || "What's your name?")+'</p></div>';
                 html += '<div class="modal-footer">';
                 html += '<input id="login" class="" type="text" name="nickname" />';
@@ -50,6 +85,7 @@
                 $(html).appendTo(DOM.modal);
                 var login = $('#login');
                 var button = $('#join');
+
                 button.click(function() {
                     var val = $.trim(login.val());
                     if (val !== "") {
@@ -62,11 +98,13 @@
                     }
                     login.val("");
                 });
+
                 login.keyup(function(event) {
                     if (event.keyCode === 13) {
                         button.click();
                     }
                 });
+
                 DOM.modal.modal('show');
                 DOM.modal.on('shown', function() {
                     login.focus();
@@ -79,7 +117,7 @@
         }
     };
 
-    // Your submitted name was invalid
+    // Submitted name was invalid
     var invalidNickName = function(feedback) {
         joinAnonymously(feedback+"<br/>Try with another one:");
     };
@@ -95,11 +133,12 @@
         DOM.modal.modal('show');
     };
 
-    // You joined the room
+    // Successfully joined the room
     var ready = function(usersData, trackscount, loggedin) {
         if (!loggedin && !/nickname\s*\=/.test(document.cookie)) {
             document.cookie = "nickname="+escape(nickname)+";path=/;";
         }
+        
         DOM.modal.modal('hide').empty();
         $('#total-tracks span').text(trackscount);
         var msg = nickname+" joined the game";
@@ -193,13 +232,13 @@
         if (data.status === 0) {
             cassetteAnimation(Date.now()+data.timeleft, true);
         }
-        if (data.status === 1) {
+        else if (data.status === 1) {
             loadTrack(data.previewUrl);
         }
         addFeedback(states[data.status]);
     };
 
-    // A new player joined the game
+    // A new player has joined the game
     var userJoin = function(username, usersData) {
         var msg = username+" joined the game";
         var joinspan = $("<span class='join'></span>");
@@ -208,7 +247,7 @@
         updateUsers(usersData);
     };
 
-    // A user left the game
+    // A player has left the game
     var userLeft = function(username, usersData) {
         var leftmsg = username+" left the game";
         var leftspan = $("<span class='left'></span>");
@@ -217,31 +256,35 @@
         updateUsers(usersData);
     };
 
-    // Update the list of users
+    // Update the list of players
     var updateUsers = function(usersData) {
         DOM.users.empty();
+        
         var users = [];
         for (var key in usersData) {
             users.push(usersData[key]);
         }
         users.sort(function(a, b) {return b.points - a.points;});
+        
         // Flag to test if our private recipient is in the list of active users
         var found = false;
         for (var i=0; i<users.length; i++) {
-            var user = users[i];
-            var li = $('<li></li>');
-            var pvt = $('<span class="private label label-info">P</span>');
-            var username = $('<span class="name"></span>').text(user.nickname);
-            var points = $('<span class="points">('+user.points+')</span>');
-            var roundrank = $('<span></span>');
-            var roundpointsel = $('<span class="round-points"></span>');
-            var guesstime = $('<span class="guess-time"></span>');
+            var user = users[i]
+                , li = $('<li></li>')
+                , pvt = $('<span class="private label label-info">P</span>')
+                , username = $('<span class="name"></span>').text(user.nickname)
+                , points = $('<span class="points">('+user.points+')</span>')
+                , roundrank = $('<span></span>')
+                , roundpointsel = $('<span class="round-points"></span>')
+                , guesstime = $('<span class="guess-time"></span>');
+
             li.append(pvt, username, points, roundrank, roundpointsel, guesstime);
             if (user.registered) {
                 var href = 'href="/user/'+encodeURIComponent(user.nickname)+'"';
                 pvt.after('<a class="registered" target="_blank" '+href+'></a>');
             }
             DOM.users.append(li);
+            
             if (pvtmsgto === user.nickname) {
                 pvt.show();
                 username.click(clearPrivate);
@@ -252,12 +295,14 @@
                     addPrivate($(this).text());
                 });
             }
+            
             if (nickname === user.nickname) {
                 username.addClass("you");
                 roundpoints = user.roundpoints;
                 DOM.rank.text(i+1);
                 DOM.points.text(user.points);
             }
+            
             if (user.roundpoints > 0) {
                 roundpointsel.text('+'+user.roundpoints);
                 if (user.roundpoints === 1) {
@@ -274,6 +319,7 @@
                 }
             }
         }
+        
         if (!found && pvtmsgto) {
             var width = DOM.recipient.outerWidth(true) + 1;
             DOM.recipient.css('margin-right','0');
@@ -319,6 +365,24 @@
         DOM.messagebox.focus();
     };
 
+    // Convert any URLs in text into clickable links.
+    var urlize = function(text) {
+        if (text.match(urlregex)) {
+            var html = '';
+            var splits = text.split(urlregex);
+            for (var i=0; i<splits.length; i++) {
+                var escapedsplit = splits[i].encodeEntities();
+                if (splits[i].match(urlregex)) {
+                    html += '<a target="_blank" href="'+escapedsplit+'">'+escapedsplit+'</a>';
+                    continue;
+                }
+                html += escapedsplit;
+            }
+            return html;
+        }
+        return text.encodeEntities();
+    };
+
     // Receive a chat message
     var getChatMessage = function(chatmsg, from, to) {
         var prefix = from;
@@ -329,7 +393,7 @@
             msgspan.addClass("private");
         }
         var msg = prefix+": "+chatmsg;
-        msgspan.text(msg);
+        msgspan.html(urlize(msg));
         addChatEntry(msgspan);
     };
 
@@ -358,9 +422,14 @@
 
     // Start cassette animation
     var cassetteAnimation = function(endtime, forward) {
-        var millisleft = endtime - Date.now();
-        var secleft = millisleft / 1000;
-        var width, deg, offsetleft, offsetright, css;
+        var millisleft = endtime - Date.now()
+            , secleft = millisleft / 1000
+            , width
+            , deg
+            , offsetleft
+            , offsetright
+            , css;
+
         if (forward) {
             width = 148 - (148*secleft/30);
             deg = 360 - (360*secleft/30);
@@ -395,6 +464,7 @@
             DOM.tapeleft.css('left', offsetleft+'px');
             DOM.taperight.css('left', offsetright+'px');
         }
+
         if (forward) {
             DOM.countdown.text(secleft.toFixed(1));
             if (touchplay) {elapsedtime = 30 - Math.round(secleft);}
@@ -402,9 +472,11 @@
         else {
             DOM.countdown.text(Math.round(secleft));
         }
+
         if (stopanimation || millisleft < 50) {
             return;
         }
+
         setTimeout(function() {cassetteAnimation(endtime, forward);}, 50);
     };
 
@@ -415,17 +487,21 @@
             touchplay.html('<i class="icon-play icon-white"></i> Wait');
         }
         cassetteAnimation(Date.now()+5000, false);
+
         var html = '<li class="bordered"><img class="artwork" src="'+data.artworkUrl+'"/>';
         html += '<div class="info"><div class="artist">'+data.artistName+'</div>';
-        var titleattr = '';
-        var trackname = data.trackName;
+
+        var titleattr = ''
+            , trackname = data.trackName
+            , attrs = ''
+            , rp = '';
+
         if (data.trackName.length > 45) {
             titleattr = data.trackName.replace(/"/g, "&quot;");
             trackname = data.trackName.substring(0,42) + '...';
         }
         html += '<div class="title" title="'+titleattr+'">'+trackname+'</div></div>';
-        var attrs = '';
-        var rp = '';
+
         if (roundpoints > 0) {
             rp = '+'+roundpoints;
             if (roundpoints > 3) {
@@ -436,6 +512,7 @@
         html += '<div '+attrs+'></div><div class="round-points">'+rp+'</div>';
         html += '<a target="_blank" href="'+data.trackViewUrl+'">';
         html += '<img src="/static/images/itunes.png"/></a></li>';
+
         DOM.tracks.prepend($(html));
     };
 
@@ -457,6 +534,7 @@
         html += '<th><div class="cups stand1"></div></th><th><div class="cups stand2"></div></th>';
         html += '<th><div class="cups stand3"></div></th><th>Guessed</th><th>Mean time</th>';
         html += '</thead><tbody>';
+        
         for(var i=0;i<3;i++) {
             if (podium[i]) {
                 var playername = podium[i].nickname.encodeEntities();
@@ -473,6 +551,7 @@
                 html += '<td>'+meantime+'</td></tr>';
             }
         }
+
         html +='</tbody></table></div>';
         html += '<div class="modal-footer">A new game will start in <span></span> second/s</div>';
         DOM.modal.append($(html));
@@ -480,13 +559,11 @@
         countDown(Date.now()+10000);
     };
 
-    // Let the user know when he / she has disconnected
+    // Let the user know when he/she has disconnected
     var disconnect = function() {
         stopanimation = true;
         jplayer.jPlayer("stop");
-        var errormsg = "ERROR: You have disconnected.";
-        var errorspan = $("<span class='error'></span>");
-        errorspan.text(errormsg);
+        var errorspan = $("<span class='error'>ERROR: You have disconnected.</span>");
         addChatEntry(errorspan);
         addFeedback('Something wrong happened');
         DOM.users.empty();
@@ -530,22 +607,22 @@
 
     var addVolumeControl = function() {
         var volumebutton = $('<div id="volume-button">'+
-                                '<a class="button"><div id="icon" class="volume-high"></div></a>'+
-                                '<div id="volume-slider">'+ // Outer background
-                                    '<div id="volume-total"></div>'+ // Rail
-                                    '<div id="volume-current"></div>'+ // Current volume
-                                    '<div id="volume-handle"></div>'+ // Handle
-                                '</div>'+
-                            '</div>').appendTo("#volume");
-        var icon = volumebutton.find('#icon');
-        var volumeslider = volumebutton.find('#volume-slider');
-        var volumetotal = volumebutton.find('#volume-total');
-        var volumecurrent = volumebutton.find('#volume-current');
-        var volumehandle = volumebutton.find('#volume-handle');
-        var mouseisdown = false;
-        var mouseisover = false;
-        var oldvalue = 1;
-        var clicked = false;
+            '<a class="button"><div id="icon" class="volume-high"></div></a>'+
+            '<div id="volume-slider">'+ // Outer background
+                '<div id="volume-total"></div>'+ // Rail
+                '<div id="volume-current"></div>'+ // Current volume
+                '<div id="volume-handle"></div>'+ // Handle
+            '</div></div>').appendTo("#volume");
+
+        var icon = volumebutton.find('#icon')
+            , volumeslider = volumebutton.find('#volume-slider')
+            , volumetotal = volumebutton.find('#volume-total')
+            , volumecurrent = volumebutton.find('#volume-current')
+            , volumehandle = volumebutton.find('#volume-handle')
+            , mouseisdown = false
+            , mouseisover = false
+            , oldvalue = 1
+            , clicked = false;
 
         var positionVolumeHandle = function(volume) {
             if (!volumeslider.is(':visible')) {
@@ -584,11 +661,11 @@
         };
 
         var handleVolumeMove = function(e) {
-            var totaloffset = volumetotal.offset();
-            var newy = e.pageY - totaloffset.top;
-            var railheight = volumetotal.height();
-            var totalTop = parseInt(volumetotal.css('top').replace(/px/,''),10);
-            var volume = (railheight - newy) / railheight;
+            var totaloffset = volumetotal.offset()
+                , newy = e.pageY - totaloffset.top
+                , railheight = volumetotal.height()
+                , totalTop = parseInt(volumetotal.css('top').replace(/px/,''),10)
+                , volume = (railheight - newy) / railheight;
 
             if (newy < 0) {
                 newy = 0;
@@ -617,10 +694,9 @@
                 value = parseFloat(value);
                 positionVolumeHandle(value);
                 setVolume(value);
+                return;
             }
-            else {
-                positionVolumeHandle(1);
-            }
+            positionVolumeHandle(1);
         };
 
         volumebutton.hover(function() {
@@ -670,6 +746,7 @@
                 }
             }
         });
+
         loadFromCookie();
     };
 
@@ -700,7 +777,7 @@
         DOM.modal.modal({keyboard:false,show:false,backdrop:"static"});
         DOM.togglechat.click(hideChat);
         if ($.browser.mozilla) {
-            // Block ESC button in firefox (it breaks all socket connection).
+            // Block ESC button in firefox (breaks socket connections).
             $(document).keypress(function(event) {
                 if(event.keyCode === 27) {
                     return false;
@@ -714,11 +791,9 @@
                     socket.emit('loggedin', function(data) {
                         if (data) {
                             nickname = data;
-                            socket.emit('joinroom', roomname);
+                            return socket.emit('joinroom', roomname);
                         }
-                        else {
-                            joinAnonymously();
-                        }
+                        joinAnonymously();
                     });
                     if (!$.jPlayer.platform.mobile && !$.jPlayer.platform.tablet) {
                         addVolumeControl();
@@ -739,7 +814,6 @@
                     }
                 },
                 swfPath: "/static/swf/",
-                //solution: "flash, html",
                 supplied: "m4a",
                 preload: "auto",
                 volume: 1
