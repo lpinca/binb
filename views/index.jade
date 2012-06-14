@@ -14,6 +14,10 @@ html
                     ul.nav.pull-right
                         li.active
                             a(href="/") Home
+                        li
+                            a(target="_blank", href="/leaderboard")
+                                i.icon-list-alt.icon-white
+                                |  Leaderboard
                         if (typeof(loggedin) !== "undefined")
                             li
                                 p.navbar-text Logged in as 

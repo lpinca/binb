@@ -14,7 +14,7 @@ var async = require('async')
 var task = function(genre) {
     return function(callback) {
         db.srandmember(genre, function(err, res) {
-            db.hget(res, "artworkUrl100", callback);
+            db.hget('song:'+res, 'artworkUrl100', callback);
         });
     };
 };
@@ -32,17 +32,7 @@ exports.index = function(req, res) {
     if (req.session.user) {
         res.local('loggedin', req.session.user);
     }
-    res.render("index", {rooms:rooms});
-};
-
-exports.signup = function(req, res) {
-    var captcha = new Captcha();
-    req.session.captchacode = captcha.getCode();
-    res.render("signup", {captchaurl:captcha.toDataURL()});
-};
-
-exports.login = function(req, res) {
-    res.render("login");
+    res.render('index', {rooms:rooms});
 };
 
 /**
@@ -65,12 +55,23 @@ exports.artworks = function(req, res) {
     });
 };
 
+exports.login = function(req, res) {
+    res.render('login');
+};
+
+exports.signup = function(req, res) {
+    var captcha = new Captcha();
+    req.session.captchacode = captcha.getCode();
+    res.render('signup', {captchaurl:captcha.toDataURL()});
+};
+
+
 exports.room = function(req, res) {
     if (rooms.indexOf(req.params.room) !== -1) {
         if (req.session.user) {
             res.local('loggedin', req.session.user);
         }
-        res.render("room", {roomname:req.params.room,rooms:rooms});
+        res.render('room', {roomname:req.params.room,rooms:rooms});
     }
     else {
         res.send(404);

@@ -19,11 +19,130 @@ String.prototype.isEmail = function() {
 };
 
 /**
+ * Parameters to get users ordered by best guess time.
+ */
+
+var sortparams = [
+    'users'
+    , 'by'
+    , 'user:*->bestguesstime'
+    , 'get'
+    , '#'
+    , 'get'
+    , 'user:*->bestguesstime'
+    , 'limit'
+    , '0'
+    , '30'
+];
+
+/**
+ * Leaderboard helper function.
+ * Rearrange database results in an object.
+ */
+
+var buildLeaderboard = function(pointsresults, timesresults) {
+    var obj = {
+        pointsleaderboard: [],
+        timesleaderboard: []
+    }
+    for (var i=0; i<pointsresults.length; i+=2) {
+        obj.pointsleaderboard.push({
+            username: pointsresults[i],
+            totpoints: pointsresults[i+1]
+        });
+        obj.timesleaderboard.push({
+            username: timesresults[i],
+            bestguesstime: (timesresults[i+1] / 1000).toFixed(2)
+        });
+    }
+    return obj;
+};
+
+/**
  * Initialize dependencies.
  */
 
 exports.use = function(options) {
     db = options.db;
+};
+
+/**
+ * Show a list of users ordered by points and best guess time (limit set to 30).
+ */
+
+exports.leaderboard = function(req, res) {
+    db.zrevrange('users', 0, 29, 'withscores', function(err, pointsresults) {
+        db.sort(sortparams, function (e, timesresults) {
+            var leaderboard = buildLeaderboard(pointsresults, timesresults);
+            res.render('leaderboard', leaderboard);
+        });
+    });
+};
+
+/**
+ * Login middlewares.
+ */
+
+exports.validateLogin = function(req, res, next) {
+    var errors = {};
+    
+    req.body.username = req.body.username.trim(); // Username sanitization
+    req.body.password = req.body.password.trim(); // Password sanitization
+    if (req.body.username === '') {
+        errors.username = "can't be empty";
+    }
+    if (req.body.password === '') {
+        errors.password = "can't be empty";
+    }
+    
+    req.session.oldvalues = {username: req.body.username};
+    if (errors.username || errors.password) {
+        req.session.errors = errors;
+        return res.redirect('/login');
+    }
+    
+    next();
+};
+
+exports.checkUser = function(req, res, next) {
+    var key = 'user:'+req.body.username;
+    db.exists(key, function(err, data) {
+        if (data === 1) {
+            // User exists, proceed with authentication
+            return next();
+        }
+        req.session.errors = {alert: 'The username you specified does not exists.'};
+        res.redirect('/login');
+    });
+};
+
+exports.authenticate = function(req, res) {
+    var key = 'user:'+req.body.username;
+    db.hmget(key, 'salt', 'password', function(err, data) {
+        var hash = crypto.createHash('sha256').update(data[0]+req.body.password).digest('hex');
+        if (hash === data[1]) {
+            // Authentication succeeded, regenerate the session
+            req.session.regenerate(function() {
+                req.session.cookie.maxAge = 604800000; // One week
+                req.session.user = req.body.username;
+                res.redirect('/');
+            });
+            return;
+        }
+        req.session.errors = {alert: 'The password you specified is not correct.'};
+        res.redirect('/login');
+    });
+};
+
+/**
+ * Logout the user.
+ */
+
+exports.logout = function(req, res) {
+    // Destroy the session
+    req.session.destroy(function() {
+        res.redirect('/');
+    });
 };
 
 /**
@@ -109,78 +228,12 @@ exports.createAccount = function(req, res) {
     // Add new user in the db
     db.hmset(userkey, user);
     db.set(mailkey, userkey);
-    db.sadd('users', userkey);
-    db.sadd('emails', mailkey);
+    db.zadd('users', 0, req.body.username);
+    db.sadd('emails', req.body.email);
     // Delete old fields values (we don't want these to be available in login view)
     delete req.session.oldvalues;
     var msg = 'You successfully created your account. You are now ready to login.';
     res.render('login', {success:msg});
-};
-
-/**
- * Login middlewares.
- */
-
-exports.validateLogin = function(req, res, next) {
-    var errors = {};
-    
-    req.body.username = req.body.username.trim(); // Username sanitization
-    req.body.password = req.body.password.trim(); // Password sanitization
-    if (req.body.username === '') {
-        errors.username = "can't be empty";
-    }
-    if (req.body.password === '') {
-        errors.password = "can't be empty";
-    }
-    
-    req.session.oldvalues = {username: req.body.username};
-    if (errors.username || errors.password) {
-        req.session.errors = errors;
-        return res.redirect('/login');
-    }
-    
-    next();
-};
-
-exports.checkUser = function(req, res, next) {
-    var key = 'user:'+req.body.username;
-    db.exists(key, function(err, data) {
-        if (data === 1) {
-            // User exists, proceed with authentication
-            return next();
-        }
-        req.session.errors = {alert: 'The username you specified does not exists.'};
-        res.redirect('/login');
-    });
-};
-
-exports.authenticate = function(req, res) {
-    var key = 'user:'+req.body.username;
-    db.hmget(key, 'salt', 'password', function(err, data) {
-        var hash = crypto.createHash('sha256').update(data[0]+req.body.password).digest('hex');
-        if (hash === data[1]) {
-            // Authentication succeeded, regenerate the session
-            req.session.regenerate(function() {
-                req.session.cookie.maxAge = 604800000; // One week
-                req.session.user = req.body.username;
-                res.redirect('/');
-            });
-            return;
-        }
-        req.session.errors = {alert: 'The password you specified is not correct.'};
-        res.redirect('/login');
-    });
-};
-
-/**
- * Logout the user.
- */
-
-exports.logout = function(req, res) {
-    // Destroy the session
-    req.session.destroy(function() {
-        res.redirect('/');
-    });
 };
 
 /**

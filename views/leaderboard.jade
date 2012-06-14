@@ -1,0 +1,46 @@
+doctype html
+html
+    include header
+        title binb :: Leaderboard
+    body
+        include uv.jade
+        .navbar.navbar-fixed-top
+            .navbar-inner
+                .container
+                    a.brand(href="#")
+                        .logo #{motto}
+        .container
+            section
+                .row
+                    .span7.offset1
+                        .highscores High Scores
+                            .img
+            section
+                .row
+                    .span7.offset1
+                        h4 Points
+                        div.leaderboard-wrapper
+                            table.table.table-striped.table-bordered.leaderboard
+                                tbody
+                                each user, i in pointsleaderboard
+                                    tr
+                                        td #{i+1}
+                                        td
+                                            a(href="/user/#{encodeURIComponent(user.username)}")
+                                                | #{user.username.replace(/&/g, '&amp;')}
+                                        td #{user.totpoints}
+                    .span7
+                        h4 Times
+                        div.leaderboard-wrapper
+                            table.table.table-striped.table-bordered.leaderboard
+                                tbody
+                                each user, i in timesleaderboard
+                                    tr
+                                        td #{i+1}
+                                        td
+                                            a(href="/user/#{encodeURIComponent(user.username)}")
+                                                | #{user.username.replace(/&/g, '&amp;')}
+                                        td 
+                                            i.icon-time
+                                            |  #{user.bestguesstime} sec
+            include footer

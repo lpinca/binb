@@ -60,11 +60,12 @@ user.use({db:usersdb});
 
 app.get('/', site.index);
 app.get('/artworks', site.artworks);
-app.get('/signup', site.signup);
-app.post('/signup', user.validateSignUp, user.userExists, user.emailExists, user.createAccount);
+app.get('/leaderboard', user.leaderboard);
 app.get('/login', site.login);
 app.post('/login', user.validateLogin, user.checkUser, user.authenticate);
 app.get('/logout', user.logout);
+app.get('/signup', site.signup);
+app.post('/signup', user.validateSignUp, user.userExists, user.emailExists, user.createAccount);
 app.get('/:room', site.room);
 app.get('/user/*', user.profile);
 
