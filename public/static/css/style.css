@@ -24,7 +24,7 @@ section {
     height: 34px;
     padding-left: 68px;
     line-height: 40px;
-    background: url('/static/images/sprites.png') no-repeat 0px -182px;
+    background: url('/static/images/sprites.png') no-repeat -36px -174px;
     font-size: 25px;
 }
 .page-header .logo {
@@ -32,7 +32,7 @@ section {
     height: 54px;
     padding-left: 109px;
     line-height: 68px;
-    background: url('/static/images/sprites.png') no-repeat 0px -128px;
+    background: url('/static/images/sprites.png') no-repeat 0 -120px;
     font-size: 34px;
     color: #0088CC;
 }
@@ -107,26 +107,20 @@ input {
 }
 .highscores, .profile {
     font-weight: bold;
-}
-.profile {
-    font-size: 24px;
+    font-size: 22px;
     line-height: 32px;
 }
-.highscores {
-    font-size: 20px;
-    line-height: 45px;
-}
-.profile .img {
+.highscores .img, .profile .img, .medals {
     width: 32px;
     height: 32px;
+}
+.profile .img {
     margin-right: 5px;
-    background: url('/static/images/sprites.png') no-repeat 0px -56px;
+    background: url('/static/images/sprites.png') no-repeat 0 -56px;
 }
 .highscores .img {
-    width: 80px;
-    height: 45px;
-    margin-right:5px;
-    background: url('/static/images/sprites.png') no-repeat 0px -216px;
+    margin-right:7px;
+    background: url('/static/images/sprites.png') no-repeat -64px 0;
 }
 .leaderboard-wrapper, .stats {
     border: 1px solid #ccc;
@@ -195,10 +189,6 @@ input {
 .cups {
     width: 16px;
     height: 16px;
-}
-.medals {
-    width: 32px;
-    height: 32px;
 }
 .rank1 {
     background: url('/static/images/sprites.png') no-repeat -32px -16px;
@@ -356,16 +346,16 @@ input {
     height: 16px;
 }
 #volume-button .button .volume-none {
-    background: url('/static/images/sprites.png') no-repeat 0 -112px;
+    background: url('/static/images/sprites.png') no-repeat 0 -88px;
 }
 #volume-button .button .volume-low {
-    background: url('/static/images/sprites.png') no-repeat -16px -112px;
+    background: url('/static/images/sprites.png') no-repeat -16px -88px;
 }
 #volume-button .button .volume-medium {
-    background: url('/static/images/sprites.png') no-repeat -32px -112px;
+    background: url('/static/images/sprites.png') no-repeat 0 -104px;
 }
 #volume-button .button .volume-high {
-    background: url('/static/images/sprites.png') no-repeat -48px -112px;
+    background: url('/static/images/sprites.png') no-repeat -16px -104px;
 }
 #volume-slider {
     display: none;
