@@ -1,3 +1,4 @@
+followup = (typeof(followup) !== "undefined") ? '?followup='+followup : '?followup=/'
 doctype html
 html
     include header
@@ -14,15 +15,15 @@ html
                         li
                             a(href="/") Home
                         li.active
-                            a(href="/signup") Sign up
+                            a(href="/signup#{followup}") Sign up
                         li
-                            a(href="/login") Login
+                            a(href="/login#{followup}") Login
         .container
             section
                 .row
                     .span3
                         h3 Not a new user?
-                        a(href="/login") Click here to log in.
+                        a(href="/login#{followup}") Click here to log in.
                     .span13
                         h3 Why sign up?
                         p Registration is optional, but if you are a regular user consider creating 
@@ -36,7 +37,7 @@ html
                                 a.close(data-dismiss="alert") &times;
                                 strong Oh snap!
                                 |  #{errors.alert}
-                        form.form-horizontal.well(method="post",action="/signup")
+                        form.form-horizontal.well(method="post",action="/signup#{followup}")
                             fieldset
                                 if (typeof(errors) !== "undefined")
                                     if (typeof(errors.username) !== "undefined")
@@ -113,7 +114,7 @@ html
                                             img#captcha(src="#{captchaurl}")
                                             input#captcha-input(type="text",name="captcha",
                                                 placeholder="type what you see...")
-                                button#signup-button.btn.btn-success(type="submit")
+                                button.submit-button.btn.btn-success(type="submit")
                                     i.icon-user.icon-white
                                     |  Sign up!
             include footer

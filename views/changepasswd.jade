@@ -1,0 +1,72 @@
+followup = (typeof(followup) !== "undefined") ? '?followup='+followup : '?followup=/'
+doctype html
+html
+    include header
+        title binb :: Change password
+        script(src="/static/js/bootstrap.min.js")
+    body
+        include uv.jade
+        .navbar.navbar-fixed-top
+            .navbar-inner
+                .container
+                    a.brand(href="/")
+                        .logo #{motto}
+                    ul.nav.pull-right
+                        li
+                            a(href="/") Home
+                        li.dropdown
+                            a.dropdown-toggle(data-toggle="dropdown",
+                                href="#") Logged in as #{loggedin.replace(/&/g, '&amp;')} 
+                                span.caret
+                            ul.dropdown-menu
+                                li
+                                    a(href="/user/#{encodeURIComponent(loggedin)}",
+                                        target="_blank") Profile
+                                li
+                                    a(href="/logout") Logout
+        .container
+            section
+                .row
+                    .span12.offset2
+                        form.form-horizontal.well(method="post",action="/changepasswd#{followup}")
+                            fieldset
+                                if (typeof(errors) !== "undefined")
+                                    if (typeof(errors.oldpassword) !== "undefined")
+                                        .control-group.error
+                                            label.control-label(for="oldpassword") Old password
+                                            .controls
+                                                input#oldpassword(type="password",name="oldpassword")
+                                                span.help-inline #{errors.oldpassword}
+                                    else
+                                        .control-group
+                                            label.control-label(for="oldpassword") Old password
+                                            .controls
+                                                input#username(type="password",name="oldpassword",
+                                                    placeholder="enter your current password...")
+                                    if (typeof(errors.newpassword) !== 'undefined')
+                                        .control-group.error
+                                            label.control-label(for="newpassword") New password
+                                            .controls
+                                                input#password(type="password",name="newpassword")
+                                                span.help-inline #{errors.newpassword}
+                                    else
+                                        .control-group
+                                            label.control-label(for="newpassword") New password
+                                            .controls
+                                                input#password(type="password",name="newpassword",
+                                                    placeholder="enter your new password...")
+                                else
+                                    .control-group
+                                        label.control-label(for="oldpassword") Old password
+                                        .controls
+                                            input#username(type="password",name="oldpassword",
+                                                placeholder="enter your current password...")
+                                    .control-group
+                                        label.control-label(for="password") New password
+                                        .controls
+                                            input#password(type="password",name="newpassword",
+                                                placeholder="enter your new password...")
+                                button.submit-button.btn.btn-primary(type="submit")
+                                    i.icon-lock.icon-white
+                                    |  Update
+            include footer

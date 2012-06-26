@@ -28,13 +28,6 @@ exports.use = function(options) {
     rooms = options.rooms;
 };
 
-exports.index = function(req, res) {
-    if (req.session.user) {
-        res.local('loggedin', req.session.user);
-    }
-    res.render('index', {rooms:rooms});
-};
-
 /**
  * Extract at random in each room, some album covers and return the result as a JSON.
  */
@@ -55,25 +48,32 @@ exports.artworks = function(req, res) {
     });
 };
 
+exports.changePasswd = function(req, res) {
+    if (!req.session.user) {
+        return res.redirect('/login?followup=/changepasswd');
+    }
+    res.render('changepasswd', {followup:req.query['followup'],loggedin:req.session.user});
+};
+
+exports.index = function(req, res) {
+    res.render('index', {loggedin:req.session.user,rooms:rooms});
+};
+
 exports.login = function(req, res) {
-    res.render('login');
+    res.render('login', {followup:req.query['followup']});
+};
+
+exports.room = function(req, res) {
+    if (rooms.indexOf(req.params.room) !== -1) {
+        res.render('room', {loggedin:req.session.user,roomname:req.params.room,rooms:rooms});
+    }
+    else {
+        res.send(404);
+    }
 };
 
 exports.signup = function(req, res) {
     var captcha = new Captcha();
     req.session.captchacode = captcha.getCode();
-    res.render('signup', {captchaurl:captcha.toDataURL()});
-};
-
-
-exports.room = function(req, res) {
-    if (rooms.indexOf(req.params.room) !== -1) {
-        if (req.session.user) {
-            res.local('loggedin', req.session.user);
-        }
-        res.render('room', {roomname:req.params.room,rooms:rooms});
-    }
-    else {
-        res.send(404);
-    }
+    res.render('signup', {captchaurl:captcha.toDataURL(),followup:req.query['followup']});
 };

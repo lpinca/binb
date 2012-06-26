@@ -18,11 +18,11 @@ var songsdb = redisurl.createClient(config.songsdburl);
 var usersdb = redisurl.createClient(config.usersdburl);
 
 songsdb.on('error', function(err) {
-    console.log(err.toString());
+    console.log(err.message);
 });
 
 usersdb.on('error', function(err) {
-    console.log(err.toString());
+    console.log(err.message);
 });
 
 /**
@@ -56,11 +56,13 @@ app.dynamicHelpers({
 
 // Routes
 site.use({db:songsdb,rooms:config.rooms});
-user.use({db:usersdb});
+user.use({db:usersdb,rooms:config.rooms});
 
 app.get('/', site.index);
 app.get('/artworks', site.artworks);
-app.get('/leaderboard', user.leaderboard);
+app.get('/changepasswd', site.changePasswd);
+app.post('/changepasswd', user.validateChangePasswd, user.checkOldPasswd, user.changePasswd);
+app.get('/leaderboards', user.leaderboards);
 app.get('/login', site.login);
 app.post('/login', user.validateLogin, user.checkUser, user.authenticate);
 app.get('/logout', user.logout);
@@ -99,7 +101,7 @@ io.set('authorization', function(data, accept) {
     var cookie = parseCookie(data.headers.cookie);
     sessionstore.get(cookie['connect.sid'], function(err, session) {
         if (err) {
-            return accept(err.toString(), false);
+            return accept(err.message, false);
         }
         else if (!session) {
             return accept('session not found', false);

@@ -1,3 +1,4 @@
+followup = (typeof(followup) !== "undefined") ? '?followup='+followup : '?followup=/'
 doctype html
 html
     include header
@@ -14,15 +15,15 @@ html
                         li
                             a(href="/") Home
                         li
-                            a(href="/signup") Sign up
+                            a(href="/signup#{followup}") Sign up
                         li.active
-                            a(href="/login") Login
+                            a(href="/login#{followup}") Login
         .container
             section
                 .row
                     .span3
                         h3 New user?
-                        a(href="/signup") Click here to create an account.
+                        a(href="/signup#{followup}") Click here to create an account.
                     .span13
                         if ((typeof(errors) !== "undefined") && (typeof(errors.alert) !== "undefined"))
                             .alert.alert-error
@@ -34,7 +35,7 @@ html
                                 a.close(data-dismiss="alert") &times;
                                 strong Well done!
                                 |  #{success}
-                        form.form-horizontal.well(method="post",action="/login")
+                        form.form-horizontal.well(method="post",action="/login#{followup}")
                             fieldset
                                 if (typeof(errors) !== "undefined")
                                     if (typeof(errors.username) !== "undefined")
@@ -73,7 +74,7 @@ html
                                         .controls
                                             input#password(type="password",name="password",
                                                 placeholder="enter your password...")
-                                button#signup-button.btn.btn-primary(type="submit")
-                                    i.icon-user.icon-white
+                                button.submit-button.btn.btn-primary(type="submit")
+                                    i.icon-lock.icon-white
                                     |  Login
             include footer

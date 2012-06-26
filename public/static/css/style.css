@@ -36,10 +36,6 @@ section {
     font-size: 34px;
     color: #0088CC;
 }
-.navbar .navbar-text {
-    line-height:19px;
-    padding: 9px 10px 11px;
-}
 .form-horizontal .control-group {
     margin-bottom: 10px;
 }
@@ -59,7 +55,7 @@ form .clearfix {
 .alert {
     margin-bottom: 9px;
 }
-#signup-button {
+.submit-button {
     margin-left: 120px;
     margin-top: 9px;
 }

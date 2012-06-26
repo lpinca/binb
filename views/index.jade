@@ -3,6 +3,7 @@ html
     include header
         title binb
         script(src="/socket.io/socket.io.js")
+        script(src="/static/js/bootstrap.min.js")
         script(src="/static/js/home.js")
     body
         include uv.jade
@@ -15,16 +16,22 @@ html
                         li.active
                             a(href="/") Home
                         li
-                            a(target="_blank", href="/leaderboard")
+                            a(target="_blank", href="/leaderboards")
                                 i.icon-list-alt.icon-white
                                 |  Leaderboards
                         if (typeof(loggedin) !== "undefined")
-                            li
-                                p.navbar-text Logged in as 
-                                    a#loggedin(href="/user/#{encodeURIComponent(loggedin)}",
-                                        target="_blank") #{loggedin.replace(/&/g, '&amp;')}
-                            li
-                                a(href="/logout") Logout
+                            li.dropdown
+                                a.dropdown-toggle(data-toggle="dropdown",
+                                    href="#") Logged in as #{loggedin.replace(/&/g, '&amp;')} 
+                                    span.caret
+                                ul.dropdown-menu
+                                    li
+                                        a(href="/user/#{encodeURIComponent(loggedin)}",
+                                            target="_blank") Profile
+                                    li
+                                        a(href="/changepasswd") Change password
+                                    li
+                                        a(href="/logout") Logout
                         else
                             li
                                 a(href="/signup") Sign up

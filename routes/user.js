@@ -4,6 +4,7 @@
 
 var crypto = require('crypto')
     , db
+    , followupurls = []
     , User = require('../lib/user');
     
 /**
@@ -16,6 +17,17 @@ String.prototype.trim = function() {
 
 String.prototype.isEmail = function() {
     return this.match(/^(?:[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\`\{\|\}\~]+\.)*[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\`\{\|\}\~]+@(?:(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9\-](?!\.)){0,61}[a-zA-Z0-9]?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9\-](?!$)){0,61}[a-zA-Z0-9]?)|(?:\[(?:(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\.){3}(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\]))$/);
+};
+
+/**
+ * Check if a URL is in the whitelist of follow-up URLs.
+ */
+
+var safeFollowup = function(url) {
+    if (followupurls.indexOf(url) !== -1) {
+        return true;
+    }
+    return false;
 };
 
 /**
@@ -36,11 +48,11 @@ var sortparams = [
 ];
 
 /**
- * Leaderboard helper function.
+ * Helper function used to build leaderboards.
  * Rearrange database results in an object.
  */
 
-var buildLeaderboard = function(pointsresults, timesresults) {
+var buildLeaderboards = function(pointsresults, timesresults) {
     var obj = {
         pointsleaderboard: [],
         timesleaderboard: []
@@ -64,17 +76,83 @@ var buildLeaderboard = function(pointsresults, timesresults) {
 
 exports.use = function(options) {
     db = options.db;
+    rooms = options.rooms;
+    // Populate the whitelist of follow-up URLs
+    followupurls.push('/');
+    followupurls.push('/changepasswd');
+    for (var i=0; i<rooms.length; i++) {
+        followupurls.push('/'+rooms[i]);
+    }
 };
 
 /**
- * Show a list of users ordered by points and best guess time (limit set to 30).
+ * Show two lists of users, one ordered by points and one by best guess time (limit set to 30).
  */
 
-exports.leaderboard = function(req, res) {
+exports.leaderboards = function(req, res) {
     db.zrevrange('users', 0, 29, 'withscores', function(err, pointsresults) {
         db.sort(sortparams, function (e, timesresults) {
-            var leaderboard = buildLeaderboard(pointsresults, timesresults);
-            res.render('leaderboard', leaderboard);
+            var leaderboards = buildLeaderboards(pointsresults, timesresults);
+            res.render('leaderboards', leaderboards);
+        });
+    });
+};
+
+/**
+ * Change password middlewares.
+ */
+ 
+exports.validateChangePasswd = function(req, res, next) {
+    if (!req.session.user || !req.body.oldpassword || !req.body.newpassword) {
+        return res.send('Missing data');
+    }
+    
+    var errors = {};
+    
+    req.body.oldpassword = req.body.oldpassword.trim();
+    req.body.newpassword = req.body.newpassword.trim();
+    if (req.body.oldpassword === '') {
+        errors.oldpassword = "can't be empty";
+    }
+    if (!req.body.newpassword.match(/^[A-Za-z0-9]{6,15}$/)) {
+        errors.newpassword = '6 to 15 alphanumeric characters required';
+    }
+    else if(req.body.newpassword === req.body.oldpassword) {
+        errors.newpassword = "can't be changed to the old one";
+    }
+    
+    if (errors.oldpassword || errors.newpassword) {
+        req.session.errors = errors;
+        return res.redirect(req.url);
+    }
+    
+    next();
+};
+
+exports.checkOldPasswd = function(req, res, next) {
+    var key = 'user:'+req.session.user;
+    db.hmget(key, 'salt', 'password', function(err, data) {
+        var hash = crypto.createHash('sha256').update(data[0]+req.body.oldpassword).digest('hex');
+        if (hash !== data[1]) {
+            req.session.errors = {oldpassword: 'is incorrect'};
+            return res.redirect(req.url);
+        }
+        next();
+    });
+};
+
+exports.changePasswd = function(req, res) {
+    var followup = (safeFollowup(req.query['followup'])) ? req.query['followup'] : '/'
+        , user = req.session.user
+        , key = 'user:'+user
+        , salt = crypto.randomBytes(6).toString('base64')
+        , password = crypto.createHash('sha256').update(salt+req.body.newpassword).digest('hex');
+    db.hmset(key, 'salt', salt, 'password', password, function(err, data) {
+        // Regenerate the session
+        req.session.regenerate(function() {
+            req.session.cookie.maxAge = 604800000; // One week
+            req.session.user = user;
+            res.redirect(followup);
         });
     });
 };
@@ -84,6 +162,10 @@ exports.leaderboard = function(req, res) {
  */
 
 exports.validateLogin = function(req, res, next) {
+    if (!req.body.username || !req.body.password) {
+        return res.send('Missing data');
+    }
+
     var errors = {};
     
     req.body.username = req.body.username.trim(); // Username sanitization
@@ -98,9 +180,8 @@ exports.validateLogin = function(req, res, next) {
     req.session.oldvalues = {username: req.body.username};
     if (errors.username || errors.password) {
         req.session.errors = errors;
-        return res.redirect('/login');
+        return res.redirect(req.url);
     }
-    
     next();
 };
 
@@ -112,7 +193,7 @@ exports.checkUser = function(req, res, next) {
             return next();
         }
         req.session.errors = {alert: 'The username you specified does not exists.'};
-        res.redirect('/login');
+        res.redirect(req.url);
     });
 };
 
@@ -121,16 +202,17 @@ exports.authenticate = function(req, res) {
     db.hmget(key, 'salt', 'password', function(err, data) {
         var hash = crypto.createHash('sha256').update(data[0]+req.body.password).digest('hex');
         if (hash === data[1]) {
+            var followup = (safeFollowup(req.query['followup'])) ? req.query['followup'] : '/';
             // Authentication succeeded, regenerate the session
             req.session.regenerate(function() {
                 req.session.cookie.maxAge = 604800000; // One week
                 req.session.user = req.body.username;
-                res.redirect('/');
+                res.redirect(followup);
             });
             return;
         }
         req.session.errors = {alert: 'The password you specified is not correct.'};
-        res.redirect('/login');
+        res.redirect(req.url);
     });
 };
 
@@ -150,6 +232,10 @@ exports.logout = function(req, res) {
  */
 
 exports.validateSignUp = function(req, res, next) {
+    if (!req.body.username || !req.body.email || !req.body.password || !req.body.captcha) {
+        return res.send('Missing data');
+    }
+
     var errors = {};
     
     req.body.username = req.body.username.trim(); // Username sanitization
@@ -177,7 +263,7 @@ exports.validateSignUp = function(req, res, next) {
     
     if (errors.username || errors.email || errors.password || errors.captcha) {
         req.session.errors = errors;
-        return res.redirect('/signup');
+        return res.redirect(req.url);
     }
     
     next();
@@ -189,7 +275,7 @@ exports.userExists = function(req, res, next) {
         if (data === 1) { 
             // User already exists
             req.session.errors = {alert: 'A user with that name already exists.'};
-            return res.redirect('/signup');
+            return res.redirect(req.url);
         }
         next();
     });
@@ -201,7 +287,7 @@ exports.emailExists = function(req, res, next) {
         if (data === 1) { 
             // Email already exists
             req.session.errors = {alert: 'A user with that email already exists.'};
-            return res.redirect('/signup');
+            return res.redirect(req.url);
         }
         next();
     });
@@ -233,7 +319,7 @@ exports.createAccount = function(req, res) {
     // Delete old fields values (we don't want these to be available in login view)
     delete req.session.oldvalues;
     var msg = 'You successfully created your account. You are now ready to login.';
-    res.render('login', {success:msg});
+    res.render('login', {followup:req.query['followup'],success:msg});
 };
 
 /**
