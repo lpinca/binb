@@ -3,6 +3,10 @@
   "songsdburl": "",
   "usersdburl": "",
   "sessionsecret": "",
+  "sendgrid": {
+    "user": "",
+    "pass": ""
+  },
   "songsinarun": 15,
   "gameswithnorepeats": 3,
   "allowederrors": 2,

@@ -1,0 +1,86 @@
+followup = (typeof(followup) !== "undefined") ? '?followup='+followup : '?followup=/'
+doctype html
+html
+    include header
+        title binb :: Recover password
+        script(src="/static/js/bootstrap.min.js")
+    body
+        include uv.jade
+        .navbar.navbar-fixed-top
+            .navbar-inner
+                .container
+                    a.brand(href="/")
+                        .logo #{motto}
+                    ul.nav.pull-right
+                        li
+                            a(href="/") Home
+                        li
+                            a(href="/signup#{followup}") Sign up
+                        li
+                            a(href="/login#{followup}") Login
+        .container
+            section
+                .row
+                    .span12.offset2
+                        if (typeof(success) !== "undefined")
+                            .alert.alert-block.alert-success
+                                h4.alert-heading Success!
+                                | An email has been sent to you.<br>To start the password reset 
+                                | process, open this email and follow the given instructions.<br>
+                                | If you don't receive it in a reasonable amount of time, please 
+                                | use the support form on the left.
+                        else
+                            if ((typeof(errors) !== "undefined") && (typeof(errors.alert) !== "undefined"))
+                                .alert.alert-error
+                                    a.close(data-dismiss="alert") &times;
+                                    strong Oh snap!
+                                    |  #{errors.alert}
+                            form.form-horizontal.well(method="post",
+                                action="/recoverpasswd#{followup}")
+                                fieldset
+                                    if (typeof(errors) !== "undefined")
+                                        if (typeof(errors.email) !== "undefined")
+                                            .control-group.error
+                                                label.control-label(for="email") Email
+                                                .controls
+                                                    input#oldpassword(type="text",name="email",
+                                                        value="#{oldvalues.email}")
+                                                    span.help-inline #{errors.email}
+                                        else
+                                            .control-group
+                                                label.control-label(for="email") Email
+                                                .controls
+                                                    input#username(type="text",name="email",
+                                                        value="#{oldvalues.email}")
+                                        if (typeof(errors.captcha) !== 'undefined')
+                                            .control-group.error
+                                                label.control-label(for="captcha-input")
+                                                    | Are you human?
+                                                .controls
+                                                    img#captcha(src="#{captchaurl}")
+                                                    input#captcha-input(type="text",name="captcha")
+                                                    span.help-inline #{errors.captcha}
+                                        else
+                                            .control-group
+                                                label.control-label(for="captcha-input")
+                                                    | Are you human?
+                                                .controls
+                                                    img#captcha(src="#{captchaurl}")
+                                                    input#captcha-input(type="text",name="captcha",
+                                                        placeholder="type what you see...")
+                                    else
+                                        .control-group
+                                            label.control-label(for="email") Email
+                                            .controls
+                                                input#email(type="text",name="email",
+                                                    placeholder="type the email you used to sign up...")
+                                        .control-group
+                                            label.control-label(for="captcha-input") Are you human?
+                                            .controls
+                                                img#captcha(src="#{captchaurl}")
+                                                input#captcha-input(type="text",name="captcha",
+                                                    placeholder="type what you see...")
+                                    button.submit-button.btn.btn-primary(type="submit")
+                                        i.icon-envelope.icon-white
+                                        |  Send password reset link
+            include footer

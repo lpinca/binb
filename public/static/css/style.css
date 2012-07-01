@@ -59,6 +59,11 @@ form .clearfix {
     margin-left: 120px;
     margin-top: 9px;
 }
+.forgot-passwd {
+    display: inline-block;
+    vertical-align: top;
+    margin: 14px 0 0 15px;
+}
 #captcha-input {
     width: 126px;
 }
@@ -83,7 +88,7 @@ input {
     float: right;
 }
 .thumbnails {
-    margin-bottom: 0px;
+    margin-bottom: 0;
 }
 .thumbnails > li {
     margin: 0 0 18px 80px;
@@ -230,7 +235,7 @@ input {
     width: 24px;
     height:24px;
     top: 49px;
-    background: url('/static/images/sprites.png') no-repeat 0px -32px;
+    background: url('/static/images/sprites.png') no-repeat 0 -32px;
 }
 #wheel-left {
     left:51px;
@@ -260,9 +265,9 @@ input {
     -webkit-border-radius:4px;
     -moz-border-radius:4px;
     border-radius:4px;
-    -webkit-box-shadow: inset 0px 1px 2px 0px #333;
-     -moz-box-shadow: inset 0px 1px 2px 0px #333;
-    box-shadow: inset 0px 1px 2px 0px #333;
+    -webkit-box-shadow: inset 0 1px 2px 0 #333;
+     -moz-box-shadow: inset 0 1px 2px 0 #333;
+    box-shadow: inset 0 1px 2px 0 #333;
 }
 #progress-bar {
     position:absolute;
@@ -274,7 +279,7 @@ input {
 }
 #progress {
     background-color: #6184b7;
-    width:0px;
+    width:0;
 }
 #touch-backdrop {
     width:220px;
@@ -319,15 +324,15 @@ input {
 }
 #volume-button .button:hover {
     border-color:#999999;
-    -webkit-box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.25);
-    -moz-box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.25);
-    box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.25);
+    -webkit-box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.25);
+    -moz-box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.25);
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.25);
 }
 #volume-button .button:active {
     border-color:#999999 #AAAAAA #CCCCCC;
-    -webkit-box-shadow: 0px 1px 2px 0px #aaa inset;
-    -moz-box-shadow: 0px 1px 2px 0px #aaa inset;
-    box-shadow: 0px 1px 2px 0px #aaa inset;
+    -webkit-box-shadow: 0 1px 2px 0 #aaa inset;
+    -moz-box-shadow: 0 1px 2px 0 #aaa inset;
+    box-shadow: 0 1px 2px 0 #aaa inset;
     filter:progid:DXImageTransform.Microsoft.Gradient(GradientType=0,StartColorStr=#e6e6e6,EndColorStr=#dcdcdc);
     background-image:-moz-linear-gradient(top,#e6e6e6 0,#dcdcdc 100%);
     background-image:-ms-linear-gradient(top,#e6e6e6 0,#dcdcdc 100%);
@@ -376,14 +381,14 @@ input {
     border-radius: 2px;
 }
 #volume-total {
-    -webkit-box-shadow: inset 0px 0px 3px 0px #333;
-    -moz-box-shadow: inset 0px 0px 3px 0px #333;
-    box-shadow: inset 0px 0px 3px 0px #333;
+    -webkit-box-shadow: inset 0 0 3px 0 #333;
+    -moz-box-shadow: inset 0 0 3px 0 #333;
+    box-shadow: inset 0 0 3px 0 #333;
 }
 #volume-current {
-    -webkit-box-shadow: inset 0px 0px 1px 0px #000;
-    -moz-box-shadow: inset 0px 0px 1px 0px #000;
-    box-shadow: inset 0px 0px 1px 0px #000;
+    -webkit-box-shadow: inset 0 0 1px 0 #000;
+    -moz-box-shadow: inset 0 0 1px 0 #000;
+    box-shadow: inset 0 0 1px 0 #000;
     background-color: #6184b7;
 }
 #volume-handle {
@@ -432,10 +437,10 @@ input {
 .registered, .round-rank {
     height: 16px;
     width: 16px;
-    margin: 1px 2px 0px 0px;
+    margin: 1px 2px 0 0;
 }
 .registered {
-    background: url('/static/images/sprites.png') no-repeat 0px -16px;
+    background: url('/static/images/sprites.png') no-repeat 0 -16px;
 }
 .registered:hover {
     background: url('/static/images/sprites.png') no-repeat -16px -16px;

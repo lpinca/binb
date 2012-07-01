@@ -52,7 +52,7 @@ exports.changePasswd = function(req, res) {
     if (!req.session.user) {
         return res.redirect('/login?followup=/changepasswd');
     }
-    res.render('changepasswd', {followup:req.query['followup'],loggedin:req.session.user});
+    res.render('changepasswd', {followup:req.query.followup,loggedin:req.session.user});
 };
 
 exports.index = function(req, res) {
@@ -60,7 +60,17 @@ exports.index = function(req, res) {
 };
 
 exports.login = function(req, res) {
-    res.render('login', {followup:req.query['followup']});
+    res.render('login', {followup:req.query.followup});
+};
+
+exports.recoverPasswd = function(req, res) {
+    var captcha = new Captcha();
+    req.session.captchacode = captcha.getCode();
+    res.render('recoverpasswd', {captchaurl:captcha.toDataURL(),followup:req.query.followup});
+};
+
+exports.resetPasswd = function(req, res) {
+    res.render('resetpasswd', {token:req.query.token});
 };
 
 exports.room = function(req, res) {
@@ -75,5 +85,5 @@ exports.room = function(req, res) {
 exports.signup = function(req, res) {
     var captcha = new Captcha();
     req.session.captchacode = captcha.getCode();
-    res.render('signup', {captchaurl:captcha.toDataURL(),followup:req.query['followup']});
+    res.render('signup', {captchaurl:captcha.toDataURL(),followup:req.query.followup});
 };

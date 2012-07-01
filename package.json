@@ -7,6 +7,7 @@
     "connect-redis": "1.4.x",
     "express": "2.5.x",
     "jade": "0.26.x",
+    "nodemailer": "0.3.x",
     "redis-url": "0.1.x",
     "socket.io": "0.9.x"
   },
@@ -17,5 +18,5 @@
   "engines": {
     "node": "0.6.x"
   },
-  "version": "0.3.1-7"
+  "version": "0.3.2"
 }

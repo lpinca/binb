@@ -14,8 +14,8 @@ var config = require('./config')
  * Setting up redis.
  */
 
-var songsdb = redisurl.createClient(config.songsdburl);
-var usersdb = redisurl.createClient(config.usersdburl);
+var songsdb = redisurl.createClient(config.songsdburl)
+    , usersdb = redisurl.createClient(config.usersdburl);
 
 songsdb.on('error', function(err) {
     console.log(err.message);
@@ -56,7 +56,7 @@ app.dynamicHelpers({
 
 // Routes
 site.use({db:songsdb,rooms:config.rooms});
-user.use({db:usersdb,rooms:config.rooms});
+user.use({db:usersdb,rooms:config.rooms,sendgrid:config.sendgrid});
 
 app.get('/', site.index);
 app.get('/artworks', site.artworks);
@@ -68,6 +68,10 @@ app.post('/login', user.validateLogin, user.checkUser, user.authenticate);
 app.get('/logout', user.logout);
 app.get('/signup', site.signup);
 app.post('/signup', user.validateSignUp, user.userExists, user.emailExists, user.createAccount);
+app.get('/recoverpasswd', site.recoverPasswd);
+app.post('/recoverpasswd', user.validateRecoverPasswd, user.sendEmail);
+app.get('/resetpasswd', site.resetPasswd);
+app.post('/resetpasswd', user.resetPasswd);
 app.get('/:room', site.room);
 app.get('/user/*', user.profile);
 
@@ -135,7 +139,7 @@ io.sockets.on('connection', function(socket) {
         }
     });
     socket.on('joinanonymously', function(nickname, roomname) {
-        if (!socket.nickname && typeof nickname === 'string' && nickname !== '' && 
+        if (!socket.nickname && typeof nickname === 'string' && nickname !== '' &&
             typeof roomname === 'string' && config.rooms.indexOf(roomname) !== -1) {
             rooms[roomname].setNickName(socket, nickname);
         }

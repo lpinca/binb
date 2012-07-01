@@ -1,0 +1,25 @@
+
+
+============================================================
+binb password recovery
+============================================================
+
+To initiate the password reset process for your binb
+account, click the link below:
+
+
+http://binb.nodejitsu.com/resetpasswd?token=<token>
+
+
+If you can't click it, please copy and paste the URL in a 
+new tab or window.
+
+If you haven't requested a password reset, you can 
+disregard this message, because it's  likely that another 
+user enteredyour email address by mistake while trying to 
+reset a password.
+
+============================================================
+============================================================
+
+Note: This email cannot accept replies.

@@ -5,6 +5,7 @@
 var crypto = require('crypto')
     , db
     , followupurls = []
+    , mailer = require('../lib/email/mailer')
     , User = require('../lib/user');
     
 /**
@@ -56,7 +57,7 @@ var buildLeaderboards = function(pointsresults, timesresults) {
     var obj = {
         pointsleaderboard: [],
         timesleaderboard: []
-    }
+    };
     for (var i=0; i<pointsresults.length; i+=2) {
         obj.pointsleaderboard.push({
             username: pointsresults[i],
@@ -77,6 +78,7 @@ var buildLeaderboards = function(pointsresults, timesresults) {
 exports.use = function(options) {
     db = options.db;
     rooms = options.rooms;
+    mailer.setTransport(options.sendgrid);
     // Populate the whitelist of follow-up URLs
     followupurls.push('/');
     followupurls.push('/changepasswd');
@@ -103,14 +105,14 @@ exports.leaderboards = function(req, res) {
  */
  
 exports.validateChangePasswd = function(req, res, next) {
-    if (!req.session.user || !req.body.oldpassword || !req.body.newpassword) {
-        return res.send('Missing data');
+    if (!req.session.user || req.body.oldpassword === undefined ||
+        req.body.newpassword === undefined) {
+        return res.send(412);
     }
     
     var errors = {};
     
     req.body.oldpassword = req.body.oldpassword.trim();
-    req.body.newpassword = req.body.newpassword.trim();
     if (req.body.oldpassword === '') {
         errors.oldpassword = "can't be empty";
     }
@@ -142,7 +144,7 @@ exports.checkOldPasswd = function(req, res, next) {
 };
 
 exports.changePasswd = function(req, res) {
-    var followup = (safeFollowup(req.query['followup'])) ? req.query['followup'] : '/'
+    var followup = (safeFollowup(req.query.followup)) ? req.query.followup : '/'
         , user = req.session.user
         , key = 'user:'+user
         , salt = crypto.randomBytes(6).toString('base64')
@@ -162,8 +164,8 @@ exports.changePasswd = function(req, res) {
  */
 
 exports.validateLogin = function(req, res, next) {
-    if (!req.body.username || !req.body.password) {
-        return res.send('Missing data');
+    if (req.body.username === undefined || req.body.password === undefined) {
+        return res.send(412);
     }
 
     var errors = {};
@@ -202,7 +204,7 @@ exports.authenticate = function(req, res) {
     db.hmget(key, 'salt', 'password', function(err, data) {
         var hash = crypto.createHash('sha256').update(data[0]+req.body.password).digest('hex');
         if (hash === data[1]) {
-            var followup = (safeFollowup(req.query['followup'])) ? req.query['followup'] : '/';
+            var followup = (safeFollowup(req.query.followup)) ? req.query.followup : '/';
             // Authentication succeeded, regenerate the session
             req.session.regenerate(function() {
                 req.session.cookie.maxAge = 604800000; // One week
@@ -232,8 +234,9 @@ exports.logout = function(req, res) {
  */
 
 exports.validateSignUp = function(req, res, next) {
-    if (!req.body.username || !req.body.email || !req.body.password || !req.body.captcha) {
-        return res.send('Missing data');
+    if (req.body.username === undefined || req.body.email === undefined ||
+        req.body.password === undefined || req.body.captcha === undefined) {
+        return res.send(412);
     }
 
     var errors = {};
@@ -272,7 +275,7 @@ exports.validateSignUp = function(req, res, next) {
 exports.userExists = function(req, res, next) {
     var key = 'user:'+req.body.username;
     db.exists(key, function(err, data) {
-        if (data === 1) { 
+        if (data === 1) {
             // User already exists
             req.session.errors = {alert: 'A user with that name already exists.'};
             return res.redirect(req.url);
@@ -284,7 +287,7 @@ exports.userExists = function(req, res, next) {
 exports.emailExists = function(req, res, next) {
     var key = 'email:'+req.body.email;
     db.exists(key, function(err, data) {
-        if (data === 1) { 
+        if (data === 1) {
             // Email already exists
             req.session.errors = {alert: 'A user with that email already exists.'};
             return res.redirect(req.url);
@@ -319,7 +322,100 @@ exports.createAccount = function(req, res) {
     // Delete old fields values (we don't want these to be available in login view)
     delete req.session.oldvalues;
     var msg = 'You successfully created your account. You are now ready to login.';
-    res.render('login', {followup:req.query['followup'],success:msg});
+    res.render('login', {followup:req.query.followup,success:msg});
+};
+
+/**
+ * Recover password middlewares.
+ */
+ 
+exports.validateRecoverPasswd = function(req, res, next) {
+    if (req.body.email === undefined || req.body.captcha === undefined) {
+        return res.send(412);
+    }
+
+    var errors = {};
+    
+    if (!req.body.email.isEmail()) {
+        errors.email = 'is not an email address';
+    }
+    if (req.body.captcha !== req.session.captchacode) {
+        errors.captcha = 'no match';
+    }
+    
+    req.session.oldvalues = {email: req.body.email};
+    
+    if (errors.email || errors.captcha) {
+        req.session.errors = errors;
+        return res.redirect(req.url);
+    }
+    
+    next();
+};
+
+exports.sendEmail = function(req, res) {
+    var key = 'email:'+req.body.email;
+    db.get(key, function(err, data) {
+        if (data !== null) {
+            // Email exists, generate a secure random token
+            delete req.session.captchacode;
+            var token = crypto.randomBytes(48).toString('hex');
+            // Token expires after 4 hours
+            db.setex('token:'+token, 14400, data, function(err, reply) {
+                mailer.sendEmail(req.body.email, token, function(err, response) {
+                    if (err) {
+                        console.log('reset password error: '+err.message);
+                    }
+                });
+            });
+            return res.render('recoverpasswd', {followup:req.query.followup,success:true});
+        }
+        req.session.errors = {alert: 'The email address you specified could not be found'};
+        res.redirect(req.url);
+    });
+};
+
+/**
+ * Reset user password.
+ */
+
+exports.resetPasswd = function(req, res) {
+    if (req.body.password === undefined) {
+        return res.send(412);
+    }
+    
+    var errors = {};
+    
+    // Validate new password
+    if (!req.body.password.match(/^[A-Za-z0-9]{6,15}$/)) {
+        errors.password = '6 to 15 alphanumeric characters required';
+    }
+    // Check token availability
+    if (!req.query.token) {
+        errors.alert = 'Missing token.';
+    }
+    
+    if (errors.password || errors.alert) {
+        req.session.errors = errors;
+        return res.redirect(req.url);
+    }
+    
+    var key = 'token:'+req.query.token;
+    db.get(key, function(err, user) {
+        if (user !== null) {
+            // Delete the token
+            db.del(key);
+            // Update password
+            var salt = crypto.randomBytes(6).toString('base64');
+            var password = crypto.createHash('sha256').update(salt+req.body.password).digest('hex');
+            db.hmset(user, 'salt', salt, 'password', password, function(err, data) {
+                res.render('login', {success:'You can now login with your new password.'});
+            });
+            return;
+        }
+        req.session.errors = {alert: 'Invalid or expired token.'};
+        res.redirect(req.url);
+    });
 };
 
 /**
