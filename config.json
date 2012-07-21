@@ -1,14 +1,13 @@
 {
-  "port": 80,
-  "songsdburl": "",
-  "usersdburl": "",
-  "sessionsecret": "",
-  "sendgrid": {
-    "user": "",
-    "pass": ""
-  },
-  "songsinarun": 15,
-  "gameswithnorepeats": 3,
   "allowederrors": 2,
-  "rooms": ["pop", "rock", "rap", "80s", "mixed"]
+  "gameswithnorepeats": 3,
+  "port": 8138,
+  "rooms": [
+    "pop",
+    "rock",
+    "rap",
+    "80s",
+    "mixed"
+  ],
+  "songsinarun": 15
 }

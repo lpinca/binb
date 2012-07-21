@@ -78,7 +78,6 @@ var buildLeaderboards = function(pointsresults, timesresults) {
 exports.use = function(options) {
     db = options.db;
     rooms = options.rooms;
-    mailer.setTransport(options.sendgrid);
     // Populate the whitelist of follow-up URLs
     followupurls.push('/');
     followupurls.push('/changepasswd');

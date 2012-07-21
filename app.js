@@ -14,8 +14,8 @@ var config = require('./config')
  * Setting up redis.
  */
 
-var songsdb = redisurl.createClient(config.songsdburl)
-    , usersdb = redisurl.createClient(config.usersdburl);
+var songsdb = redisurl.createClient(process.env.SONGS_DB_URL)
+    , usersdb = redisurl.createClient(process.env.USERS_DB_URL);
 
 songsdb.on('error', function(err) {
     console.log(err.message);
@@ -36,7 +36,7 @@ app.use(express.static(__dirname + '/public'), {maxAge: 2592000000});
 app.use(express.favicon(__dirname + '/public/static/images/favicon.ico', {maxAge: 2592000000}));
 app.use(express.bodyParser());
 app.use(express.cookieParser());
-app.use(express.session({secret:config.sessionsecret,store:sessionstore}));
+app.use(express.session({secret:process.env.SESSION_SECRET,store:sessionstore}));
 
 app.set('view engine', 'jade');
 app.set('view options', {layout:false});
@@ -56,7 +56,7 @@ app.dynamicHelpers({
 
 // Routes
 site.use({db:songsdb,rooms:config.rooms});
-user.use({db:usersdb,rooms:config.rooms,sendgrid:config.sendgrid});
+user.use({db:usersdb,rooms:config.rooms});
 
 app.get('/', site.index);
 app.get('/artworks', site.artworks);

@@ -1,5 +1,4 @@
 {
-  "name": "binb",
   "dependencies": {
     "async": "0.1.x",
     "canvas": "0.12.x",
@@ -8,15 +7,17 @@
     "express": "2.5.x",
     "jade": "0.26.x",
     "nodemailer": "0.3.x",
+    "redis": "0.7.x",
     "redis-url": "0.1.x",
     "socket.io": "0.9.x"
-  },
-  "subdomain": "binb",
-  "scripts": {
-    "start": "app.js"
   },
   "engines": {
     "node": "0.6.x"
   },
-  "version": "0.3.2"
+  "name": "binb",
+  "scripts": {
+    "start": "app.js"
+  },
+  "subdomain": "binb",
+  "version": "0.3.2-16"
 }
