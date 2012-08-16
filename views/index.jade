@@ -59,6 +59,8 @@ html
                         ul.thumbnails
                             each item in rooms
                                 li.span4
-                                    a.thumbnail.relative(href="/#{item}")
-                                        .room #{item} - <span id="#{item}"></span> Players
+                                    a.thumbnail.relative(href=item)
+                                        .room #{item} - 
+                                            span(id=item)
+                                            |  Players
             include footer

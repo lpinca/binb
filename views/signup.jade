@@ -45,27 +45,27 @@ html
                                             label.control-label(for="username") Name
                                             .controls
                                                 input#username(type="text",name="username",
-                                                    value="#{oldvalues.username}")
+                                                    value=oldvalues.username)
                                                 span.help-inline #{errors.username}
                                     else
                                         .control-group
                                             label.control-label(for="username") Name
                                             .controls
                                                 input#username(type="text",name="username",
-                                                    value="#{oldvalues.username}")
+                                                    value=oldvalues.username)
                                     if (typeof(errors.email) !== 'undefined')
                                         .control-group.error
                                             label.control-label(for="email") Email
                                             .controls
                                                 input#email(type="text",name="email",
-                                                    value="#{oldvalues.email}")
+                                                    value=oldvalues.email)
                                                 span.help-inline #{errors.email}
                                     else
                                         .control-group
                                             label.control-label(for="email") Email
                                             .controls
                                                 input#email(type="text",name="email",
-                                                    value="#{oldvalues.email}")
+                                                    value=oldvalues.email)
                                     if (typeof(errors.password) !== 'undefined')
                                         .control-group.error
                                             label.control-label(for="password") Password
@@ -82,14 +82,14 @@ html
                                         .control-group.error
                                             label.control-label(for="captcha-input") Are you human?
                                             .controls
-                                                img#captcha(src="#{captchaurl}")
+                                                img#captcha(src=captchaurl)
                                                 input#captcha-input(type="text",name="captcha")
                                                 span.help-inline #{errors.captcha}
                                     else
                                         .control-group
                                             label.control-label(for="captcha-input") Are you human?
                                             .controls
-                                                img#captcha(src="#{captchaurl}")
+                                                img#captcha(src=captchaurl)
                                                 input#captcha-input(type="text",name="captcha",
                                                     placeholder="type what you see...")
                                 else
@@ -111,7 +111,7 @@ html
                                     .control-group
                                         label.control-label(for="captcha-input") Are you human?
                                         .controls
-                                            img#captcha(src="#{captchaurl}")
+                                            img#captcha(src=captchaurl)
                                             input#captcha-input(type="text",name="captcha",
                                                 placeholder="type what you see...")
                                 button.submit-button.btn.btn-success(type="submit")

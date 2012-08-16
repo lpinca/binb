@@ -318,7 +318,7 @@ exports.createAccount = function(req, res) {
     db.set(mailkey, userkey);
     db.zadd('users', 0, req.body.username);
     db.sadd('emails', req.body.email);
-    // Delete old fields values (we don't want these to be available in login view)
+    // Delete old fields values
     delete req.session.oldvalues;
     var msg = 'You successfully created your account. You are now ready to login.';
     res.render('login', {followup:req.query.followup,success:msg});
@@ -367,6 +367,7 @@ exports.sendEmail = function(req, res) {
                     }
                 });
             });
+            delete req.session.oldvalues;
             return res.render('recoverpasswd', {followup:req.query.followup,success:true});
         }
         req.session.errors = {alert: 'The email address you specified could not be found'};

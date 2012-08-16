@@ -4,7 +4,9 @@
 
 var config = require('./config')
     , express = require('express')
-    , parseCookie = require('connect').utils.parseCookie
+    , http = require('http')
+    , parseCookie = require('express/node_modules/cookie').parse
+    , parseSignedCookies = require('express/node_modules/connect').utils.parseSignedCookies
     , redisstore = require('connect-redis')(express)
     , redisurl = require('redis-url')
     , site = require('./routes/site')
@@ -28,30 +30,29 @@ usersdb.on('error', function(err) {
 /**
  * Setting up Express.
  */
-var sessionstore = new redisstore({client:usersdb})
-    , app = express.createServer();
+
+var app = express()
+    , sessionstore = new redisstore({client:usersdb});
 
 // Configuration
 app.use(express.static(__dirname + '/public'), {maxAge: 2592000000});
 app.use(express.favicon(__dirname + '/public/static/images/favicon.ico', {maxAge: 2592000000}));
 app.use(express.bodyParser());
-app.use(express.cookieParser());
-app.use(express.session({secret:process.env.SESSION_SECRET,store:sessionstore}));
-
+app.use(express.cookieParser(process.env.SITE_SECRET));
+app.use(express.session({store:sessionstore}));
 app.set('view engine', 'jade');
-app.set('view options', {layout:false});
 
-app.dynamicHelpers({
-    errors: function(req, res) {
-        var errors = req.session.errors;
+// Middleware to report errors during form submission
+app.use(function(req, res, next) {
+    if (req.session.errors) {
+        res.locals.errors = req.session.errors;
         delete req.session.errors;
-        return errors;
-    },
-    oldvalues: function(req, res) {
-        var oldvalues = req.session.oldvalues;
-        delete req.session.oldvalues;
-        return oldvalues;
     }
+    if (req.session.oldvalues) {
+        res.locals.oldvalues = req.session.oldvalues;
+        delete req.session.oldvalues;
+    }
+    next();
 });
 
 // Routes
@@ -75,14 +76,14 @@ app.post('/resetpasswd', user.resetPasswd);
 app.get('/:room', site.room);
 app.get('/user/*', user.profile);
 
-// App listen
-app.listen(config.port);
+// HTTP server object
+var server = http.createServer(app);
 
 /**
  * Setting up Socket.IO.
  */
 
-var io = require('socket.io').listen(app)
+var io = require('socket.io').listen(server)
     , sockets = Object.create(null); // Sockets of all rooms
 
 // Configuration
@@ -102,7 +103,8 @@ io.set('authorization', function(data, accept) {
     if(!data.headers.cookie) {
         return accept('no cookie transmitted', false);
     }
-    var cookie = parseCookie(data.headers.cookie);
+    var signedcookie = parseCookie(decodeURIComponent(data.headers.cookie));
+    var cookie = parseSignedCookies(signedcookie, process.env.SITE_SECRET);
     sessionstore.get(cookie['connect.sid'], function(err, session) {
         if (err) {
             return accept(err.message, false);
@@ -188,4 +190,6 @@ for (var i=0; i<config.rooms.length; i++) {
     rooms[config.rooms[i]].start();
 }
 
+// Begin accepting connections
+server.listen(config.port);
 console.log('   binb started and listening on port ' + config.port);

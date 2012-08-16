@@ -27,7 +27,7 @@ html
                                 each item in rooms
                                     if item != roomname
                                         li
-                                            a(href="/#{item}") #{item}
+                                            a(href=item) #{item}
                         if (typeof(loggedin) !== "undefined")
                             li.dropdown
                                 a.dropdown-toggle(data-toggle="dropdown",

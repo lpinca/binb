@@ -2,9 +2,8 @@
   "dependencies": {
     "async": "0.1.x",
     "canvas": "0.13.x",
-    "connect": "1.9.x",
     "connect-redis": "1.4.x",
-    "express": "2.5.x",
+    "express": "3.0.x",
     "jade": "0.27.x",
     "nodemailer": "0.3.x",
     "redis": "0.7.x",
@@ -12,12 +11,12 @@
     "socket.io": "0.9.x"
   },
   "engines": {
-    "node": "0.6.x"
+    "node": "0.8.x"
   },
   "name": "binb",
   "scripts": {
     "start": "app.js"
   },
   "subdomain": "binb",
-  "version": "0.3.2-17"
+  "version": "0.3.3"
 }

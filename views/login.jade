@@ -43,14 +43,14 @@ html
                                             label.control-label(for="username") Name
                                             .controls
                                                 input#username(type="text",name="username",
-                                                    value="#{oldvalues.username}")
+                                                    value=oldvalues.username)
                                                 span.help-inline #{errors.username}
                                     else
                                         .control-group
                                             label.control-label(for="username") Name
                                             .controls
                                                 input#username(type="text",name="username",
-                                                    value="#{oldvalues.username}")
+                                                    value=oldvalues.username)
                                     if (typeof(errors.password) !== 'undefined')
                                         .control-group.error
                                             label.control-label(for="password") Password

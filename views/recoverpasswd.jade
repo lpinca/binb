@@ -44,20 +44,20 @@ html
                                                 label.control-label(for="email") Email
                                                 .controls
                                                     input#oldpassword(type="text",name="email",
-                                                        value="#{oldvalues.email}")
+                                                        value=oldvalues.email)
                                                     span.help-inline #{errors.email}
                                         else
                                             .control-group
                                                 label.control-label(for="email") Email
                                                 .controls
                                                     input#username(type="text",name="email",
-                                                        value="#{oldvalues.email}")
+                                                        value=oldvalues.email)
                                         if (typeof(errors.captcha) !== 'undefined')
                                             .control-group.error
                                                 label.control-label(for="captcha-input")
                                                     | Are you human?
                                                 .controls
-                                                    img#captcha(src="#{captchaurl}")
+                                                    img#captcha(src=captchaurl)
                                                     input#captcha-input(type="text",name="captcha")
                                                     span.help-inline #{errors.captcha}
                                         else
@@ -65,7 +65,7 @@ html
                                                 label.control-label(for="captcha-input")
                                                     | Are you human?
                                                 .controls
-                                                    img#captcha(src="#{captchaurl}")
+                                                    img#captcha(src=captchaurl)
                                                     input#captcha-input(type="text",name="captcha",
                                                         placeholder="type what you see...")
                                     else
@@ -77,7 +77,7 @@ html
                                         .control-group
                                             label.control-label(for="captcha-input") Are you human?
                                             .controls
-                                                img#captcha(src="#{captchaurl}")
+                                                img#captcha(src=captchaurl)
                                                 input#captcha-input(type="text",name="captcha",
                                                     placeholder="type what you see...")
                                     button.submit-button.btn.btn-primary(type="submit")
