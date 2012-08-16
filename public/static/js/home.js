@@ -16,7 +16,7 @@ $(function() {
             }
         });
     });
-    var socket = io.connect("http://binb.nodejitsu.com/", {'reconnect':false});
+    var socket = io.connect('http://'+window.location.host, {'reconnect':false});
     socket.on("connect", function() {
         socket.emit("getoverview");
         socket.on("overview", function(data) {

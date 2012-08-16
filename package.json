@@ -1,11 +1,11 @@
 {
   "dependencies": {
     "async": "0.1.x",
-    "canvas": "0.12.x",
+    "canvas": "0.13.x",
     "connect": "1.9.x",
     "connect-redis": "1.4.x",
     "express": "2.5.x",
-    "jade": "0.26.x",
+    "jade": "0.27.x",
     "nodemailer": "0.3.x",
     "redis": "0.7.x",
     "redis-url": "0.1.x",
@@ -19,5 +19,5 @@
     "start": "app.js"
   },
   "subdomain": "binb",
-  "version": "0.3.2-16"
+  "version": "0.3.2-17"
 }

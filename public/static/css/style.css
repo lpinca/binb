@@ -84,7 +84,7 @@ input {
 .modal-footer {
     text-align: left;
 }
-.modal-footer .btn {
+.modal-footer .btn, #total-tracks, #tracks a, #nodejitsu-logo, .footer-info {
     float: right;
 }
 .thumbnails {
@@ -214,7 +214,6 @@ input {
     display: inline-block;
 }
 #total-tracks {
-    float: right;
     color: #BFBFBF;
     margin-top: 34px;
 }
@@ -598,7 +597,6 @@ input {
     margin-top: 11px;
 }
 #tracks a {
-    float:right;
     display:block;
     width:24px;
     height:24px;
@@ -623,11 +621,11 @@ footer {
 }
 #footer-inner {
     border-top:1px solid white;
-    padding-top:5px;
+    padding:5px 20px 0 20px;
     margin-bottom:30px;
 }
 #copy {
-    margin: 0 20px 0 20px;
+    margin-right: 20px;
 }
 #facebook-button {
     width:90px;
@@ -636,10 +634,18 @@ footer {
 #twitter-button, #github-button {
     width:100px;
 }
-#copy, #footer-right {
+#copy, .footer-info {
     line-height:20px;
 }
-#footer-right {
-    float:right;
-    margin-right:20px;
+.footer-info {
+    white-space: pre-wrap;
+}
+#nodejitsu-logo {
+    display: block;
+    width: 84px;
+    height: 20px;
+    background: url('/static/images/sprites.png') no-repeat 0 -208px;
+}
+#nodejitsu-logo:hover {
+    background: url('/static/images/sprites.png') no-repeat 0 -228px;
 }

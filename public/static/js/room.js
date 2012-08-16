@@ -58,18 +58,13 @@
     ];
 
     String.prototype.encodeEntities = function() {
-        return this.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    };
-
-    // Exact match version of jQuery :contains selector
-    $.expr[":"].econtains = function(obj, index, meta, stack) {
-        return $(obj).html() === meta[0].replace(/^[\s\S]+:econtains\(([\s\S]+)\)$/, "$1");
+        return this.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     };
 
     // Prompt for name and send it.
     var joinAnonymously = function(msg) {
         if (/nickname\s*\=/.test(document.cookie) && !msg) {
-            nickname = unescape(document.cookie.replace(/.*nickname\s*\=\s*([^;]*);?.*/, "$1"));
+            nickname = unescape(document.cookie.replace(/.*nickname\s*\=\s*([^;]*);?.*/, '$1'));
             socket.emit('joinanonymously', nickname, roomname);
         }
         else {
@@ -88,15 +83,15 @@
 
                 button.click(function() {
                     var val = $.trim(login.val());
-                    if (val !== "") {
+                    if (val !== '') {
                         nickname = val;
                         socket.emit('joinanonymously', nickname, roomname);
                     }
                     else {
-                        var txt = "Nickname can't be empty.";
+                        var txt = 'Nickname can\'t be empty.';
                         invalidNickName('<span class="label label-important">'+txt+'</span>');
                     }
-                    login.val("");
+                    login.val('');
                 });
 
                 login.keyup(function(event) {
@@ -119,7 +114,7 @@
 
     // Submitted name was invalid
     var invalidNickName = function(feedback) {
-        joinAnonymously(feedback+"<br/>Try with another one:");
+        joinAnonymously(feedback+'<br/>Try with another one:');
     };
 
     /* Triggered when a logged user tries to join a room from another tab or another browser
@@ -136,13 +131,13 @@
     // Successfully joined the room
     var ready = function(usersData, trackscount, loggedin) {
         if (!loggedin && !/nickname\s*\=/.test(document.cookie)) {
-            document.cookie = "nickname="+escape(nickname)+";path=/;";
+            document.cookie = 'nickname='+escape(nickname)+';path=/;';
         }
         
         DOM.modal.modal('hide').empty();
         $('#total-tracks span').text(trackscount);
-        var msg = nickname+" joined the game";
-        var joinspan = $("<span class='join'></span>");
+        var msg = nickname+' joined the game';
+        var joinspan = $('<span class="join"></span>');
         joinspan.text(msg);
         addChatEntry(joinspan);
         updateUsers(usersData);
@@ -150,7 +145,7 @@
         DOM.messagebox.keydown(function(event) {
             if (event.keyCode === 13) {
                 var val = $.trim(DOM.messagebox.val());
-                if (val !== "") {
+                if (val !== '') {
                     if (pvtmsgto) {
                         socket.emit('sendchatmsg', val, pvtmsgto);
                     }
@@ -158,7 +153,7 @@
                         socket.emit('sendchatmsg', val);
                     }
                 }
-                DOM.messagebox.val("");
+                DOM.messagebox.val('');
             }
         });
 
@@ -166,7 +161,7 @@
             switch (event.keyCode) {
                 case 13: // return
                     var guess = $.trim(DOM.guessbox.val());
-                    if (guess !== "") {
+                    if (guess !== '') {
                         socket.emit('guess', guess.toLowerCase());
                         historyvalues.push(guess);
                         if (historyvalues.length > 20) {
@@ -174,7 +169,7 @@
                         }
                         historycursor = historyvalues.length;
                     }
-                    DOM.guessbox.val("");
+                    DOM.guessbox.val('');
                     break;
                 case 38: // up-arrow
                     if (historycursor > 0) {
@@ -187,7 +182,7 @@
                     }
                     else {
                         historycursor = historyvalues.length;
-                        DOM.guessbox.val("");
+                        DOM.guessbox.val('');
                     }
             }
         });
@@ -203,19 +198,19 @@
         socket.on('trackinfo', addTrackInfo);
         socket.on('artistmatched', function() {
             var feedback = amstrings[Math.floor(Math.random()*amstrings.length)];
-            addFeedback(feedback, "correct");
+            addFeedback(feedback, 'correct');
         });
         socket.on('titlematched', function() {
             var feedback = tmstrings[Math.floor(Math.random()*tmstrings.length)];
-            addFeedback(feedback, "correct");
+            addFeedback(feedback, 'correct');
         });
         socket.on('bothmatched', function() {
             var feedback = bmstrings[Math.floor(Math.random()*bmstrings.length)];
-            addFeedback(feedback, "correct");
+            addFeedback(feedback, 'correct');
         });
         socket.on('nomatch', function() {
             var feedback = nmstrings[Math.floor(Math.random()*nmstrings.length)];
-            addFeedback(feedback, "wrong");
+            addFeedback(feedback, 'wrong');
         });
         socket.on('stoptrying', function() {
             addFeedback('You guessed both artist and title. Please wait...');
@@ -240,8 +235,8 @@
 
     // A new player has joined the game
     var userJoin = function(username, usersData) {
-        var msg = username+" joined the game";
-        var joinspan = $("<span class='join'></span>");
+        var msg = username+' joined the game';
+        var joinspan = $('<span class="join"></span>');
         joinspan.text(msg);
         addChatEntry(joinspan);
         updateUsers(usersData);
@@ -249,8 +244,8 @@
 
     // A player has left the game
     var userLeft = function(username, usersData) {
-        var leftmsg = username+" left the game";
-        var leftspan = $("<span class='left'></span>");
+        var leftmsg = username+' left the game';
+        var leftspan = $('<span class="left"></span>');
         leftspan.text(leftmsg);
         addChatEntry(leftspan);
         updateUsers(usersData);
@@ -297,7 +292,7 @@
             }
             
             if (nickname === user.nickname) {
-                username.addClass("you");
+                username.addClass('you');
                 roundpoints = user.roundpoints;
                 DOM.rank.text(i+1);
                 DOM.points.text(user.points);
@@ -306,25 +301,25 @@
             if (user.roundpoints > 0) {
                 roundpointsel.text('+'+user.roundpoints);
                 if (user.roundpoints === 1) {
-                    username.addClass("matched");
+                    username.addClass('matched');
                 }
                 else {
                     if (user.roundpoints > 3) {
                         var stand = 7 - user.roundpoints;
-                        roundrank.addClass("round-rank stand"+stand);
+                        roundrank.addClass('round-rank stand'+stand);
                         var gtime = (user.guesstime / 1000).toFixed(1);
-                        guesstime.text(gtime+" s");
+                        guesstime.text(gtime+' s');
                     }
-                    username.addClass("correct");
+                    username.addClass('correct');
                 }
             }
         }
         
         if (!found && pvtmsgto) {
             var width = DOM.recipient.outerWidth(true) + 1;
-            DOM.recipient.css('margin-right','0');
-            DOM.recipient.text("");
-            DOM.messagebox.animate({'width':'+='+width+'px'}, "fast");
+            DOM.recipient.css('margin-right', '0');
+            DOM.recipient.text('');
+            DOM.messagebox.animate({'width':'+='+width+'px'}, 'fast');
             pvtmsgto = null;
             DOM.messagebox.focus();
         }
@@ -337,13 +332,17 @@
         if (nickname === usrname) {
             return;
         }
-        DOM.recipient.css('margin-right','4px');
-        DOM.recipient.text("To "+usrname+":");
+        DOM.recipient.css('margin-right', '4px');
+        DOM.recipient.text('To '+usrname+':');
         var width = DOM.recipient.outerWidth(true) + 1;
         DOM.recipient.hide();
-        DOM.messagebox.animate({'width':'-='+width+'px'}, "fast", function() {DOM.recipient.show();});
-        var el = $("span.name:econtains("+usrname.encodeEntities()+")");
-        el.prevAll(".private").show();
+        DOM.messagebox.animate({'width':'-='+width+'px'}, 'fast', function() {
+            DOM.recipient.show();
+        });
+        var el = $('.name').filter(function(index) {
+            return $(this).text() === usrname;
+        });
+        el.prevAll('.private').show();
         el.unbind('click');
         el.click(clearPrivate);
         pvtmsgto = usrname;
@@ -352,12 +351,14 @@
 
     var clearPrivate = function() {
         var width = DOM.recipient.outerWidth(true) + 1;
-        DOM.recipient.css('margin-right','0');
-        DOM.recipient.text("");
-        DOM.messagebox.animate({'width':'+='+width+'px'}, "fast");
-        var el = $("span.name:econtains("+pvtmsgto.encodeEntities()+")");
-        el.prevAll(".private").hide();
-        el.unbind("click");
+        DOM.recipient.css('margin-right', '0');
+        DOM.recipient.text('');
+        DOM.messagebox.animate({'width':'+='+width+'px'}, 'fast');
+        var el = $('.name').filter(function(index) {
+            return $(this).text() === pvtmsgto;
+        });
+        el.prevAll('.private').hide();
+        el.unbind('click');
         el.click(function() {
             addPrivate($(this).text());
         });
@@ -386,30 +387,30 @@
     // Receive a chat message
     var getChatMessage = function(chatmsg, from, to) {
         var prefix = from;
-        var msgspan = $("<span class='message'></span>");
+        var msgspan = $('<span class="message"></span>');
         if (to) {
             // Private Message
             prefix = (nickname === from) ? '(To '+to+')' : '(From '+prefix+')';
-            msgspan.addClass("private");
+            msgspan.addClass('private');
         }
-        var msg = prefix+": "+chatmsg;
+        var msg = prefix+': '+chatmsg;
         msgspan.html(urlize(msg));
         addChatEntry(msgspan);
     };
 
     var loadTrack = function(previewUrl) {
-        jplayer.jPlayer("mute");
-        jplayer.jPlayer("setMedia", {m4a: previewUrl});
+        jplayer.jPlayer('mute');
+        jplayer.jPlayer('setMedia', {m4a: previewUrl});
     };
 
     // Play a track
     var playTrack = function(data) {
         if (touchplay) {
-            touchplay.removeClass("btn-danger disabled").addClass("btn-success");
+            touchplay.removeClass('btn-danger disabled').addClass('btn-success');
             touchplay.html('<i class="icon-play icon-white"></i> Play');
         }
-        jplayer.jPlayer("unmute");
-        jplayer.jPlayer("play");
+        jplayer.jPlayer('unmute');
+        jplayer.jPlayer('play');
         updateUsers(data.users);
         cassetteAnimation(Date.now()+30000, true);
         if (data.counter === 1) {
@@ -436,14 +437,7 @@
             offsetleft = 44 - 24*secleft/30;
             offsetright = 130 - 24*secleft/30;
             DOM.progress.width(width);
-            css = {
-                '-moz-transform' : 'rotate('+deg+'deg)',
-                '-webkit-transform' : 'rotate('+deg+'deg)',
-                '-o-transform' : 'rotate('+deg+'deg)',
-                '-ms-transform' : 'rotate('+deg+'deg)',
-                'transform' : 'rotate('+deg+'deg)'
-            };
-            DOM.cassettewheels.css(css);
+            DOM.cassettewheels.css('transform', 'rotate('+deg+'deg)');
             DOM.tapeleft.css('left', offsetleft+'px');
             DOM.taperight.css('left', offsetright+'px');
         }
@@ -453,14 +447,7 @@
             offsetleft = 20 + 24*secleft/5;
             offsetright = 106 + 24*secleft/5;
             DOM.progress.width(width);
-            css = {
-                '-moz-transform' : 'rotate('+deg+'deg)',
-                '-webkit-transform' : 'rotate('+deg+'deg)',
-                '-o-transform' : 'rotate('+deg+'deg)',
-                '-ms-transform' : 'rotate('+deg+'deg)',
-                'transform' : 'rotate('+deg+'deg)'
-            };
-            DOM.cassettewheels.css(css);
+            DOM.cassettewheels.css('transform', 'rotate('+deg+'deg)');
             DOM.tapeleft.css('left', offsetleft+'px');
             DOM.taperight.css('left', offsetright+'px');
         }
@@ -483,7 +470,7 @@
     // Add track info
     var addTrackInfo = function(data) {
         if (touchplay) {
-            touchplay.removeClass("btn-success").addClass("btn-danger disabled");
+            touchplay.removeClass('btn-success').addClass('btn-danger disabled');
             touchplay.html('<i class="icon-play icon-white"></i> Wait');
         }
         cassetteAnimation(Date.now()+5000, false);
@@ -497,8 +484,8 @@
             , rp = '';
 
         if (data.trackName.length > 45) {
-            titleattr = data.trackName.replace(/"/g, "&quot;");
-            trackname = data.trackName.substring(0,42) + '...';
+            titleattr = data.trackName.replace(/"/g, '&quot;');
+            trackname = data.trackName.substring(0, 42) + '...';
         }
         html += '<div class="title" title="'+titleattr+'">'+trackname+'</div></div>';
 
@@ -546,7 +533,7 @@
                 var meantime = "N/A";
                 if (podium[i].guessed !== 0) {
                     meantime = podium[i].totguesstime / podium[i].guessed;
-                    meantime = (meantime / 1000).toFixed(1)+" s";
+                    meantime = (meantime / 1000).toFixed(1)+' s';
                 }
                 html += '<td>'+meantime+'</td></tr>';
             }
@@ -562,8 +549,8 @@
     // Let the user know when he/she has disconnected
     var disconnect = function() {
         stopanimation = true;
-        jplayer.jPlayer("stop");
-        var errorspan = $("<span class='error'>ERROR: You have disconnected.</span>");
+        jplayer.jPlayer('stop');
+        var errorspan = $('<span class="error">ERROR: You have disconnected.</span>');
         addChatEntry(errorspan);
         addFeedback('Something wrong happened');
         DOM.users.empty();
@@ -571,23 +558,23 @@
 
     // Add a chat entry, whether message, notification, etc.
     var addChatEntry = function(childNode) {
-        var li = $("<li class='entry'></li>");
+        var li = $('<li class="entry"></li>');
         li.append(childNode);
         DOM.chat.append(li);
         DOM.chat[0].scrollTop = DOM.chat[0].scrollHeight;
     };
 
     var hideChat = function() {
-        DOM.togglechat.text("Show chat").unbind('click');
+        DOM.togglechat.text('Show chat').unbind('click');
         DOM.chatwrapper.toggle(300);
-        DOM.tracks.animate({maxHeight:"434px"}, 300);
+        DOM.tracks.animate({maxHeight:'434px'}, 300);
         DOM.togglechat.click(showChat);
     };
 
     var showChat = function() {
-        DOM.togglechat.text("Hide chat").unbind('click');
+        DOM.togglechat.text('Hide chat').unbind('click');
         DOM.chatwrapper.toggle(300);
-        DOM.tracks.animate({maxHeight:"240px"}, 300, function() {
+        DOM.tracks.animate({maxHeight:'240px'}, 300, function() {
             DOM.chat[0].scrollTop = DOM.chat[0].scrollHeight;
         });
         DOM.togglechat.click(hideChat);
@@ -612,7 +599,7 @@
                 '<div id="volume-total"></div>'+ // Rail
                 '<div id="volume-current"></div>'+ // Current volume
                 '<div id="volume-handle"></div>'+ // Handle
-            '</div></div>').appendTo("#volume");
+            '</div></div>').appendTo('#volume');
 
         var icon = volumebutton.find('#icon')
             , volumeslider = volumebutton.find('#volume-slider')
@@ -657,14 +644,14 @@
         var setVolume = function(volume) {
             handleIcon(volume);
             oldvalue = volume;
-            jplayer.jPlayer("volume", volume);
+            jplayer.jPlayer('volume', volume);
         };
 
         var handleVolumeMove = function(e) {
             var totaloffset = volumetotal.offset()
                 , newy = e.pageY - totaloffset.top
                 , railheight = volumetotal.height()
-                , totalTop = parseInt(volumetotal.css('top').replace(/px/,''),10)
+                , totalTop = parseInt(volumetotal.css('top').replace(/px/, ''), 10)
                 , volume = (railheight - newy) / railheight;
 
             if (newy < 0) {
@@ -676,21 +663,21 @@
 
             volumehandle.css('top', totalTop + newy - (volumehandle.height() / 2));
             volumecurrent.height(railheight - newy);
-            volumecurrent.css('top',newy+totalTop);
+            volumecurrent.css('top', newy + totalTop);
 
-            volume = Math.max(0,volume);
-            volume = Math.min(volume,1);
+            volume = Math.max(0, volume);
+            volume = Math.min(volume, 1);
 
             setVolume(volume);
 
             var d = new Date();
             d.setTime(d.getTime() + 31536000000); // One year in milliseconds
-            document.cookie = "volume="+volume+";path=/;expires="+d.toGMTString()+";";
+            document.cookie = 'volume='+volume+';path=/;expires='+d.toGMTString()+';';
         };
 
         var loadFromCookie = function() {
             if (/volume\s*\=/.test(document.cookie)) {
-                var value = document.cookie.replace(/.*volume\s*\=\s*([^;]*);?.*/, "$1");
+                var value = document.cookie.replace(/.*volume\s*\=\s*([^;]*);?.*/, '$1');
                 value = parseFloat(value);
                 positionVolumeHandle(value);
                 setVolume(value);
@@ -732,7 +719,7 @@
             if (!clicked) {
                 clicked = true;
                 if (oldvalue !== 0) {
-                    jplayer.jPlayer("volume", 0);
+                    jplayer.jPlayer('volume', 0);
                     positionVolumeHandle(0);
                     handleIcon(0);
                 }
@@ -740,7 +727,7 @@
             else {
                 clicked = false;
                 if (oldvalue !== 0) {
-                    jplayer.jPlayer("volume", oldvalue);
+                    jplayer.jPlayer('volume', oldvalue);
                     positionVolumeHandle(oldvalue);
                     handleIcon(oldvalue);
                 }
@@ -774,7 +761,7 @@
     // Set up the room.
     $(function() {
         setVariables();
-        DOM.modal.modal({keyboard:false,show:false,backdrop:"static"});
+        DOM.modal.modal({keyboard:false, show:false, backdrop:'static'});
         DOM.togglechat.click(hideChat);
         if ($.browser.mozilla) {
             // Block ESC button in firefox (breaks socket connections).
@@ -784,9 +771,9 @@
                 }
             });
         }
-        socket = io.connect("http://binb.nodejitsu.com/", {'reconnect':false});
-        socket.on("connect", function() {
-            jplayer = $("#player").jPlayer({
+        socket = io.connect('http://'+window.location.host, {'reconnect':false});
+        socket.on('connect', function() {
+            jplayer = $('#player').jPlayer({
                 ready: function() {
                     socket.emit('loggedin', function(data) {
                         if (data) {
@@ -802,10 +789,10 @@
                         var touchbackdrop = $('<div id="touch-backdrop">'+
                             '<button id="touch-play" class="btn btn-danger disabled">'+
                                 '<i class="icon-play icon-white"></i> Wait'+
-                            '</button></div>').appendTo("#cassette");
+                            '</button></div>').appendTo('#cassette');
                         touchplay = $('#touch-play');
                         touchplay.click(function() {
-                            if (!$(this).hasClass("btn-danger")) {
+                            if (!$(this).hasClass('btn-danger')) {
                                 touchplay = null;
                                 jplayer.jPlayer('play', elapsedtime);
                                 touchbackdrop.remove();
@@ -813,15 +800,15 @@
                         });
                     }
                 },
-                swfPath: "/static/swf/",
-                supplied: "m4a",
-                preload: "auto",
+                swfPath: '/static/swf/',
+                supplied: 'm4a',
+                preload: 'auto',
                 volume: 1
             });
         });
         socket.on('alreadyinaroom', alreadyInARoom);
         socket.on('invalidnickname', invalidNickName);
         socket.on('ready', ready);
-        socket.on("disconnect", disconnect);
+        socket.on('disconnect', disconnect);
     });
 })();
