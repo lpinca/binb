@@ -64,7 +64,8 @@
     // Prompt for name and send it.
     var joinAnonymously = function(msg) {
         if (/nickname\s*\=/.test(document.cookie) && !msg) {
-            nickname = unescape(document.cookie.replace(/.*nickname\s*\=\s*([^;]*);?.*/, '$1'));
+            var encodednickname = document.cookie.replace(/.*nickname\s*\=\s*([^;]*);?.*/, '$1');
+            nickname = decodeURIComponent(encodednickname);
             socket.emit('joinanonymously', nickname, roomname);
         }
         else {
@@ -131,7 +132,7 @@
     // Successfully joined the room
     var ready = function(usersData, trackscount, loggedin) {
         if (!loggedin && !/nickname\s*\=/.test(document.cookie)) {
-            document.cookie = 'nickname='+escape(nickname)+';path=/;';
+            document.cookie = 'nickname='+encodeURIComponent(nickname)+';path=/;';
         }
         
         DOM.modal.modal('hide').empty();
