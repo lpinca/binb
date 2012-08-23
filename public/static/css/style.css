@@ -14,6 +14,35 @@ body {
 section {
     margin-top:30px;
 }
+h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+}
+h1 {
+    font-size: 30px;
+    line-height: 36px;
+}
+h2 {
+    font-size: 24px;
+    line-height: 36px;
+}
+h3 {
+    font-size: 18px;
+    line-height: 27px;
+}
+h4, h5, h6 {
+    line-height: 18px;
+}
+h4 {
+    font-size: 14px;
+}
+h5 {
+    font-size: 12px;
+}
+h6 {
+    font-size: 11px;
+    color: #999999;
+    text-transform: uppercase;
+}
 .navbar .brand {
     padding: 2px 20px 4px;
 }
@@ -26,6 +55,13 @@ section {
     line-height: 40px;
     background: url('/static/images/sprites.png') no-repeat -36px -174px;
     font-size: 25px;
+}
+.navbar .nav > li > a {
+    padding: 11px 10px;
+}
+.navbar .nav.pull-right {
+    margin-left: 10px;
+    margin-right: 0;
 }
 .page-header .logo {
     display: inline-block;

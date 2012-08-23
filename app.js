@@ -110,6 +110,12 @@ io.set('authorization', function(data, accept) {
             return accept(err.message, false);
         }
         else if (!session) {
+            var debuginfos = {
+                address: data.address,
+                ua: data.headers['user-agent'],
+                cookie: data.headers.cookie
+            };
+            console.log(debuginfos);
             return accept('session not found', false);
         }
         data.session = session;
