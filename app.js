@@ -111,7 +111,7 @@ io.set('authorization', function(data, accept) {
         }
         else if (!session) {
             var debuginfos = {
-                address: data.address,
+                address: data.headers['x-forwarded-for'],
                 ua: data.headers['user-agent'],
                 cookie: data.headers.cookie
             };
@@ -197,5 +197,6 @@ for (var i=0; i<config.rooms.length; i++) {
 }
 
 // Begin accepting connections
-server.listen(config.port);
-console.log('   binb started and listening on port ' + config.port);
+server.listen(config.port, function() {
+    console.log('binb server listening on port ' + config.port);
+});

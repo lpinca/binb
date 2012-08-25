@@ -7,8 +7,8 @@ $(function() {
             }
         });
     }
-    $.get("/artworks", function(data) {
-        $(".thumbnail").each(function(index) {
+    $.get('/artworks', function(data) {
+        $('.thumbnail').each(function(index) {
             var i = index * 6;
             var j = i + 6;
             for(i; i < j; i++) {
@@ -16,16 +16,17 @@ $(function() {
             }
         });
     });
-    var socket = io.connect('http://'+window.location.host, {'reconnect':false});
-    socket.on("connect", function() {
-        socket.emit("getoverview");
-        socket.on("overview", function(data) {
+    var uri = window.location.protocol+'//'+window.location.host;
+    var socket = io.connect(uri, {'reconnect':false});
+    socket.on('connect', function() {
+        socket.emit('getoverview');
+        socket.on('overview', function(data) {
             for (var prop in data) {
-                $("#"+prop).text(data[prop]);
+                $('#'+prop).text(data[prop]);
             }
         });
-        socket.on("update", function(room, players) {
-            $("#"+room).text(players);
+        socket.on('update', function(room, players) {
+            $('#'+room).text(players);
         });
     });
 });

@@ -120,7 +120,7 @@ input {
 .modal-footer {
     text-align: left;
 }
-.modal-footer .btn, #total-tracks, #tracks a, #nodejitsu-logo, .footer-info {
+.modal-footer .btn, .users-counter, #total-tracks, #tracks a, #nodejitsu-logo, .footer-info {
     float: right;
 }
 .thumbnails {
@@ -207,14 +207,13 @@ input {
     text-align: center;
     text-transform: capitalize;
 }
-.dropdown-menu {
-    min-width: 140px;
-}
 .dropdown-menu a {
     padding: 2px 10px;
+    white-space: normal;
 }
-.dropdown-menu .divider {
-    margin: 4px 1px;
+.users-counter {
+    font-size: 12px;
+    margin-right: 4px;
 }
 .matched {
     color: #f3a22f;

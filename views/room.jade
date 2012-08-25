@@ -27,7 +27,10 @@ html
                                 each item in rooms
                                     if item != roomname
                                         li
-                                            a(href=item) #{item}
+                                            a(href=item)
+                                                span.room-name #{item}
+                                                i.icon-user.pull-right
+                                                span.users-counter
                         if (typeof(loggedin) !== "undefined")
                             li.dropdown
                                 a.dropdown-toggle(data-toggle="dropdown",
