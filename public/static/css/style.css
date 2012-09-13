@@ -114,7 +114,7 @@ form .clearfix {
     -moz-box-shadow:0 1px 0 rgba(255, 255, 255, 0.5);
     box-shadow:0 1px 0 rgba(255, 255, 255, 0.5);
 }
-input {
+#message, #guess {
     margin-bottom: 0;
 }
 .modal-footer {
@@ -316,7 +316,6 @@ input {
     width:0;
 }
 #touch-backdrop {
-    width:220px;
     height:137px;
     -webkit-border-radius:5px;
     -moz-border-radius:5px;
@@ -324,8 +323,9 @@ input {
     background:rgba(50,50,50,0.8);
 }
 #touch-play {
-    margin-top: 54px;
-    margin-left: 77px;
+    position: absolute;
+    top: 54px;
+    left: 73px;
 }
 #volume {
     height:159px;
