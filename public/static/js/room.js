@@ -407,7 +407,8 @@
         }
 
         html +='</tbody></table></div>';
-        html += '<div class="modal-footer">A new game will start in <span></span> second/s</div>';
+        html += '<div class="modal-footer align-left">A new game will start in ';
+        html += '<span></span> second/s</div>';
         DOM.modal.append($(html));
         DOM.modal.modal('show');
         countDown(Date.now()+10000);
@@ -451,10 +452,13 @@
                 var html = '<div class="modal-header">';
                 html += '<h3>You are joining the '+roomname+' room</h3></div>';
                 html += '<div class="modal-body"><p>'+(msg || "What's your name?")+'</p></div>';
-                html += '<div class="modal-footer">';
+                html += '<div class="modal-footer relative">';
                 html += '<input id="login" class="" type="text" name="nickname" />';
-                html += '<button id="join" class="btn btn-primary">';
-                html += '<i class="icon-user icon-white"></i> Join the game</button></div>';
+                html += '<button id="join" class="btn btn-success">';
+                html += '<i class="icon-user icon-white"></i> Join the game</button>';
+                html += '<span class="divider"><span>or</span></span>';
+                html += '<a class="btn btn-primary" href="/login?followup=/'+roomname+'">';
+                html += '<i class="icon-lock icon-white"></i> Login</a></div>';
 
                 $(html).appendTo(DOM.modal);
                 var login = $('#login');

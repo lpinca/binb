@@ -43,6 +43,9 @@ h6 {
     color: #999999;
     text-transform: uppercase;
 }
+.align-left {
+    text-align: left;
+}
 .navbar .brand {
     padding: 2px 20px 4px;
 }
@@ -114,13 +117,31 @@ form .clearfix {
     -moz-box-shadow:0 1px 0 rgba(255, 255, 255, 0.5);
     box-shadow:0 1px 0 rgba(255, 255, 255, 0.5);
 }
-#message, #guess {
+#login, #guess, #message {
     margin-bottom: 0;
 }
-.modal-footer {
-    text-align: left;
+#login {
+    float: left;
 }
-.modal-footer .btn, .users-counter, #total-tracks, #tracks a, #nodejitsu-logo, .footer-info {
+#join {
+    margin-right: 45px;
+}
+.modal-footer .divider, .modal-footer .divider span {
+    position: absolute;
+}
+.modal-footer .divider {
+    border-left: 1px solid #ddd;
+    height: 38px;
+    top: 9px;
+    left: 442px;
+}
+.modal-footer .divider span {
+    color: #aaa;
+    background-color: #F5F5F5;
+    top: 10px;
+    left: -6px;
+}
+.users-counter, #total-tracks, #tracks a, #nodejitsu-logo, .footer-info {
     float: right;
 }
 .thumbnails {
