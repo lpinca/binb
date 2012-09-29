@@ -121,9 +121,9 @@
             , attrs = ''
             , rp = '';
 
-        if (data.trackName.length > 45) {
+        if (data.trackName.length > 40) {
             titleattr = data.trackName.replace(/"/g, '&quot;');
-            trackname = data.trackName.substring(0, 42) + '...';
+            trackname = data.trackName.substring(0, 37) + '...';
         }
         html += '<div class="title" title="'+titleattr+'">'+trackname+'</div></div>';
 
@@ -135,8 +135,7 @@
             }
         }
         html += '<div '+attrs+'></div><div class="round-points">'+rp+'</div>';
-        html += '<a target="_blank" href="'+data.trackViewUrl+'">';
-        html += '<img src="/static/images/itunes.png"/></a></li>';
+        html += '<a target="itunes_store" href="'+data.trackViewUrl+'"></a></li>';
 
         DOM.tracks.prepend($(html));
     };

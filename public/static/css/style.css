@@ -653,10 +653,17 @@ form .clearfix {
     margin-top: 11px;
 }
 #tracks a {
-    display:block;
-    width:24px;
-    height:24px;
-    margin-top:8px;
+    display: block;
+    width: 44px;
+    height: 15px;
+    margin-top: 12px;
+    background: url('/static/images/sprites.png') no-repeat 0 -248px;
+}
+#tracks a:hover {
+    background: url('/static/images/sprites.png') no-repeat -44px -248px;
+}
+#tracks a:active {
+    background: url('/static/images/sprites.png') no-repeat 0 -263px;
 }
 #disclaimer {
     position: absolute;
