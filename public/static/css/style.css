@@ -9,10 +9,10 @@
 }
 body {
     background: url('/static/images/bg.jpg') repeat-x scroll 0 0 #F5F6F7;
-    padding-top:45px;
+    padding-top: 45px;
 }
 section {
-    margin-top:30px;
+    margin-top: 30px;
 }
 h1, h2, h3, h4, h5, h6 {
     margin: 0;
@@ -43,6 +43,9 @@ h6 {
     color: #999999;
     text-transform: uppercase;
 }
+.icons {
+    background: url('/static/images/sprites.png') no-repeat;
+}
 .align-left {
     text-align: left;
 }
@@ -56,7 +59,7 @@ h6 {
     height: 34px;
     padding-left: 68px;
     line-height: 40px;
-    background: url('/static/images/sprites.png') no-repeat -36px -174px;
+    background-position: -36px -174px;
     font-size: 25px;
 }
 .navbar .nav > li > a {
@@ -71,7 +74,7 @@ h6 {
     height: 54px;
     padding-left: 109px;
     line-height: 68px;
-    background: url('/static/images/sprites.png') no-repeat 0 -120px;
+    background-position: 0 -120px;
     font-size: 34px;
     color: #0088CC;
 }
@@ -107,15 +110,15 @@ form .clearfix {
     width: 126px;
 }
 #captcha {
-    margin-right:20px;
+    margin-right: 20px;
 }
 .page-header {
     padding: 0;
     margin: 0 0 17px 0;
-    border-bottom:1px solid #ddd;
-    -webkit-box-shadow:0 1px 0 rgba(255, 255, 255, 0.5);
-    -moz-box-shadow:0 1px 0 rgba(255, 255, 255, 0.5);
-    box-shadow:0 1px 0 rgba(255, 255, 255, 0.5);
+    border-bottom: 1px solid #ddd;
+    -webkit-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+    -moz-box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 #login, #guess, #message {
     margin-bottom: 0;
@@ -174,28 +177,28 @@ form .clearfix {
 }
 .profile .img {
     margin-right: 5px;
-    background: url('/static/images/sprites.png') no-repeat 0 -56px;
+    background-position: 0 -56px;
 }
 .highscores .img {
-    margin-right:7px;
-    background: url('/static/images/sprites.png') no-repeat -64px 0;
+    margin-right: 7px;
+    background-position: -64px 0;
 }
 .leaderboard-wrapper, .stats {
     border: 1px solid #ccc;
     border-left: 0;
-    margin-top:8px;
+    margin-top: 8px;
 }
 .leaderboard-wrapper {
     height: 349px;
     overflow: auto;
-    margin-bottom:18px;
+    margin-bottom: 18px;
     -webkit-border-radius: 4px;
     -moz-border-radius: 4px;
     border-radius: 4px;
 }
 .leaderboard {
-    margin:0;
-    border:0;
+    margin: 0;
+    border: 0;
 }
 .leaderboard td, .stats td {
     border-left: 1px solid #ccc;
@@ -248,20 +251,20 @@ form .clearfix {
     height: 16px;
 }
 .rank1 {
-    background: url('/static/images/sprites.png') no-repeat -32px -16px;
+    background-position: -32px -16px;
 }
 .rank2 {
-    background: url('/static/images/sprites.png') no-repeat -32px -48px;
+    background-position: -32px -48px;
 }
 .rank3 {
-    background: url('/static/images/sprites.png') no-repeat -32px -80px;
+    background-position: -32px -80px;
 }
 .scoreboard th, .scoreboard td {
     vertical-align: middle;
     text-align: center;
 }
 .scoreboard .name {
-    font-weight:bold;
+    font-weight: bold;
 }
 .relative {
     position: relative;
@@ -274,40 +277,40 @@ form .clearfix {
     margin-top: 34px;
 }
 #cassette {
-    margin-top:22px;
+    margin-top: 22px;
     height: 137px;
     background: url('/static/images/cassette.png') no-repeat 0 0;
 }
 #countdown {
     position: absolute;
     width: 26px;
-    text-align:center;
-    top:80px;
-    left:175px;
+    text-align: center;
+    top: 80px;
+    left: 175px;
 }
 #wheel-left, #wheel-right {
-    position:absolute;
+    position: absolute;
     width: 24px;
-    height:24px;
+    height: 24px;
     top: 49px;
-    background: url('/static/images/sprites.png') no-repeat 0 -32px;
+    background-position: 0 -32px;
 }
 #wheel-left {
-    left:51px;
+    left: 51px;
 }
 #wheel-right {
-    left:145px;
+    left: 145px;
 }
 #tape-left, #tape-right {
-    height:70px;
-    width:70px;
-    position:absolute;
-    top:25px;
+    height: 70px;
+    width: 70px;
+    position: absolute;
+    top: 25px;
     background-color: black;
     -webkit-border-radius: 70px;
     -moz-border-radius: 70px;
     border-radius: 70px;
-    z-index:-1;
+    z-index: -1;
 }
 #tape-left {
     left: 20px;
@@ -316,32 +319,32 @@ form .clearfix {
     left: 106px;
 }
 #progress-bar, #progress {
-    height:7px;
-    -webkit-border-radius:4px;
-    -moz-border-radius:4px;
-    border-radius:4px;
+    height: 7px;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
     -webkit-box-shadow: inset 0 1px 2px 0 #333;
      -moz-box-shadow: inset 0 1px 2px 0 #333;
     box-shadow: inset 0 1px 2px 0 #333;
 }
 #progress-bar {
-    position:absolute;
+    position: absolute;
     width: 148px;
-    top:85px;
-    left:20px;
-    border:1px solid #404040;
-    border:1px solid rgba(0, 0, 0, 0.5);
+    top: 85px;
+    left: 20px;
+    border: 1px solid #404040;
+    border: 1px solid rgba(0, 0, 0, 0.5);
 }
 #progress {
     background-color: #6184b7;
-    width:0;
+    width: 0;
 }
 #touch-backdrop {
-    height:137px;
-    -webkit-border-radius:5px;
-    -moz-border-radius:5px;
-    border-radius:5px;
-    background:rgba(50,50,50,0.8);
+    height: 137px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    background: rgba(50,50,50,0.8);
 }
 #touch-play {
     position: absolute;
@@ -349,7 +352,7 @@ form .clearfix {
     left: 73px;
 }
 #volume {
-    height:159px;
+    height: 159px;
 }
 #volume-button, #volume-slider, #volume-total, #volume-current, #volume-handle {
     position: absolute;
@@ -360,41 +363,41 @@ form .clearfix {
     width: 20px;
 }
 #volume-button .button {
-    display:block;
+    display: block;
     height: 18px;
     width: 18px;
-    border:1px solid;
+    border: 1px solid;
     border-color: #CCCCCC #CCCCCC #AAAAAA;
-    -webkit-border-radius:3px;
-    -moz-border-radius:3px;
-    border-radius:3px;
-    cursor:pointer;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+    cursor: pointer;
     filter:progid:DXImageTransform.Microsoft.Gradient(GradientType=0,StartColorStr=#ffffffff,EndColorStr=#ffe0e0e0);
-    background-image:-moz-linear-gradient(top,#fff 0,#e0e0e0 100%);
-    background-image:-ms-linear-gradient(top,#fff 0,#e0e0e0 100%);
-    background-image:-o-linear-gradient(top,#fff 0,#e0e0e0 100%);
-    background-image:-webkit-gradient(linear,left top,left bottom,color-stop(0,#fff),color-stop(100%,#e0e0e0));
-    background-image:-webkit-linear-gradient(top,#fff 0,#e0e0e0 100%);
-    background-image:linear-gradient(to bottom,#fff 0,#e0e0e0 100%);
+    background-image: -moz-linear-gradient(top,#fff 0,#e0e0e0 100%);
+    background-image: -ms-linear-gradient(top,#fff 0,#e0e0e0 100%);
+    background-image: -o-linear-gradient(top,#fff 0,#e0e0e0 100%);
+    background-image: -webkit-gradient(linear,left top,left bottom,color-stop(0,#fff),color-stop(100%,#e0e0e0));
+    background-image: -webkit-linear-gradient(top,#fff 0,#e0e0e0 100%);
+    background-image: linear-gradient(to bottom,#fff 0,#e0e0e0 100%);
 }
 #volume-button .button:hover {
-    border-color:#999999;
+    border-color: #999999;
     -webkit-box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.25);
     -moz-box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.25);
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.25);
 }
 #volume-button .button:active {
-    border-color:#999999 #AAAAAA #CCCCCC;
+    border-color: #999999 #AAAAAA #CCCCCC;
     -webkit-box-shadow: 0 1px 2px 0 #aaa inset;
     -moz-box-shadow: 0 1px 2px 0 #aaa inset;
     box-shadow: 0 1px 2px 0 #aaa inset;
     filter:progid:DXImageTransform.Microsoft.Gradient(GradientType=0,StartColorStr=#e6e6e6,EndColorStr=#dcdcdc);
-    background-image:-moz-linear-gradient(top,#e6e6e6 0,#dcdcdc 100%);
-    background-image:-ms-linear-gradient(top,#e6e6e6 0,#dcdcdc 100%);
-    background-image:-o-linear-gradient(top,#e6e6e6 0,#dcdcdc 100%);
-    background-image:-webkit-gradient(linear,left top,left bottom,color-stop(0,#e6e6e6),color-stop(100%,#dcdcdc));
-    background-image:-webkit-linear-gradient(top,#e6e6e6 0,#dcdcdc 100%);
-    background-image:linear-gradient(to bottom,#e6e6e6 0,#dcdcdc 100%);
+    background-image: -moz-linear-gradient(top,#e6e6e6 0,#dcdcdc 100%);
+    background-image: -ms-linear-gradient(top,#e6e6e6 0,#dcdcdc 100%);
+    background-image: -o-linear-gradient(top,#e6e6e6 0,#dcdcdc 100%);
+    background-image: -webkit-gradient(linear,left top,left bottom,color-stop(0,#e6e6e6),color-stop(100%,#dcdcdc));
+    background-image: -webkit-linear-gradient(top,#e6e6e6 0,#dcdcdc 100%);
+    background-image: linear-gradient(to bottom,#e6e6e6 0,#dcdcdc 100%);
 }
 #volume-button .button #icon {
     margin: 1px;
@@ -402,25 +405,25 @@ form .clearfix {
     height: 16px;
 }
 #volume-button .button .volume-none {
-    background: url('/static/images/sprites.png') no-repeat 0 -88px;
+    background-position: 0 -88px;
 }
 #volume-button .button .volume-low {
-    background: url('/static/images/sprites.png') no-repeat -16px -88px;
+    background-position: -16px -88px;
 }
 #volume-button .button .volume-medium {
-    background: url('/static/images/sprites.png') no-repeat 0 -104px;
+    background-position: 0 -104px;
 }
 #volume-button .button .volume-high {
-    background: url('/static/images/sprites.png') no-repeat -16px -104px;
+    background-position: -16px -104px;
 }
 #volume-slider {
     display: none;
     height: 116px;
     width: 20px;
     top: -116px;
-    -webkit-border-radius:3px;
-    -moz-border-radius:3px;
-    border-radius:3px;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
     background: rgba(50, 50, 50, 0.1);
     z-index: 1;
 }
@@ -453,18 +456,18 @@ form .clearfix {
     background: #ddd;
     background: rgba(255, 255, 255, 0.9);
     cursor: N-resize;
-    border:1px solid #999;
+    border: 1px solid #999;
 }
 #summary {
     text-align: center;
-    margin-bottom:18px;
+    margin-bottom: 18px;
 }
 #users-wrapper {
     margin-left: 120px;
     width: 300px;
 }
 #users {
-    padding-left:20px;
+    padding-left: 20px;
     margin-bottom: 90px;
     max-height: 380px;
     overflow: auto;
@@ -495,10 +498,10 @@ form .clearfix {
     margin: 1px 2px 0 0;
 }
 .registered {
-    background: url('/static/images/sprites.png') no-repeat 0 -16px;
+    background-position: 0 -16px;
 }
 .registered:hover {
-    background: url('/static/images/sprites.png') no-repeat -16px -16px;
+    background-position: -16px -16px;
 }
 #users .name {
     margin-right: 4px;
@@ -513,13 +516,13 @@ form .clearfix {
     margin-right: 10px;
 }
 .stand1 {
-    background: url('/static/images/sprites.png') no-repeat 0 0;
+    background-position: 0 0;
 }
 .stand2 {
-    background: url('/static/images/sprites.png') no-repeat -16px 0;
+    background-position: -16px 0;
 }
 .stand3 {
-    background: url('/static/images/sprites.png') no-repeat -32px 0;
+    background-position: -32px 0;
 }
 #users .guess-time {
     font-size: 11px;
@@ -626,28 +629,29 @@ form .clearfix {
     padding: 8px;
     min-height: 40px;
     background: -moz-linear-gradient(center top , #FBFBFB, #F5F5F5);
+    background: -webkit-gradient(linear, center top, center bottom, from(#FBFBFB), to(#F5F5F5));
     background: -webkit-linear-gradient(center top , #FBFBFB, #F5F5F5);
     background: -o-linear-gradient(center top , #FBFBFB, #F5F5F5);
     background: -ms-linear-gradient(center top , #FBFBFB, #F5F5F5);
     background: linear-gradient(center top , #FBFBFB, #F5F5F5);
 }
 .registered, #users .name, #users .points, .round-rank, .round-points, #users .guess-time, #tracks img.artwork, #tracks .info, .highscores .img, .profile .img, #copy, #facebook-button, #twitter-button, #github-button {
-    float:left;
+    float: left;
 }
 #tracks img.artwork {
     width: 40px;
     height: 40px;
-    margin-right:10px;
+    margin-right: 10px;
 }
 #tracks .info {
-    margin-right:15px;
+    margin-right: 15px;
 }
 #tracks .artist {
     margin-top: 1px;
     font-size: 14px;
 }
 #tracks .round-rank {
-    margin-top:12px;
+    margin-top: 12px;
 }
 #tracks .round-points {
     margin-top: 11px;
@@ -657,48 +661,48 @@ form .clearfix {
     width: 44px;
     height: 15px;
     margin-top: 12px;
-    background: url('/static/images/sprites.png') no-repeat 0 -248px;
+    background-position: 0 -248px;
 }
 #tracks a:hover {
-    background: url('/static/images/sprites.png') no-repeat -44px -248px;
+    background-position: -44px -248px;
 }
 #tracks a:active {
-    background: url('/static/images/sprites.png') no-repeat 0 -263px;
+    background-position: 0 -263px;
 }
 #disclaimer {
     position: absolute;
     left: 60px;
     bottom: 18px;
     color: #BFBFBF;
-    width:340px;
+    width: 340px;
 }
 footer {
     padding: 0;
     margin-top: 17px;
-    border-top:1px solid #DDDDDD;
+    border-top: 1px solid #DDDDDD;
     color: #BFBFBF;
     text-shadow: 0 1px 0 #FFFFFF;
 }
 #footer-inner, #twitter-button, #github-button {
-    height:20px;
+    height: 20px;
 }
 #footer-inner {
-    border-top:1px solid white;
-    padding:5px 20px 0 20px;
-    margin-bottom:30px;
+    border-top: 1px solid white;
+    padding: 5px 20px 0 20px;
+    margin-bottom: 30px;
 }
 #copy {
     margin-right: 20px;
 }
 #facebook-button {
-    width:90px;
-    height:21px
+    width: 90px;
+    height: 21px
 }
 #twitter-button, #github-button {
-    width:100px;
+    width: 100px;
 }
 #copy, .footer-info {
-    line-height:20px;
+    line-height: 20px;
 }
 .footer-info {
     white-space: pre-wrap;
@@ -707,8 +711,8 @@ footer {
     display: block;
     width: 84px;
     height: 20px;
-    background: url('/static/images/sprites.png') no-repeat 0 -208px;
+    background-position: 0 -208px;
 }
 #nodejitsu-logo:hover {
-    background: url('/static/images/sprites.png') no-repeat 0 -228px;
+    background-position: 0 -228px;
 }

@@ -131,76 +131,57 @@
             rp = '+'+roundpoints;
             if (roundpoints > 3) {
                 var stand = 7 - roundpoints;
-                attrs += 'class="round-rank stand'+stand+'"';
+                attrs += 'class="icons round-rank stand'+stand+'"';
             }
         }
         html += '<div '+attrs+'></div><div class="round-points">'+rp+'</div>';
-        html += '<a target="itunes_store" href="'+data.trackViewUrl+'"></a></li>';
+        html += '<a class="icons" target="itunes_store" href="'+data.trackViewUrl+'"></a></li>';
 
         DOM.tracks.prepend($(html));
     };
 
     var addVolumeControl = function() {
         var volumebutton = $('<div id="volume-button">'+
-            '<a class="button"><div id="icon" class="volume-high"></div></a>'+
+            '<a class="button"><div id="icon" class="icons volume-high"></div></a>'+
             '<div id="volume-slider">'+ // Outer background
                 '<div id="volume-total"></div>'+ // Rail
                 '<div id="volume-current"></div>'+ // Current volume
                 '<div id="volume-handle"></div>'+ // Handle
             '</div></div>').appendTo('#volume');
 
-        var icon = volumebutton.find('#icon')
-            , volumeslider = volumebutton.find('#volume-slider')
-            , volumetotal = volumebutton.find('#volume-total')
-            , volumecurrent = volumebutton.find('#volume-current')
-            , volumehandle = volumebutton.find('#volume-handle')
+        var clicked = false
+            , icon = volumebutton.find('#icon')
             , mouseisdown = false
             , mouseisover = false
             , oldvalue = 1
-            , clicked = false;
-
-        var positionVolumeHandle = function(volume) {
-            if (!volumeslider.is(':visible')) {
-                volumeslider.show();
-                positionVolumeHandle(volume);
-                volumeslider.hide();
-                return;
-            }
-            var totalheight = volumetotal.height();
-            var totalposition = volumetotal.position();
-            var newtop = totalheight - (totalheight * volume);
-            volumehandle.css('top', totalposition.top + newtop - (volumehandle.height() / 2));
-            volumecurrent.height(totalheight - newtop );
-            volumecurrent.css('top', totalposition.top + newtop);
-        };
+            , volumecurrent = volumebutton.find('#volume-current')
+            , volumehandle = volumebutton.find('#volume-handle')
+            , volumeslider = volumebutton.find('#volume-slider')
+            , volumetotal = volumebutton.find('#volume-total');
 
         var handleIcon = function (volume) {
             if (volume === 0) {
-                icon.removeClass().addClass('volume-none');
+                icon.removeClass().addClass('icons volume-none');
             }
             else if (volume <= 0.33) {
-                icon.removeClass().addClass('volume-low');
+                icon.removeClass().addClass('icons volume-low');
             }
             else if (volume <= 0.66) {
-                icon.removeClass().addClass('volume-medium');
+                icon.removeClass().addClass('icons volume-medium');
             }
             else {
-                icon.removeClass().addClass('volume-high');
+                icon.removeClass().addClass('icons volume-high');
             }
-        };
-
-        var setVolume = function(volume) {
-            handleIcon(volume);
-            oldvalue = volume;
-            jplayer.jPlayer('volume', volume);
         };
 
         var handleVolumeMove = function(e) {
-            var totaloffset = volumetotal.offset()
-                , newy = e.pageY - totaloffset.top
-                , railheight = volumetotal.height()
+            var railheight = volumetotal.height()
+                , totaloffset = volumetotal.offset()
                 , totalTop = parseInt(volumetotal.css('top').replace(/px/, ''), 10)
+                , newy = e.pageY - totaloffset.top
                 , volume = (railheight - newy) / railheight;
+
+            clicked = false;
 
             if (newy < 0) {
                 newy = 0;
@@ -209,18 +190,14 @@
                 newy = railheight;
             }
 
-            volumehandle.css('top', totalTop + newy - (volumehandle.height() / 2));
             volumecurrent.height(railheight - newy);
             volumecurrent.css('top', newy + totalTop);
+            volumehandle.css('top', totalTop + newy - (volumehandle.height() / 2));
 
             volume = Math.max(0, volume);
             volume = Math.min(volume, 1);
 
             setVolume(volume);
-
-            var d = new Date();
-            d.setTime(d.getTime() + 31536000000); // One year in milliseconds
-            document.cookie = 'volume='+volume+';path=/;expires='+d.toGMTString()+';';
         };
 
         var loadFromCookie = function() {
@@ -234,9 +211,56 @@
             positionVolumeHandle(1);
         };
 
+        var positionVolumeHandle = function(volume) {
+            if (!volumeslider.is(':visible')) {
+                volumeslider.show();
+                positionVolumeHandle(volume);
+                volumeslider.hide();
+                return;
+            }
+            var totalheight = volumetotal.height();
+            var totalposition = volumetotal.position();
+            var newtop = totalheight - (totalheight * volume);
+            volumecurrent.height(totalheight - newtop );
+            volumecurrent.css('top', totalposition.top + newtop);
+            volumehandle.css('top', totalposition.top + newtop - (volumehandle.height() / 2));
+        };
+
+        var setCookie = function(volume) {
+            var d = new Date();
+            d.setTime(d.getTime() + 31536000000); // One year in milliseconds
+            document.cookie = 'volume='+volume+';path=/;expires='+d.toGMTString()+';';
+        };
+
+        var setVolume = function(volume) {
+            handleIcon(volume);
+            jplayer.jPlayer('volume', volume);
+            oldvalue = volume;
+            setCookie(volume);
+        };
+
+        volumebutton.find('.button').click(function() {
+            if (!clicked) {
+                clicked = true;
+                if (oldvalue !== 0) {
+                    handleIcon(0);
+                    jplayer.jPlayer('volume', 0);
+                    positionVolumeHandle(0);
+                }
+            }
+            else {
+                clicked = false;
+                if (oldvalue !== 0) {
+                    handleIcon(oldvalue);
+                    jplayer.jPlayer('volume', oldvalue);
+                    positionVolumeHandle(oldvalue);
+                }
+            }
+        });
+
         volumebutton.hover(function() {
-            volumeslider.show();
             mouseisover = true;
+            volumeslider.show();
         }, function() {
             mouseisover = false;
             if (!mouseisdown) {
@@ -246,39 +270,20 @@
 
         volumeslider.on('mouseover', function() {
             mouseisover = true;
-        }).on('mousedown', function (e) {
+        }).on('mousedown', function(e) {
             handleVolumeMove(e);
             mouseisdown = true;
             return false;
         });
 
-        $(document).on('mouseup', function (e) {
+        $(document).on('mouseup', function(e) {
             mouseisdown = false;
             if (!mouseisover) {
                 volumeslider.hide();
             }
-        }).on('mousemove', function (e) {
+        }).on('mousemove', function(e) {
             if (mouseisdown) {
                 handleVolumeMove(e);
-            }
-        });
-
-        volumebutton.find('.button').click(function() {
-            if (!clicked) {
-                clicked = true;
-                if (oldvalue !== 0) {
-                    jplayer.jPlayer('volume', 0);
-                    positionVolumeHandle(0);
-                    handleIcon(0);
-                }
-            }
-            else {
-                clicked = false;
-                if (oldvalue !== 0) {
-                    jplayer.jPlayer('volume', oldvalue);
-                    positionVolumeHandle(oldvalue);
-                    handleIcon(oldvalue);
-                }
             }
         });
 
@@ -384,14 +389,15 @@
         var html = '<div class="modal-header"><h3>Game Over</h3></div>';
         html += '<div class="modal-body"><table class="table table-striped scoreboard">';
         html += '<thead><tr><th>#</th><th>Name</th><th>Points</th>';
-        html += '<th><div class="cups stand1"></div></th><th><div class="cups stand2"></div></th>';
-        html += '<th><div class="cups stand3"></div></th><th>Guessed</th><th>Mean time</th>';
+        html += '<th><div class="icons cups stand1"></div></th>';
+        html += '<th><div class="icons cups stand2"></div></th>';
+        html += '<th><div class="icons cups stand3"></div></th><th>Guessed</th><th>Mean time</th>';
         html += '</thead><tbody>';
         
         for(var i=0;i<3;i++) {
             if (podium[i]) {
                 var playername = podium[i].nickname.encodeEntities();
-                html += '<tr><td><div class="medals rank'+(i+1)+'"></div></td>';
+                html += '<tr><td><div class="icons medals rank'+(i+1)+'"></div></td>';
                 html += '<td class="name">'+playername+'</td>';
                 html += '<td>'+podium[i].points+'</td>';
                 html += '<td>'+podium[i].golds+'</td><td>'+podium[i].silvers+'</td>';
@@ -711,7 +717,7 @@
             li.append(pvt, username, points, roundrank, roundpointsel, guesstime);
             if (user.registered) {
                 var href = 'href="/user/'+encodeURIComponent(user.nickname)+'"';
-                pvt.after('<a class="registered" target="_blank" '+href+'></a>');
+                pvt.after('<a class="icons registered" target="_blank" '+href+'></a>');
             }
             DOM.users.append(li);
             
@@ -741,7 +747,7 @@
                 else {
                     if (user.roundpoints > 3) {
                         var stand = 7 - user.roundpoints;
-                        roundrank.addClass('round-rank stand'+stand);
+                        roundrank.addClass('icons round-rank stand'+stand);
                         var gtime = (user.guesstime / 1000).toFixed(1);
                         guesstime.text(gtime+' s');
                     }
