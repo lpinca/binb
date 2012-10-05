@@ -646,6 +646,14 @@ form .clearfix {
 #tracks .info {
     margin-right: 15px;
 }
+#tracks .artist, #tracks .title {
+    white-space: nowrap;
+    max-width: 270px;
+    overflow: hidden;
+    -o-text-overflow: ellipsis;
+    -ms-text-overflow: ellipsis;
+    text-overflow: ellipsis;
+}
 #tracks .artist {
     margin-top: 1px;
     font-size: 14px;
@@ -660,7 +668,7 @@ form .clearfix {
     display: block;
     width: 44px;
     height: 15px;
-    margin-top: 12px;
+    margin-top: 13px;
     background-position: 0 -248px;
 }
 #tracks a:hover {

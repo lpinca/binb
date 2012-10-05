@@ -113,19 +113,14 @@
         }
         cassetteAnimation(Date.now()+5000, false);
 
-        var html = '<li class="bordered"><img class="artwork" src="'+data.artworkUrl+'"/>';
-        html += '<div class="info"><div class="artist">'+data.artistName+'</div>';
-
-        var titleattr = ''
-            , trackname = data.trackName
+        var artistName = data.artistName.replace(/"/g, '&quot;')
+            , trackName = data.trackName.replace(/"/g, '&quot;')
             , attrs = ''
             , rp = '';
 
-        if (data.trackName.length > 40) {
-            titleattr = data.trackName.replace(/"/g, '&quot;');
-            trackname = data.trackName.substring(0, 37) + '...';
-        }
-        html += '<div class="title" title="'+titleattr+'">'+trackname+'</div></div>';
+        var html = '<li class="bordered"><img class="artwork" src="'+data.artworkUrl+'"/>';
+        html += '<div class="info"><div class="artist" title="'+artistName+'">'+artistName+'</div>';
+        html += '<div class="title" title="'+trackName+'">'+trackName+'</div></div>';
 
         if (roundpoints > 0) {
             rp = '+'+roundpoints;
