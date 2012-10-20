@@ -125,19 +125,44 @@ io.set('authorization', function(data, accept) {
 
 io.sockets.on('connection', function(socket) {
     var session = socket.handshake.session;
-    socket.on('getoverview', function() {
+    socket.on('disconnect', function() {
+        if (socket.roomname) {
+            rooms[socket.roomname].removeUser(socket.nickname);
+        }
+    });
+    socket.on('getoverview', function(callback) {
+        if (typeof callback !== 'function') {
+            return;
+        }
         var data = Object.create(null);
         for (var prop in rooms) {
             data[prop] = rooms[prop].getPopulation();
         }
-        socket.join('home');
-        socket.emit('overview', data);
+        callback(data);
     });
-    socket.on('loggedin', function(fn) {
-        return (session.user) ? fn(session.user) : fn(false);
+    socket.on('getstatus', function(callback) {
+        if (socket.roomname && typeof callback === 'function') {
+            rooms[socket.roomname].sendStatus(callback);
+        }
+    });
+    socket.on('guess', function(guess) {
+        if (socket.roomname && typeof guess === 'string') {
+            rooms[socket.roomname].guess(socket, guess);
+        }
+    });
+    socket.on('ignore', function(baduser, callback) {
+        if (socket.roomname && typeof baduser === 'string' && typeof callback === 'function') {
+            rooms[socket.roomname].ignore(baduser, socket.nickname, callback);
+        }
+    });
+    socket.on('joinanonymously', function(nickname, roomname) {
+        if (!socket.nickname && typeof nickname === 'string' && nickname !== '' &&
+            config.rooms.indexOf(roomname) !== -1) {
+            rooms[roomname].setNickName(socket, nickname);
+        }
     });
     socket.on('joinroom', function(room) {
-        if (session.user && typeof room === 'string' && config.rooms.indexOf(room) !== -1) {
+        if (session.user && config.rooms.indexOf(room) !== -1) {
             if (sockets[session.user]) { // User already in a room
                 socket.emit('alreadyinaroom');
                 return;
@@ -146,30 +171,20 @@ io.sockets.on('connection', function(socket) {
             rooms[room].joinRoom(socket);
         }
     });
-    socket.on('joinanonymously', function(nickname, roomname) {
-        if (!socket.nickname && typeof nickname === 'string' && nickname !== '' &&
-            typeof roomname === 'string' && config.rooms.indexOf(roomname) !== -1) {
-            rooms[roomname].setNickName(socket, nickname);
+    socket.on('loggedin', function(callback) {
+        if (typeof callback !== 'function') {
+            return;
         }
-    });
-    socket.on('getstatus', function() {
-        if (socket.roomname) {
-            rooms[socket.roomname].sendStatus(socket);
-        }
+        return (session.user) ? callback(session.user) : callback(false);
     });
     socket.on('sendchatmsg', function(msg, to) {
         if (socket.roomname && typeof msg === 'string') {
             rooms[socket.roomname].sendChatMessage(msg, socket, to);
         }
     });
-    socket.on('guess', function(guess) {
-        if (socket.roomname && typeof guess === 'string') {
-            rooms[socket.roomname].guess(socket, guess);
-        }
-    });
-    socket.on('disconnect', function() {
-        if (socket.roomname) {
-            rooms[socket.roomname].removeUser(socket.nickname);
+    socket.on('unignore', function(baduser) {
+        if (socket.roomname && typeof baduser === 'string') {
+            rooms[socket.roomname].unignore(baduser, socket.nickname);
         }
     });
 });

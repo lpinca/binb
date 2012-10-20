@@ -4,6 +4,7 @@
         , DOM = {}
         , historycursor = 0
         , historyvalues = []
+        , ignoredplayers = {}
         , jplayer
         , nickname
         , pvtmsgto
@@ -11,7 +12,7 @@
         , socket
         , stopanimation = false
         , touchplay
-        , urlregex = /(https?:\/\/[-A-Za-z0-9+&@#/%?=~_()|!:,.;]*[-A-Za-z0-9+&@#/%=~_()|])/;
+        , urlregex = /(https?:\/\/[\-A-Za-z0-9+&@#\/%?=~_()|!:,.;]*[\-A-Za-z0-9+&@#\/%=~_()|])/;
 
     var amstrings = [
         'Yes, that\'s the artist. What about the title?'
@@ -388,7 +389,7 @@
         html += '<th><div class="icons cups stand2"></div></th>';
         html += '<th><div class="icons cups stand3"></div></th><th>Guessed</th><th>Mean time</th>';
         html += '</thead><tbody>';
-        
+
         for(var i=0;i<3;i++) {
             if (podium[i]) {
                 var playername = podium[i].nickname.encodeEntities();
@@ -416,6 +417,9 @@
 
     // Receive a chat message
     var getChatMessage = function(chatmsg, from, to) {
+        if (ignoredplayers[from]) {
+            return;
+        }
         var prefix = from;
         var msgspan = $('<span class="message"></span>');
         if (to) {
@@ -433,6 +437,19 @@
         DOM.chatwrapper.toggle(300);
         DOM.tracks.animate({maxHeight:'434px'}, 300);
         DOM.togglechat.click(showChat);
+    };
+
+    // Put a player in the ignore list
+    var ignore = function(baduser, outcome) {
+        socket.emit('ignore', baduser, function(player) {
+            if (player) {
+                ignoredplayers[player] = true;
+                outcome.text('(From binb): '+player+' is now ignored.');
+                return addChatEntry(outcome);
+            }
+            outcome.append('player not found.');
+            addChatEntry(outcome);
+        });
     };
 
     // Submitted name was invalid
@@ -548,7 +565,7 @@
         if (!loggedin && !/nickname\s*\=/.test(document.cookie)) {
             document.cookie = 'nickname='+encodeURIComponent(nickname)+';path=/;';
         }
-        
+
         DOM.modal.modal('hide').empty();
         $('#total-tracks span').text(trackscount);
         var msg = nickname+' joined the game';
@@ -563,6 +580,9 @@
                 if (val !== '') {
                     if (pvtmsgto) {
                         socket.emit('sendchatmsg', val, pvtmsgto);
+                    }
+                    else if (/^\/[^ ]/.test(val)) {
+                        slashCommandHandler(val);
                     }
                     else {
                         socket.emit('sendchatmsg', val);
@@ -621,7 +641,6 @@
             addFeedback(nmstrings[Math.floor(Math.random()*nmstrings.length)], 'wrong');
         });
         socket.on('playtrack', playTrack);
-        socket.on('status', setStatus);
         socket.on('stoptrying', function() {
             addFeedback('You guessed both artist and title. Please wait...');
         });
@@ -631,7 +650,7 @@
         socket.on('trackinfo', addTrackInfo);
         socket.on('updateusers', updateUsers);
         socket.on('userleft', userLeft);
-        socket.emit('getstatus');
+        socket.emit('getstatus', setStatus);
     };
 
     // Show the number of players inside each room
@@ -687,16 +706,58 @@
         DOM.togglechat.click(hideChat);
     };
 
+    var slashCommandHandler = function(line) {
+        var matches = line.match(/^(\/[^ ]+) ?(.*)/)
+            , argument = matches[2]
+            , command = matches[1]
+            , outcome = $('<span class="message private">(From binb): </span>');
+
+        if (/^\/(?:(?:un)?ignore|kick)$/.test(command)) {
+            if (!argument) {
+                outcome.append('usage: '+command+' &lt;player name&gt;');
+                return addChatEntry(outcome);
+            }
+            if (argument === nickname) {
+                outcome.append('you can\'t '+command.replace(/^\//, '')+' yourself.');
+                return addChatEntry(outcome);
+            }
+            switch (command) {
+                case '/ignore':
+                    if (!ignoredplayers[argument]) {
+                        return ignore(argument, outcome);
+                    }
+                    outcome.text('(From binb): '+argument+' is already ignored.');
+                    break;
+                case '/kick':
+                    // TO DO
+                    break;
+                case '/unignore':
+                    if (ignoredplayers[argument]) {
+                        delete ignoredplayers[argument];
+                        socket.emit('unignore', argument);
+                        outcome.text('(From binb): '+argument+' is no longer ignored.');
+                    }
+                    else {
+                        outcome.text('(From binb): you have not ignored '+argument+'.');
+                    }
+            }
+        }
+        else {
+            outcome.append('unknown command '+command+'.');
+        }
+        addChatEntry(outcome);
+    };
+
     // Update the list of players
     var updateUsers = function(usersData) {
         DOM.users.empty();
-        
+
         var users = [];
         for (var key in usersData) {
             users.push(usersData[key]);
         }
         users.sort(function(a, b) {return b.points - a.points;});
-        
+
         // Flag to test if our private recipient is in the list of active users
         var found = false;
         for (var i=0; i<users.length; i++) {
@@ -715,7 +776,7 @@
                 pvt.after('<a class="icons registered" target="_blank" '+href+'></a>');
             }
             DOM.users.append(li);
-            
+
             if (pvtmsgto === user.nickname) {
                 pvt.show();
                 username.click(clearPrivate);
@@ -726,14 +787,14 @@
                     addPrivate($(this).text());
                 });
             }
-            
+
             if (nickname === user.nickname) {
                 username.addClass('you');
                 roundpoints = user.roundpoints;
                 DOM.rank.text(i+1);
                 DOM.points.text(user.points);
             }
-            
+
             if (user.roundpoints > 0) {
                 roundpointsel.text('+'+user.roundpoints);
                 if (user.roundpoints === 1) {
@@ -750,7 +811,7 @@
                 }
             }
         }
-        
+
         if (!found && pvtmsgto) {
             var width = DOM.recipient.outerWidth(true) + 1;
             DOM.recipient.css('margin-right', '0');
@@ -787,9 +848,9 @@
 
     // A new player has joined the game
     var userJoin = function(username, usersData) {
-        var msg = username+' joined the game';
+        var joinmsg = username+' joined the game';
         var joinspan = $('<span class="join"></span>');
-        joinspan.text(msg);
+        joinspan.text(joinmsg);
         addChatEntry(joinspan);
         updateUsers(usersData);
     };
@@ -829,10 +890,9 @@
             socket.on('alreadyinaroom', alreadyInARoom);
             socket.on('disconnect', disconnect);
             socket.on('invalidnickname', invalidNickName);
-            socket.on('overview', roomsOverview);
             socket.on('ready', ready);
-            socket.on('update', updateRoomsOverview);
-            socket.emit('getoverview');
+            socket.on('updateoverview', updateRoomsOverview);
+            socket.emit('getoverview', roomsOverview);
         });
     });
 

@@ -19,13 +19,12 @@ $(function() {
     var uri = window.location.protocol+'//'+window.location.host;
     var socket = io.connect(uri, {'reconnect':false});
     socket.on('connect', function() {
-        socket.emit('getoverview');
-        socket.on('overview', function(data) {
+        socket.emit('getoverview', function(data) {
             for (var prop in data) {
                 $('#'+prop).text(data[prop]);
             }
         });
-        socket.on('update', function(room, players) {
+        socket.on('updateoverview', function(room, players) {
             $('#'+room).text(players);
         });
     });
