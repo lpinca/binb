@@ -77,7 +77,7 @@ var buildLeaderboards = function(pointsresults, timesresults) {
 
 exports.use = function(options) {
     db = options.db;
-    rooms = options.rooms;
+    var rooms = options.rooms;
     // Populate the whitelist of follow-up URLs
     followupurls.push('/');
     followupurls.push('/changepasswd');

@@ -8,6 +8,7 @@
         , jplayer
         , nickname
         , pvtmsgto
+        , subscriber = false
         , roundpoints = 0
         , socket
         , stopanimation = false
@@ -516,6 +517,7 @@
         socket.emit('loggedin', function(data) {
             if (data) {
                 nickname = data;
+                subscriber = true;
                 return socket.emit('joinroom', roomname);
             }
             joinAnonymously();
@@ -534,6 +536,14 @@
                 jplayer.jPlayer('play', elapsedtime);
                 touchbackdrop.remove();
             }
+        });
+    };
+
+    // Kick a player
+    var kick = function(baduser, outcome) {
+        socket.emit('kick', baduser, function() {
+            outcome.append('you are not allowed to kick a player.');
+            addChatEntry(outcome);
         });
     };
 
@@ -729,7 +739,10 @@
                     outcome.text('(From binb): '+argument+' is already ignored.');
                     break;
                 case '/kick':
-                    // TO DO
+                    if (subscriber) {
+                        return kick(argument, outcome);
+                    }
+                    outcome.append('you are not allowed to kick a player.');
                     break;
                 case '/unignore':
                     if (ignoredplayers[argument]) {
@@ -743,7 +756,7 @@
             }
         }
         else {
-            outcome.append('unknown command '+command+'.');
+            outcome.text('(From binb): unknown command '+command+'.');
         }
         addChatEntry(outcome);
     };

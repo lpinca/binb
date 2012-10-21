@@ -171,6 +171,11 @@ io.sockets.on('connection', function(socket) {
             rooms[room].joinRoom(socket);
         }
     });
+    socket.on('kick', function(baduser, callback) {
+        if (socket.roomname && typeof baduser === 'string' && typeof callback === 'function') {
+            rooms[socket.roomname].kick(baduser, socket.nickname, callback);
+        }
+    });
     socket.on('loggedin', function(callback) {
         if (typeof callback !== 'function') {
             return;
