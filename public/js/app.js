@@ -724,7 +724,17 @@
             , command = matches[1]
             , outcome = $('<span class="message private">(From binb): </span>');
 
-        if (/^\/(?:(?:un)?ignore|kick)$/.test(command)) {
+        if (/^\/(?:(?:un)?ignore|kick|(?:un)?mutesong)$/.test(command)) {
+            switch (command) {
+                case '/mutesong':
+                    jplayer.jPlayer('mute');
+                    outcome.append('the current song has been muted.');
+                    return;
+                case '/unmutesong':
+                    jplayer.jPlayer('unmute');
+                    outcome.append('the current song is no longer muted.');
+                    return;
+            }
             if (!argument) {
                 outcome.append('usage: '+command+' &lt;player name&gt;');
                 return addChatEntry(outcome);
