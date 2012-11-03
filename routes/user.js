@@ -3,88 +3,20 @@
  */
 
 var crypto = require('crypto')
-    , db
-    , followupurls = []
+    , db = require('../lib/redis-clients').users
     , mailer = require('../lib/email/mailer')
-    , User = require('../lib/user');
-    
-/**
- * Extend String with custom methods for input validation.
- */
-
-String.prototype.trim = function() {
-    return this.replace(/^[\r\n\t\s]+|[\r\n\t\s]+$/g, '');
-};
-
-String.prototype.isEmail = function() {
-    return this.match(/^(?:[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\`\{\|\}\~]+\.)*[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\`\{\|\}\~]+@(?:(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9\-](?!\.)){0,61}[a-zA-Z0-9]?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9\-](?!$)){0,61}[a-zA-Z0-9]?)|(?:\[(?:(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\.){3}(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\]))$/);
-};
+    , rooms = require('../config').rooms
+    , User = require('../lib/user')
+    , utils = require('../lib/utils');
 
 /**
- * Check if a URL is in the whitelist of follow-up URLs.
+ * Populate the whitelist of follow-up URLs.
  */
 
-var safeFollowup = function(url) {
-    if (followupurls.indexOf(url) !== -1) {
-        return true;
-    }
-    return false;
-};
-
-/**
- * Parameters to get users ordered by best guess time.
- */
-
-var sortparams = [
-    'users'
-    , 'by'
-    , 'user:*->bestguesstime'
-    , 'get'
-    , '#'
-    , 'get'
-    , 'user:*->bestguesstime'
-    , 'limit'
-    , '0'
-    , '30'
-];
-
-/**
- * Helper function used to build leaderboards.
- * Rearrange database results in an object.
- */
-
-var buildLeaderboards = function(pointsresults, timesresults) {
-    var obj = {
-        pointsleaderboard: [],
-        timesleaderboard: []
-    };
-    for (var i=0; i<pointsresults.length; i+=2) {
-        obj.pointsleaderboard.push({
-            username: pointsresults[i],
-            totpoints: pointsresults[i+1]
-        });
-        obj.timesleaderboard.push({
-            username: timesresults[i],
-            bestguesstime: (timesresults[i+1] / 1000).toFixed(2)
-        });
-    }
-    return obj;
-};
-
-/**
- * Initialize dependencies.
- */
-
-exports.use = function(options) {
-    db = options.db;
-    var rooms = options.rooms;
-    // Populate the whitelist of follow-up URLs
-    followupurls.push('/');
-    followupurls.push('/changepasswd');
-    for (var i=0; i<rooms.length; i++) {
-        followupurls.push('/'+rooms[i]);
-    }
-};
+var safeurls = ['/', '/changepasswd'];
+for (var i=0; i<rooms.length; i++) {
+    safeurls.push('/'+rooms[i]);
+}
 
 /**
  * Show two lists of users, one ordered by points and one by best guess time (limit set to 30).
@@ -92,8 +24,21 @@ exports.use = function(options) {
 
 exports.leaderboards = function(req, res) {
     db.zrevrange('users', 0, 29, 'withscores', function(err, pointsresults) {
+        var sortparams = [
+            'users'
+            , 'by'
+            , 'user:*->bestguesstime'
+            , 'get'
+            , '#'
+            , 'get'
+            , 'user:*->bestguesstime'
+            , 'limit'
+            , '0'
+            , '30'
+        ];
         db.sort(sortparams, function (e, timesresults) {
-            var leaderboards = buildLeaderboards(pointsresults, timesresults);
+            var leaderboards = utils.buildLeaderboards(pointsresults, timesresults);
+            res.locals.slogan = utils.randomSlogan();
             res.render('leaderboards', leaderboards);
         });
     });
@@ -143,7 +88,7 @@ exports.checkOldPasswd = function(req, res, next) {
 };
 
 exports.changePasswd = function(req, res) {
-    var followup = (safeFollowup(req.query.followup)) ? req.query.followup : '/'
+    var followup = ~safeurls.indexOf(req.query.followup) ? req.query.followup : '/'
         , user = req.session.user
         , key = 'user:'+user
         , salt = crypto.randomBytes(6).toString('base64')
@@ -203,7 +148,7 @@ exports.authenticate = function(req, res) {
     db.hmget(key, 'salt', 'password', function(err, data) {
         var hash = crypto.createHash('sha256').update(data[0]+req.body.password).digest('hex');
         if (hash === data[1]) {
-            var followup = (safeFollowup(req.query.followup)) ? req.query.followup : '/';
+            var followup = ~safeurls.indexOf(req.query.followup) ? req.query.followup : '/';
             // Authentication succeeded, regenerate the session
             req.session.regenerate(function() {
                 req.session.cookie.maxAge = 604800000; // One week
@@ -247,7 +192,7 @@ exports.validateSignUp = function(req, res, next) {
     else if (!req.body.username.match(/^[^\x00-\x1F\x7F]{1,15}$/)) {
         errors.username = '1 to 15 characters required';
     }
-    if (!req.body.email.isEmail()) {
+    if (!utils.isEmail(req.body.email)) {
         errors.email = 'is not an email address';
     }
     if (!req.body.password.match(/^[A-Za-z0-9]{6,15}$/)) {
@@ -320,8 +265,11 @@ exports.createAccount = function(req, res) {
     db.sadd('emails', req.body.email);
     // Delete old fields values
     delete req.session.oldvalues;
-    var msg = 'You successfully created your account. You are now ready to login.';
-    res.render('login', {followup:req.query.followup,success:msg});
+    res.render('login', {
+        followup: req.query.followup || '/',
+        slogan: utils.randomSlogan(),
+        success: 'You successfully created your account. You are now ready to login.'
+    });
 };
 
 /**
@@ -335,7 +283,7 @@ exports.validateRecoverPasswd = function(req, res, next) {
 
     var errors = {};
     
-    if (!req.body.email.isEmail()) {
+    if (!utils.isEmail(req.body.email)) {
         errors.email = 'is not an email address';
     }
     if (req.body.captcha !== req.session.captchacode) {
@@ -363,12 +311,16 @@ exports.sendEmail = function(req, res) {
             db.setex('token:'+token, 14400, data, function(err, reply) {
                 mailer.sendEmail(req.body.email, token, function(err, response) {
                     if (err) {
-                        console.log('reset password error: '+err.message);
+                        console.log('error sending email: '+err.message);
                     }
                 });
             });
             delete req.session.oldvalues;
-            return res.render('recoverpasswd', {followup:req.query.followup,success:true});
+            return res.render('recoverpasswd', {
+                followup: req.query.followup || '/',
+                slogan: utils.randomSlogan(),
+                success: true
+            });
         }
         req.session.errors = {alert: 'The email address you specified could not be found'};
         res.redirect(req.url);
@@ -409,7 +361,11 @@ exports.resetPasswd = function(req, res) {
             var salt = crypto.randomBytes(6).toString('base64');
             var password = crypto.createHash('sha256').update(salt+req.body.password).digest('hex');
             db.hmset(user, 'salt', salt, 'password', password, function(err, data) {
-                res.render('login', {success:'You can now login with your new password.'});
+                res.render('login', {
+                    followup: '/',
+                    slogan: utils.randomSlogan(),
+                    success: 'You can now login with your new password.'
+                });
             });
             return;
         }
@@ -436,6 +392,7 @@ exports.profile = function(req, res) {
                 delete obj.password;
                 delete obj.salt;
                 delete obj.totguesstime;
+                res.locals.slogan = utils.randomSlogan();
                 res.render('user', obj);
             });
             return;

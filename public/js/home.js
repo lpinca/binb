@@ -1,4 +1,4 @@
-$(function() {
+(function() {
     if ($.browser.mozilla) {
         // Block ESC button in firefox (breaks socket connections).
         $(document).keypress(function(event) {
@@ -28,4 +28,4 @@ $(function() {
             $('#'+room).text(players);
         });
     });
-});
+})();

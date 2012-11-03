@@ -1,82 +1,75 @@
-followup = (typeof(followup) !== "undefined") ? '?followup='+followup : '?followup=/'
-doctype html
-html
-    include header
-        title binb :: login
-        script(src="/static/js/bootstrap.min.js")
-    body
-        include uv.jade
-        .navbar.navbar-inverse.navbar-fixed-top
-            .navbar-inner
-                .container
-                    a.brand(href="/")
-                        .icons.logo #{motto}
-                    ul.nav.pull-right
-                        li
-                            a(href="/") Home
-                        li
-                            a(href="/signup#{followup}") Sign up
-                        li.active
-                            a(href="/login#{followup}") Login
-        .container
-            section
-                .row
-                    .span3
-                        h3 New user?
-                        a(href="/signup#{followup}") Click here to create an account.
-                    .span13
-                        if ((typeof(errors) !== "undefined") && (typeof(errors.alert) !== "undefined"))
-                            .alert.alert-error
-                                a.close(data-dismiss="alert") &times;
-                                strong Oh snap!
-                                |  #{errors.alert}
-                        else if (typeof(success) !== "undefined")
-                            .alert.alert-success
-                                a.close(data-dismiss="alert") &times;
-                                strong Well done!
-                                |  #{success}
-                        form.form-horizontal.well(method="post",action="/login#{followup}")
-                            fieldset
-                                if (typeof(errors) !== "undefined")
-                                    if (typeof(errors.username) !== "undefined")
-                                        .control-group.error
-                                            label.control-label(for="username") Name
-                                            .controls
-                                                input#username(type="text",name="username",
-                                                    value=oldvalues.username)
-                                                span.help-inline #{errors.username}
-                                    else
-                                        .control-group
-                                            label.control-label(for="username") Name
-                                            .controls
-                                                input#username(type="text",name="username",
-                                                    value=oldvalues.username)
-                                    if (typeof(errors.password) !== 'undefined')
-                                        .control-group.error
-                                            label.control-label(for="password") Password
-                                            .controls
-                                                input#password(type="password",name="password")
-                                                span.help-inline #{errors.password}
-                                    else
-                                        .control-group
-                                            label.control-label(for="password") Password
-                                            .controls
-                                                input#password(type="password",name="password",
-                                                    placeholder="enter your password...")
-                                else
-                                    .control-group
-                                        label.control-label(for="username") Name
-                                        .controls
-                                            input#username(type="text",name="username",
-                                                placeholder="enter your nickname...")
-                                    .control-group
-                                        label.control-label(for="password") Password
-                                        .controls
-                                            input#password(type="password",name="password",
-                                                placeholder="enter your password...")
-                                button.submit-button.btn.btn-primary(type="submit")
-                                    i.icon-lock.icon-white
-                                    |  Login
-                                a.forgot-passwd(href="/recoverpasswd#{followup}")
-                                    | Forgot your password?
-            include footer
+extends layout
+
+block title
+    title binb :: login
+        
+block nav
+    ul.nav.pull-right
+        li
+            a(href="/") Home
+        li
+            a(href="/signup?followup=#{followup}") Sign up
+        li.active
+            a(href="/login?followup=#{followup}") Login
+
+block sections
+    section
+        .row
+            .span3
+                h3 New user?
+                a(href="/signup?followup=#{followup}") Click here to create an account.
+            .span13
+                - if (locals.errors && errors.alert)
+                    .alert.alert-error
+                        a.close(data-dismiss="alert") &times;
+                        strong Oh snap!
+                        |  #{errors.alert}
+                - else if (locals.success)
+                    .alert.alert-success
+                        a.close(data-dismiss="alert") &times;
+                        strong Well done!
+                        |  #{success}
+                form.form-horizontal.well(method="post", action="/login?followup=#{followup}")
+                    fieldset
+                        - if (locals.errors)
+                            - if (errors.username)
+                                .control-group.error
+                                    label.control-label(for="username") Name
+                                    .controls
+                                        input#username(type="text", name="username",
+                                            value=oldvalues.username)
+                                        span.help-inline #{errors.username}
+                            - else
+                                .control-group
+                                    label.control-label(for="username") Name
+                                    .controls
+                                        input#username(type="text", name="username",
+                                            value=oldvalues.username)
+                            - if (errors.password)
+                                .control-group.error
+                                    label.control-label(for="password") Password
+                                    .controls
+                                        input#password(type="password", name="password")
+                                        span.help-inline #{errors.password}
+                            - else
+                                .control-group
+                                    label.control-label(for="password") Password
+                                    .controls
+                                        input#password(type="password", name="password",
+                                            placeholder="enter your password...")
+                        - else
+                            .control-group
+                                label.control-label(for="username") Name
+                                .controls
+                                    input#username(type="text", name="username",
+                                        placeholder="enter your nickname...")
+                            .control-group
+                                label.control-label(for="password") Password
+                                .controls
+                                    input#password(type="password", name="password",
+                                        placeholder="enter your password...")
+                        button.submit-button.btn.btn-primary(type="submit")
+                            i.icon-lock.icon-white
+                            |  Login
+                        a.forgot-passwd(href="/recoverpasswd?followup=#{followup}")
+                            | Forgot your password?

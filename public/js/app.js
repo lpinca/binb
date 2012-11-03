@@ -1,5 +1,5 @@
 (function() {
-
+    
     var elapsedtime = 0
         , DOM = {}
         , historycursor = 0
@@ -10,10 +10,12 @@
         , pvtmsgto
         , subscriber = false
         , roundpoints = 0
+        , roomname = window.location.pathname.replace('/', '')
         , socket
         , stopanimation = false
         , touchplay
-        , urlregex = /(https?:\/\/[\-A-Za-z0-9+&@#\/%?=~_()|!:,.;]*[\-A-Za-z0-9+&@#\/%=~_()|])/;
+        , urlregex = /(https?:\/\/[\-A-Za-z0-9+&@#\/%?=~_()|!:,.;]*[\-A-Za-z0-9+&@#\/%=~_()|])/
+        , uri = window.location.protocol+'//'+window.location.host; // Socket.IO server URI
 
     var amstrings = [
         'Yes, that\'s the artist. What about the title?'
@@ -877,36 +879,33 @@
         updateUsers(usersData);
     };
 
-    // Set up the room.
-    $(function() {
-        setVariables();
-        DOM.modal.modal({keyboard:false, show:false, backdrop:'static'});
-        DOM.togglechat.click(hideChat);
-        if ($.browser.mozilla) {
-            // Block ESC button in firefox (breaks socket connections).
-            $(document).keypress(function(event) {
-                if(event.keyCode === 27) {
-                    return false;
-                }
-            });
-        }
-        var uri = window.location.protocol+'//'+window.location.host;
-        socket = io.connect(uri, {'reconnect':false});
-        socket.on('connect', function() {
-            jplayer = $('#player').jPlayer({
-                ready: jplayerReady,
-                swfPath: '/static/swf/',
-                supplied: 'm4a',
-                preload: 'auto',
-                volume: 1
-            });
-            socket.on('alreadyinaroom', alreadyInARoom);
-            socket.on('disconnect', disconnect);
-            socket.on('invalidnickname', invalidNickName);
-            socket.on('ready', ready);
-            socket.on('updateoverview', updateRoomsOverview);
-            socket.emit('getoverview', roomsOverview);
+    // Set up the app.
+    setVariables();
+    DOM.modal.modal({keyboard:false, show:false, backdrop:'static'});
+    DOM.togglechat.click(hideChat);
+    if ($.browser.mozilla) {
+        // Block ESC button in firefox (breaks socket connections).
+        $(document).keypress(function(event) {
+            if(event.keyCode === 27) {
+                return false;
+            }
         });
+    }
+    socket = io.connect(uri, {'reconnect':false});
+    socket.on('connect', function() {
+        jplayer = $('#player').jPlayer({
+            ready: jplayerReady,
+            swfPath: '/static/swf/',
+            supplied: 'm4a',
+            preload: 'auto',
+            volume: 1
+        });
+        socket.on('alreadyinaroom', alreadyInARoom);
+        socket.on('disconnect', disconnect);
+        socket.on('invalidnickname', invalidNickName);
+        socket.on('ready', ready);
+        socket.on('updateoverview', updateRoomsOverview);
+        socket.emit('getoverview', roomsOverview);
     });
 
 })();

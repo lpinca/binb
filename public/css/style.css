@@ -1,14 +1,14 @@
 @font-face {
     font-family: 'ChristopherhandRegular';
-    src: url('comesinhandy-webfont.eot');
-    src: url('comesinhandy-webfont.eot?#iefix') format('embedded-opentype'),
-         url('comesinhandy-webfont.woff') format('woff'),
-         url('comesinhandy-webfont.ttf') format('truetype');
+    src: url('/static/fonts/comesinhandy-webfont.eot');
+    src: url('/static/fonts/comesinhandy-webfont.eot?#iefix') format('embedded-opentype'),
+         url('/static/fonts/comesinhandy-webfont.woff') format('woff'),
+         url('/static/fonts/comesinhandy-webfont.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
 }
 body {
-    background: url('/static/images/bg.jpg') repeat-x scroll 0 0 #F5F6F7;
+    background: url('/static/img/bg.jpg') repeat-x scroll 0 0 #F5F6F7;
     padding-top: 45px;
 }
 section {
@@ -44,7 +44,7 @@ h6 {
     text-transform: uppercase;
 }
 .icons {
-    background: url('/static/images/sprites.png') no-repeat;
+    background: url('/static/img/sprites.png') no-repeat;
 }
 .align-left {
     text-align: left;
@@ -279,7 +279,7 @@ form .clearfix {
 #cassette {
     margin-top: 22px;
     height: 137px;
-    background: url('/static/images/cassette.png') no-repeat 0 0;
+    background: url('/static/img/cassette.png') no-repeat 0 0;
 }
 #countdown {
     position: absolute;

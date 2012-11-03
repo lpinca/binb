@@ -8,70 +8,41 @@ var config = require('./config')
     , parseCookie = require('express/node_modules/cookie').parse
     , parseSignedCookies = require('express/node_modules/connect').utils.parseSignedCookies
     , redisstore = require('connect-redis')(express)
-    , redisurl = require('redis-url')
     , site = require('./routes/site')
-    , user = require('./routes/user');
-
-/**
- * Setting up redis.
- */
-
-var songsdb = redisurl.createClient(process.env.SONGS_DB_URL)
-    , usersdb = redisurl.createClient(process.env.USERS_DB_URL);
-
-songsdb.on('error', function(err) {
-    console.log(err.message);
-});
-
-usersdb.on('error', function(err) {
-    console.log(err.message);
-});
+    , user = require('./routes/user')
+    , usersdb = require('./lib/redis-clients').users;
 
 /**
  * Setting up Express.
  */
 
 var app = express()
-    , sessionstore = new redisstore({client:usersdb});
+    , pub = __dirname + '/public' // Path to public directory
+    , sessionstore = new redisstore({client: usersdb});
 
 // Configuration
-app.use(express.static(__dirname + '/public'), {maxAge: 2592000000});
-app.use(express.favicon(__dirname + '/public/static/images/favicon.ico', {maxAge: 2592000000}));
+app.set('view engine', 'jade');
+app.use(express.compress());
+app.use('/static', express.static(pub, {maxAge: 2419200000})); // 4 weeks = 2419200000 ms
+app.use(express.favicon(pub + '/img/favicon.ico', {maxAge: 2419200000}));
 app.use(express.bodyParser());
 app.use(express.cookieParser(process.env.SITE_SECRET));
-app.use(express.session({store:sessionstore}));
-app.set('view engine', 'jade');
-
-// Middleware to report errors during form submission
-app.use(function(req, res, next) {
-    if (req.session.errors) {
-        res.locals.errors = req.session.errors;
-        delete req.session.errors;
-    }
-    if (req.session.oldvalues) {
-        res.locals.oldvalues = req.session.oldvalues;
-        delete req.session.oldvalues;
-    }
-    next();
-});
+app.use(express.session({store: sessionstore}));
 
 // Routes
-site.use({db:songsdb,rooms:config.rooms});
-user.use({db:usersdb,rooms:config.rooms});
-
-app.get('/', site.index);
+app.get('/', site.home);
 app.get('/artworks', site.artworks);
-app.get('/changepasswd', site.changePasswd);
+app.get('/changepasswd', site.validationErrors, site.changePasswd);
 app.post('/changepasswd', user.validateChangePasswd, user.checkOldPasswd, user.changePasswd);
 app.get('/leaderboards', user.leaderboards);
-app.get('/login', site.login);
+app.get('/login', site.validationErrors, site.login);
 app.post('/login', user.validateLogin, user.checkUser, user.authenticate);
 app.get('/logout', user.logout);
-app.get('/signup', site.signup);
+app.get('/signup', site.validationErrors, site.signup);
 app.post('/signup', user.validateSignUp, user.userExists, user.emailExists, user.createAccount);
-app.get('/recoverpasswd', site.recoverPasswd);
+app.get('/recoverpasswd', site.validationErrors, site.recoverPasswd);
 app.post('/recoverpasswd', user.validateRecoverPasswd, user.sendEmail);
-app.get('/resetpasswd', site.resetPasswd);
+app.get('/resetpasswd', site.validationErrors, site.resetPasswd);
 app.post('/resetpasswd', user.resetPasswd);
 app.get('/:room', site.room);
 app.get('/user/*', user.profile);
@@ -103,7 +74,7 @@ io.set('authorization', function(data, accept) {
     if(!data.headers.cookie) {
         return accept('no cookie transmitted', false);
     }
-    var signedcookie = parseCookie(decodeURIComponent(data.headers.cookie));
+    var signedcookie = parseCookie(data.headers.cookie);
     var cookie = parseSignedCookies(signedcookie, process.env.SITE_SECRET);
     sessionstore.get(cookie['connect.sid'], function(err, session) {
         if (err) {
@@ -157,12 +128,12 @@ io.sockets.on('connection', function(socket) {
     });
     socket.on('joinanonymously', function(nickname, roomname) {
         if (!socket.nickname && typeof nickname === 'string' && nickname !== '' &&
-            config.rooms.indexOf(roomname) !== -1) {
+            ~config.rooms.indexOf(roomname)) {
             rooms[roomname].setNickName(socket, nickname);
         }
     });
     socket.on('joinroom', function(room) {
-        if (session.user && config.rooms.indexOf(room) !== -1) {
+        if (session.user && ~config.rooms.indexOf(room)) {
             if (sockets[session.user]) { // User already in a room
                 socket.emit('alreadyinaroom');
                 return;
@@ -198,17 +169,7 @@ io.sockets.on('connection', function(socket) {
  * Setting up the rooms.
  */
 
-var roomoptions = {
-    songsdb: songsdb,
-    usersdb: usersdb,
-    io: io,
-    sockets: sockets,
-    songsinarun: config.songsinarun,
-    fifolength: config.songsinarun * config.gameswithnorepeats,
-    threshold: config.allowederrors
-};
-
-var Room = require('./lib/room')(roomoptions)
+var Room = require('./lib/room')({io: io, sockets: sockets})
     , rooms = Object.create(null); // The Object that contains all the room instances
 
 for (var i=0; i<config.rooms.length; i++) {
