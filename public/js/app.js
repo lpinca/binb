@@ -468,7 +468,7 @@
             socket.emit('joinanonymously', nickname, roomname);
         }
         else {
-            if (!$('body').hasClass('modal-open')) {
+            if (!DOM.modal.hasClass('in')) {
                 var html = '<div class="modal-header">';
                 html += '<h3>You are joining the '+roomname+' room</h3></div>';
                 html += '<div class="modal-body"><p>'+(msg || "What's your name?")+'</p></div>';
