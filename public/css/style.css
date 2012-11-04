@@ -231,7 +231,7 @@ form .clearfix {
     text-align: center;
     text-transform: capitalize;
 }
-.dropdown-menu a {
+.dropdown-menu li > a {
     padding: 2px 10px;
     white-space: normal;
 }
