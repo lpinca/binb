@@ -60,8 +60,8 @@ exports.validateChangePasswd = function(req, res, next) {
     if (req.body.oldpassword === '') {
         errors.oldpassword = "can't be empty";
     }
-    if (!req.body.newpassword.match(/^[A-Za-z0-9]{6,15}$/)) {
-        errors.newpassword = '6 to 15 alphanumeric characters required';
+    if (!/^[\x21-\x7E]{6,15}$/.test(req.body.newpassword)) {
+        errors.newpassword = '6 to 15 characters required';
     }
     else if(req.body.newpassword === req.body.oldpassword) {
         errors.newpassword = "can't be changed to the old one";
@@ -189,14 +189,18 @@ exports.validateSignUp = function(req, res, next) {
     if (req.body.username === 'binb') {
         errors.username = 'is reserved';
     }
-    else if (!req.body.username.match(/^[^\x00-\x1F\x7F]{1,15}$/)) {
+    else if (/\.\.?/.test('/'+req.body.username+'/')) {
+        // Username contains dot segments which will be removed by URL normalization
+        errors.username = 'is not valid';
+    }
+    else if (!/^[^\x00-\x1F\x7F]{1,15}$/.test(req.body.username)) {
         errors.username = '1 to 15 characters required';
     }
     if (!utils.isEmail(req.body.email)) {
         errors.email = 'is not an email address';
     }
-    if (!req.body.password.match(/^[A-Za-z0-9]{6,15}$/)) {
-        errors.password = '6 to 15 alphanumeric characters required';
+    if (!/^[\x21-\x7E]{6,15}$/.test(req.body.password)) {
+        errors.password = '6 to 15 characters required';
     }
     if (req.body.captcha !== req.session.captchacode) {
         errors.captcha = 'no match';
@@ -339,8 +343,8 @@ exports.resetPasswd = function(req, res) {
     var errors = {};
     
     // Validate new password
-    if (!req.body.password.match(/^[A-Za-z0-9]{6,15}$/)) {
-        errors.password = '6 to 15 alphanumeric characters required';
+    if (!/^[\x21-\x7E]{6,15}$/.test(req.body.password)) {
+        errors.password = '6 to 15 characters required';
     }
     // Check token availability
     if (!req.query.token) {
