@@ -218,6 +218,97 @@ form .clearfix {
 .leaderboard tbody tr:hover td, .stats tbody tr:hover td {
     background-color: #dadada;
 }
+.loading {
+    width: 18px;
+    position: absolute;
+    top: 360px;
+    left: 191px;
+    display: none;
+}
+.loading-block {
+    background-color: #6184B7;
+    border: 1px solid #466085;
+    float: left;
+    height: 12px;
+    margin-left: 1px;
+    width: 3px;
+    opacity: 0.1;
+    -o-animation-name: bounce;
+    -o-animation-duration: 1s;
+    -o-animation-iteration-count: infinite;
+    -o-transform: scale(0.7);
+    -moz-animation-name: bounce;
+    -moz-animation-duration: 1s;
+    -moz-animation-iteration-count: infinite;
+    -moz-transform: scale(0.7);
+    -ms-transform: scale(0.7);
+    -webkit-animation-name: bounce;
+    -webkit-animation-duration: 1s;
+    -webkit-animation-iteration-count: infinite;
+    -webkit-transform: scale(0.7);
+    animation-name: bounce;
+    animation-duration: 1s;
+    animation-iteration-count: infinite;
+    transform: scale(0.7);
+}
+.loading-block:first-child {
+    -o-animation-delay: 0.4s;
+    -moz-animation-delay: 0.4s;
+    -webkit-animation-delay: 0.4s;
+    animation-delay: 0.4s;
+}
+.loading-block:nth-child(2) {
+    -o-animation-delay: 0.5s;
+    -moz-animation-delay: 0.5s;
+    -webkit-animation-delay: 0.5s;
+    animation-delay: 0.5s;
+}
+.loading-block:last-child {
+    -o-animation-delay: 0.6s;
+    -moz-animation-delay: 0.6s;
+    -webkit-animation-delay: 0.6s;
+    animation-delay: 0.6s;
+}
+@-o-keyframes bounce {
+    0% {
+        -o-transform: scale(1);
+        opacity: 1;
+    }
+    100% {
+        -o-transform: scale(0.7);
+        opacity: 0.1; 
+    }
+}
+@-moz-keyframes bounce {
+    0% {
+        -moz-transform: scale(1);
+        opacity: 1;
+    }
+    100% {
+        -moz-transform: scale(0.7);
+        opacity: 0.1;
+    }
+}
+@-webkit-keyframes bounce {
+    0% {
+        -webkit-transform: scale(1);
+        opacity: 1;
+    }
+    100% {
+        -webkit-transform: scale(0.7);
+        opacity: 0.1;
+    }
+}
+@keyframes bounce {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform:s cale(0.7);
+        opacity: 0.1;
+    }
+}
 .room {
     height: 25px;
     line-height: 25px;

@@ -15,31 +15,41 @@ block sections
                     .icons.img
     section
         .row
-            .span7.offset1
+            .span7.offset1.relative
                 h4 Points
-                div.leaderboard-wrapper
+                .leaderboard-wrapper
                     table.table.table-striped.table-bordered.leaderboard
                         tbody
-                        - each user, i in pointsleaderboard
-                            tr
-                                td #{i+1}
-                                td
-                                    a(href="/user/#{encodeURIComponent(user.username)}")
-                                        | #{user.username.replace(/&/g, '&amp;')}
-                                td #{user.totpoints}
-            .span7
+                            - each user, i in pointsleaderboard
+                                tr
+                                    td #{i+1}
+                                    td
+                                        a(href="/user/#{encodeURIComponent(user.username)}")
+                                            | #{user.username.replace(/&/g, '&amp;')}
+                                    td #{user.totpoints}
+                    .loading
+                        .loading-block
+                        .loading-block
+                        .loading-block
+            .span7.relative
                 h4 Times
-                div.leaderboard-wrapper
+                .leaderboard-wrapper
                     table.table.table-striped.table-bordered.leaderboard
                         tbody
-                        - each user, i in timesleaderboard
-                            tr
-                                td #{i+1}
-                                td
-                                    a(href="/user/#{encodeURIComponent(user.username)}")
-                                        | #{user.username.replace(/&/g, '&amp;')}
-                                td 
-                                    i.icon-time
-                                    |  #{user.bestguesstime} sec
+                            - each user, i in timesleaderboard
+                                tr
+                                    td #{i+1}
+                                    td
+                                        a(href="/user/#{encodeURIComponent(user.username)}")
+                                            | #{user.username.replace(/&/g, '&amp;')}
+                                    td 
+                                        i.icon-time
+                                        |  #{user.bestguesstime} sec
+                    .loading
+                        .loading-block
+                        .loading-block
+                        .loading-block
 
 block scripts
+    script(src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js")
+    script(src="/static/js/leaderboards.js")

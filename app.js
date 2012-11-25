@@ -27,7 +27,7 @@ app.use('/static', express.static(pub, {maxAge: 2419200000})); // 4 weeks = 2419
 app.use(express.favicon(pub + '/img/favicon.ico', {maxAge: 2419200000}));
 app.use(express.bodyParser());
 app.use(express.cookieParser(process.env.SITE_SECRET));
-app.use(express.session({store: sessionstore}));
+app.use(express.session({store: sessionstore, cookie: {maxAge: 14400000}})); // 4 h = 14400000 ms
 
 // Routes
 app.get('/', site.home);
@@ -38,12 +38,13 @@ app.get('/leaderboards', user.leaderboards);
 app.get('/login', site.validationErrors, site.login);
 app.post('/login', user.validateLogin, user.checkUser, user.authenticate);
 app.get('/logout', user.logout);
-app.get('/signup', site.validationErrors, site.signup);
-app.post('/signup', user.validateSignUp, user.userExists, user.emailExists, user.createAccount);
 app.get('/recoverpasswd', site.validationErrors, site.recoverPasswd);
 app.post('/recoverpasswd', user.validateRecoverPasswd, user.sendEmail);
 app.get('/resetpasswd', site.validationErrors, site.resetPasswd);
 app.post('/resetpasswd', user.resetPasswd);
+app.get('/sliceleaderboard', user.sliceLeaderboard);
+app.get('/signup', site.validationErrors, site.signup);
+app.post('/signup', user.validateSignUp, user.userExists, user.emailExists, user.createAccount);
 app.get('/:room', site.room);
 app.get('/user/*', user.profile);
 

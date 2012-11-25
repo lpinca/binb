@@ -24,23 +24,33 @@ for (var i=0; i<rooms.length; i++) {
 
 exports.leaderboards = function(req, res) {
     db.zrevrange('users', 0, 29, 'withscores', function(err, pointsresults) {
-        var sortparams = [
-            'users'
-            , 'by'
-            , 'user:*->bestguesstime'
-            , 'get'
-            , '#'
-            , 'get'
-            , 'user:*->bestguesstime'
-            , 'limit'
-            , '0'
-            , '30'
-        ];
-        db.sort(sortparams, function (e, timesresults) {
+        db.sort(utils.sortParams(0), function(e, timesresults) {
             var leaderboards = utils.buildLeaderboards(pointsresults, timesresults);
             res.locals.slogan = utils.randomSlogan();
             res.render('leaderboards', leaderboards);
         });
+    });
+};
+
+/**
+ * Get 30 users from the ranking, starting at index `begin`.
+ */
+
+exports.sliceLeaderboard = function(req, res) {
+    var begin = parseInt(req.query.begin, 10)
+        , by = req.query.by;
+    if (isNaN(begin) || begin > 180 || (by !== 'points' && by !== 'times')) {
+        return res.send(412);
+    }
+    var end = begin + 29;
+    if (by === 'points') {
+        db.zrevrange('users', begin, end, 'withscores', function(err, results) {
+            res.json(results);
+        });
+        return;
+    }
+    db.sort(utils.sortParams(begin), function(err, results) {
+        res.json(results);
     });
 };
 
