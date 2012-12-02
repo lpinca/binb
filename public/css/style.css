@@ -559,8 +559,8 @@ form .clearfix {
 }
 #users {
     padding-left: 20px;
-    margin-bottom: 90px;
-    max-height: 380px;
+    margin-bottom: 72px;
+    max-height: 398px;
     overflow: auto;
 }
 #users .name, #tracks .artist {
