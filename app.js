@@ -22,7 +22,6 @@ var app = express()
 
 // Configuration
 app.set('view engine', 'jade');
-app.use(express.compress());
 app.use('/static', express.static(pub, {maxAge: 2419200000})); // 4 weeks = 2419200000 ms
 app.use(express.favicon(pub + '/img/favicon.ico', {maxAge: 2419200000}));
 app.use(express.bodyParser());
