@@ -121,9 +121,9 @@ io.sockets.on('connection', function(socket) {
             rooms[socket.roomname].guess(socket, guess);
         }
     });
-    socket.on('ignore', function(baduser, callback) {
-        if (socket.roomname && typeof baduser === 'string' && typeof callback === 'function') {
-            rooms[socket.roomname].ignore(baduser, socket.nickname, callback);
+    socket.on('ignore', function(who, callback) {
+        if (socket.roomname && typeof who === 'string' && typeof callback === 'function') {
+            rooms[socket.roomname].ignore(who, socket.nickname, callback);
         }
     });
     socket.on('joinanonymously', function(nickname, roomname) {
@@ -142,9 +142,10 @@ io.sockets.on('connection', function(socket) {
             rooms[room].joinRoom(socket);
         }
     });
-    socket.on('kick', function(baduser, callback) {
-        if (socket.roomname && typeof baduser === 'string' && typeof callback === 'function') {
-            rooms[socket.roomname].kick(baduser, socket.nickname, callback);
+    socket.on('kick', function(who, why, callback) {
+        if (socket.roomname && typeof who === 'string' && typeof why === 'string' &&
+            typeof callback === 'function') {
+            rooms[socket.roomname].kick(who, why, socket.nickname, callback);
         }
     });
     socket.on('loggedin', function(callback) {
@@ -158,9 +159,9 @@ io.sockets.on('connection', function(socket) {
             rooms[socket.roomname].sendChatMessage(msg, socket, to);
         }
     });
-    socket.on('unignore', function(baduser) {
-        if (socket.roomname && typeof baduser === 'string') {
-            rooms[socket.roomname].unignore(baduser, socket.nickname);
+    socket.on('unignore', function(who) {
+        if (socket.roomname && typeof who === 'string') {
+            rooms[socket.roomname].unignore(who, socket.nickname);
         }
     });
 });

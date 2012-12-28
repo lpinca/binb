@@ -1,5 +1,5 @@
 (function() {
-    
+
     var elapsedtime = 0
         , DOM = {}
         , historycursor = 0
@@ -289,8 +289,7 @@
         loadFromCookie();
     };
 
-    /* Triggered when a logged user tries to join a room from another tab or another browser
-        and he is already in a room */
+    // Called when a registered user already in a room, tries to enter in another room
     var alreadyInARoom = function() {
         var html = '<div class="modal-header"><h3>Already in a room</h3></div>';
         html += '<div class="modal-body"><div class="alert alert-error alert-block">';
@@ -443,8 +442,12 @@
     };
 
     // Put a player in the ignore list
-    var ignore = function(baduser, outcome) {
-        socket.emit('ignore', baduser, function(player) {
+    var ignorePlayer = function(args, outcome) {
+        if (ignoredplayers[args[0]]) {
+            outcome.text('(From binb): '+args[0]+' is already ignored.');
+            return addChatEntry(outcome);
+        }
+        socket.emit('ignore', args[0], function(player) {
             if (player) {
                 ignoredplayers[player] = true;
                 outcome.text('(From binb): '+player+' is now ignored.');
@@ -460,7 +463,7 @@
         joinAnonymously(feedback+'<br/>Try with another one:');
     };
 
-    // Prompt for name and send it.
+    // Prompt for name and send it
     var joinAnonymously = function(msg) {
         if (/nickname\s*\=/.test(document.cookie) && !msg) {
             var encodednickname = document.cookie.replace(/.*nickname\s*\=\s*([^;]*);?.*/, '$1');
@@ -542,9 +545,13 @@
     };
 
     // Kick a player
-    var kick = function(baduser, outcome) {
-        socket.emit('kick', baduser, function() {
-            outcome.append('you are not allowed to kick a player.');
+    var kickPlayer = function(args, outcome) {
+        outcome.append('you are not allowed to kick a player.');
+        if (!subscriber) {
+            return addChatEntry(outcome);
+        }
+        var why = args[1] || '';
+        socket.emit('kick', args[0], why, function() {
             addChatEntry(outcome);
         });
     };
@@ -552,6 +559,59 @@
     var loadTrack = function(previewUrl) {
         jplayer.jPlayer('mute');
         jplayer.jPlayer('setMedia', {m4a: previewUrl});
+    };
+
+    /**
+     * Given a string, parse the string extracting fields separated by whitespace
+     * and optionally enclosed within double quotes (which are stripped off), and
+     * build an array of copies of the string for each field.
+     */
+
+    var parseCommand = function(input) {
+        var inquotes = false
+            , token = ''
+            , tokens = [];
+        for (var i = 0; i < input.length; i++) {
+            if (input[i] === '\\') {
+                if (++i === input.length) {
+                    throw new Error('SyntaxError: Unexpected end of input');
+                }
+                if (input[i] === '\\' || input[i] === '"' || !inquotes) {
+                    token += input[i];
+                    continue;
+                }
+                token += '\\'+input[i];
+                continue;
+            }
+            if (input[i] === '"') {
+                inquotes = !inquotes;
+                var j = i + 1;
+                if (!inquotes && (input[j] === ' ' || j === input.length)) {
+                    tokens.push(token);
+                    token = '';
+                    i = j;
+                }
+                continue;
+            }
+            if (input[i] === ' ') {
+                if (inquotes) {
+                    token += ' ';
+                }
+                else if (token.length) {
+                    tokens.push(token);
+                    token = '';
+                }
+                continue;
+            }
+            token += input[i];
+        }
+        if (inquotes) {
+            throw new Error('SyntaxError: Unexpected end of input');
+        }
+        if (token.length) {
+            tokens.push(token);
+        }
+        return tokens;
     };
 
     // Play a track
@@ -719,47 +779,45 @@
     };
 
     var slashCommandHandler = function(line) {
-        var matches = line.match(/^(\/[^ ]+) ?(.*)/)
-            , argument = matches[2]
-            , command = matches[1]
-            , outcome = $('<span class="message private">(From binb): </span>');
+        var args;
+        var outcome = $('<span class="message private">(From binb): </span>');
 
-        if (/^\/(?:(?:un)?ignore|kick)$/.test(command)) {
-            if (!argument) {
-                outcome.append('usage: '+command+' &lt;player name&gt;');
+        try {
+            args = parseCommand(line);
+        }
+        catch (err) {
+            outcome.append(err.message);
+            return addChatEntry(outcome);
+        }
+
+        var cmdname = args.shift();
+        var command = slashcommands[cmdname.substr(1)];
+
+        if (command) {
+            if (args.length < command.minargs) {
+                outcome.append(command.usage);
                 return addChatEntry(outcome);
             }
-            if (argument === nickname) {
-                outcome.append('you can\'t '+command.replace(/^\//, '')+' yourself.');
+            if (command.checkrecipient && (!args[0] || args[0] === nickname)) {
+                outcome.append('invalid argument.');
                 return addChatEntry(outcome);
             }
-            switch (command) {
-                case '/ignore':
-                    if (!ignoredplayers[argument]) {
-                        return ignore(argument, outcome);
-                    }
-                    outcome.text('(From binb): '+argument+' is already ignored.');
-                    break;
-                case '/kick':
-                    if (subscriber) {
-                        return kick(argument, outcome);
-                    }
-                    outcome.append('you are not allowed to kick a player.');
-                    break;
-                case '/unignore':
-                    if (ignoredplayers[argument]) {
-                        delete ignoredplayers[argument];
-                        socket.emit('unignore', argument);
-                        outcome.text('(From binb): '+argument+' is no longer ignored.');
-                    }
-                    else {
-                        outcome.text('(From binb): you have not ignored '+argument+'.');
-                    }
-            }
+            return command.fn(args, outcome);
         }
-        else {
-            outcome.text('(From binb): unknown command '+command+'.');
+
+        outcome.text('(From binb): unknown command '+cmdname+'.');
+        addChatEntry(outcome);
+    };
+
+    // Remove a player from the ignore list
+    var unignorePlayer = function(args, outcome) {
+        if (!ignoredplayers[args[0]]) {
+            outcome.text('(From binb): you have not ignored '+args[0]+'.');
+            return addChatEntry(outcome);
         }
+        delete ignoredplayers[args[0]];
+        socket.emit('unignore', args[0]);
+        outcome.text('(From binb): '+args[0]+' is no longer ignored.');
         addChatEntry(outcome);
     };
 
@@ -843,7 +901,7 @@
         }
     };
 
-    // Convert any URLs in text into clickable links.
+    // Convert any URLs in text into clickable links
     var urlize = function(text) {
         if (text.match(urlregex)) {
             var html = '';
@@ -879,12 +937,33 @@
         updateUsers(usersData);
     };
 
-    // Set up the app.
+    var slashcommands = {
+        ignore: {
+            checkrecipient: true, // Assume that the first argument (argv[0]) is the recipient
+            fn: ignorePlayer,
+            minargs: 1,
+            usage: 'usage: /ignore &lt;player name&gt;'
+        },
+        kick: {
+            checkrecipient: true,
+            fn: kickPlayer,
+            minargs: 1,
+            usage: 'usage: /kick &lt;player name&gt; [message]'
+        },
+        unignore: {
+            checkrecipient: true,
+            fn: unignorePlayer,
+            minargs: 1,
+            usage: 'usage: /unignore &lt;player name&gt;'
+        }
+    };
+
+    // Set up the app
     setVariables();
     DOM.modal.modal({keyboard:false, show:false, backdrop:'static'});
     DOM.togglechat.click(hideChat);
     if ($.browser.mozilla) {
-        // Block ESC button in firefox (breaks socket connections).
+        // Block ESC button in firefox (breaks socket connections)
         $(document).keypress(function(event) {
             if(event.keyCode === 27) {
                 return false;
