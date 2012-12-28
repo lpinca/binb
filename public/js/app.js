@@ -468,54 +468,52 @@
         if (/nickname\s*\=/.test(document.cookie) && !msg) {
             var encodednickname = document.cookie.replace(/.*nickname\s*\=\s*([^;]*);?.*/, '$1');
             nickname = decodeURIComponent(encodednickname);
-            socket.emit('joinanonymously', nickname, roomname);
+            return socket.emit('joinanonymously', nickname, roomname);
         }
-        else {
-            if (!DOM.modal.hasClass('in')) {
-                var html = '<div class="modal-header">';
-                html += '<h3>You are joining the '+roomname+' room</h3></div>';
-                html += '<div class="modal-body"><p>'+(msg || "What's your name?")+'</p></div>';
-                html += '<div class="modal-footer relative">';
-                html += '<input id="login" class="" type="text" name="nickname" />';
-                html += '<button id="join" class="btn btn-success">';
-                html += '<i class="icon-user icon-white"></i> Join the game</button>';
-                html += '<span class="divider"><span>or</span></span>';
-                html += '<a class="btn btn-primary" href="/login?followup=/'+roomname+'">';
-                html += '<i class="icon-lock icon-white"></i> Login</a></div>';
 
-                $(html).appendTo(DOM.modal);
-                var login = $('#login');
-                var button = $('#join');
+        if (DOM.modal.hasClass('in')) {
+            $('.modal-body p').html(msg);
+            return $('#login').focus();
+        }
 
-                button.click(function() {
-                    var val = $.trim(login.val());
-                    if (val !== '') {
-                        nickname = val;
-                        socket.emit('joinanonymously', nickname, roomname);
-                    }
-                    else {
-                        var txt = 'Nickname can\'t be empty.';
-                        invalidNickName('<span class="label label-important">'+txt+'</span>');
-                    }
-                    login.val('');
-                });
+        var html = '<div class="modal-header">';
+        html += '<h3>You are joining the '+roomname+' room</h3></div>';
+        html += '<div class="modal-body"><p>'+(msg || "What's your name?")+'</p></div>';
+        html += '<div class="modal-footer relative">';
+        html += '<input id="login" class="" type="text" name="nickname" />';
+        html += '<button id="join" class="btn btn-success">';
+        html += '<i class="icon-user icon-white"></i> Join the game</button>';
+        html += '<span class="divider"><span>or</span></span>';
+        html += '<a class="btn btn-primary" href="/login?followup=/'+roomname+'">';
+        html += '<i class="icon-lock icon-white"></i> Login</a></div>';
 
-                login.keyup(function(event) {
-                    if (event.keyCode === 13) {
-                        button.click();
-                    }
-                });
+        $(html).appendTo(DOM.modal);
+        var login = $('#login');
+        var button = $('#join');
 
-                DOM.modal.modal('show');
-                DOM.modal.on('shown', function() {
-                    login.focus();
-                });
+        button.click(function() {
+            var val = $.trim(login.val());
+            if (val !== '') {
+                nickname = val;
+                socket.emit('joinanonymously', nickname, roomname);
             }
             else {
-                $('.modal-body p').html(msg);
-                $('#login').focus();
+                var txt = 'Nickname can\'t be empty.';
+                invalidNickName('<span class="label label-important">'+txt+'</span>');
             }
-        }
+            login.val('');
+        });
+
+        login.keyup(function(event) {
+            if (event.keyCode === 13) {
+                button.click();
+            }
+        });
+
+        DOM.modal.modal('show');
+        DOM.modal.on('shown', function() {
+            login.focus();
+        });
     };
 
     var jplayerReady = function() {
