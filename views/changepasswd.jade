@@ -35,30 +35,30 @@ block sections
                                 .control-group
                                     label.control-label(for="oldpassword") Old password
                                     .controls
-                                        input#username(type="password", name="oldpassword",
+                                        input#oldpassword(type="password", name="oldpassword",
                                             placeholder="enter your current password...")
                             - if (errors.newpassword)
                                 .control-group.error
                                     label.control-label(for="newpassword") New password
                                     .controls
-                                        input#password(type="password", name="newpassword")
+                                        input#newpassword(type="password", name="newpassword")
                                         span.help-inline #{errors.newpassword}
                             - else
                                 .control-group
                                     label.control-label(for="newpassword") New password
                                     .controls
-                                        input#password(type="password", name="newpassword",
+                                        input#newpassword(type="password", name="newpassword",
                                             placeholder="enter your new password...")
                         - else
                             .control-group
                                 label.control-label(for="oldpassword") Old password
                                 .controls
-                                    input#username(type="password", name="oldpassword",
+                                    input#oldpassword(type="password", name="oldpassword",
                                         placeholder="enter your current password...")
                             .control-group
                                 label.control-label(for="password") New password
                                 .controls
-                                    input#password(type="password", name="newpassword",
+                                    input#newpassword(type="password", name="newpassword",
                                         placeholder="enter your new password...")
                         button.submit-button.btn.btn-primary(type="submit")
                             i.icon-edit.icon-white

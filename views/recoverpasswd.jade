@@ -37,21 +37,22 @@ block sections
                                     .control-group.error
                                         label.control-label(for="email") Email
                                         .controls
-                                            input#oldpassword(type="text", name="email",
+                                            input#email(type="text", name="email",
                                                 value=oldvalues.email)
                                             span.help-inline #{errors.email}
                                 - else
                                     .control-group
                                         label.control-label(for="email") Email
                                         .controls
-                                            input#username(type="text", name="email",
+                                            input#email(type="text", name="email",
                                                 value=oldvalues.email)
                                 - if (errors.captcha)
                                     .control-group.error
                                         label.control-label(for="captcha-input") Are you human?
                                         .controls
                                             img#captcha(src=captchaurl)
-                                            input#captcha-input(type="text", name="captcha")
+                                            input#captcha-input(type="text", name="captcha",
+                                                maxlength="4")
                                             span.help-inline #{errors.captcha}
                                 - else
                                     .control-group
@@ -59,7 +60,7 @@ block sections
                                         .controls
                                             img#captcha(src=captchaurl)
                                             input#captcha-input(type="text", name="captcha",
-                                                placeholder="type what you see...")
+                                                maxlength="4", placeholder="type what you see...")
                             - else
                                 .control-group
                                     label.control-label(for="email") Email
@@ -71,7 +72,7 @@ block sections
                                     .controls
                                         img#captcha(src=captchaurl)
                                         input#captcha-input(type="text", name="captcha",
-                                            placeholder="type what you see...")
+                                            maxlength="4", placeholder="type what you see...")
                             button.submit-button.btn.btn-primary(type="submit")
                                 i.icon-envelope.icon-white
                                 |  Send password reset link

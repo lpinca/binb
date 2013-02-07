@@ -37,14 +37,14 @@ block sections
                                     label.control-label(for="username") Name
                                     .controls
                                         input#username(type="text", name="username",
-                                            value=oldvalues.username)
+                                            maxlength="15", value=oldvalues.username)
                                         span.help-inline #{errors.username}
                             - else
                                 .control-group
                                     label.control-label(for="username") Name
                                     .controls
                                         input#username(type="text", name="username",
-                                            value=oldvalues.username)
+                                            maxlength="15", value=oldvalues.username)
                             - if (errors.password)
                                 .control-group.error
                                     label.control-label(for="password") Password
@@ -62,7 +62,7 @@ block sections
                                 label.control-label(for="username") Name
                                 .controls
                                     input#username(type="text", name="username",
-                                        placeholder="enter your nickname...")
+                                        maxlength="15", placeholder="enter your nickname...")
                             .control-group
                                 label.control-label(for="password") Password
                                 .controls

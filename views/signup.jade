@@ -39,14 +39,14 @@ block sections
                                     label.control-label(for="username") Name
                                     .controls
                                         input#username(type="text", name="username",
-                                            value=oldvalues.username)
+                                            maxlength="15", value=oldvalues.username)
                                         span.help-inline #{errors.username}
                             - else
                                 .control-group
                                     label.control-label(for="username") Name
                                     .controls
                                         input#username(type="text", name="username",
-                                            value=oldvalues.username)
+                                            maxlength="15", value=oldvalues.username)
                             - if (errors.email)
                                 .control-group.error
                                     label.control-label(for="email") Email
@@ -77,7 +77,8 @@ block sections
                                     label.control-label(for="captcha-input") Are you human?
                                     .controls
                                         img#captcha(src=captchaurl)
-                                        input#captcha-input(type="text", name="captcha")
+                                        input#captcha-input(type="text", name="captcha",
+                                            maxlength="4")
                                         span.help-inline #{errors.captcha}
                             - else
                                 .control-group
@@ -85,13 +86,13 @@ block sections
                                     .controls
                                         img#captcha(src=captchaurl)
                                         input#captcha-input(type="text", name="captcha",
-                                            placeholder="type what you see...")
+                                            maxlength="4", placeholder="type what you see...")
                         - else
                             .control-group
                                 label.control-label(for="username") Name
                                 .controls
                                     input#username(type="text", name="username",
-                                        placeholder="enter a nickname...")
+                                        maxlength="15", placeholder="enter a nickname...")
                             .control-group
                                 label.control-label(for="email") Email
                                 .controls
@@ -107,7 +108,7 @@ block sections
                                 .controls
                                     img#captcha(src=captchaurl)
                                     input#captcha-input(type="text", name="captcha",
-                                        placeholder="type what you see...")
+                                        maxlength="4", placeholder="type what you see...")
                         button.submit-button.btn.btn-success(type="submit")
                             i.icon-user.icon-white
                             |  Sign up!
