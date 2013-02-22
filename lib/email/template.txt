@@ -16,7 +16,7 @@ new tab or window.
 
 If you haven't requested a password reset, you can 
 disregard this message, because it's  likely that another 
-user enteredyour email address by mistake while trying to 
+user entered your email address by mistake while trying to 
 reset a password.
 
 ============================================================
