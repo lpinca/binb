@@ -1,7 +1,7 @@
 extends layout
 
 block title
-    title binb :: #{username.replace(/&/g, '&amp;')} info
+    title binb :: #{username} info
     
 block brand
     a.brand(href="#")
@@ -11,7 +11,7 @@ block sections
     section
         .row
             .span7.offset1
-                .profile #{username.replace(/&/g, '&amp;')}
+                .profile #{username}
                     .icons.img
                 div member since #{joindate}
     section

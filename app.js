@@ -127,8 +127,7 @@ io.sockets.on('connection', function(socket) {
         }
     });
     socket.on('joinanonymously', function(nickname, roomname) {
-        if (!socket.nickname && typeof nickname === 'string' && nickname !== '' &&
-            ~config.rooms.indexOf(roomname)) {
+        if (!socket.nickname && typeof nickname === 'string' && ~config.rooms.indexOf(roomname)) {
             rooms[roomname].setNickName(socket, nickname);
         }
     });

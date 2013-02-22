@@ -394,9 +394,8 @@
 
         for(var i=0;i<3;i++) {
             if (podium[i]) {
-                var playername = podium[i].nickname.encodeEntities();
                 html += '<tr><td><div class="icons medals rank'+(i+1)+'"></div></td>';
-                html += '<td class="name">'+playername+'</td>';
+                html += '<td class="name">'+podium[i].nickname+'</td>';
                 html += '<td>'+podium[i].points+'</td>';
                 html += '<td>'+podium[i].golds+'</td><td>'+podium[i].silvers+'</td>';
                 html += '<td>'+podium[i].bronzes+'</td><td>'+podium[i].guessed+'</td>';
@@ -466,8 +465,7 @@
     // Prompt for name and send it
     var joinAnonymously = function(msg) {
         if (/nickname\s*\=/.test(document.cookie) && !msg) {
-            var encodednickname = document.cookie.replace(/.*nickname\s*\=\s*([^;]*);?.*/, '$1');
-            nickname = decodeURIComponent(encodednickname);
+            var nickname = document.cookie.replace(/.*nickname\s*\=\s*([^;]*);?.*/, '$1');
             return socket.emit('joinanonymously', nickname, roomname);
         }
 
@@ -480,7 +478,7 @@
         html += '<h3>You are joining the '+roomname+' room</h3></div>';
         html += '<div class="modal-body"><p>'+(msg || "What's your name?")+'</p></div>';
         html += '<div class="modal-footer relative">';
-        html += '<input id="login" class="" type="text" name="nickname" />';
+        html += '<input id="login" maxlength="15" type="text" name="nickname" />';
         html += '<button id="join" class="btn btn-success">';
         html += '<i class="icon-user icon-white"></i> Join the game</button>';
         html += '<span class="divider"><span>or</span></span>';
@@ -492,9 +490,8 @@
         var button = $('#join');
 
         button.click(function() {
-            var val = $.trim(login.val());
-            if (val !== '') {
-                nickname = val;
+            if ($.trim(login.val()) !== '') {
+                nickname = login.val();
                 socket.emit('joinanonymously', nickname, roomname);
             }
             else {
@@ -633,7 +630,7 @@
     // Successfully joined the room
     var ready = function(usersData, trackscount, loggedin) {
         if (!loggedin && !/nickname\s*\=/.test(document.cookie)) {
-            document.cookie = 'nickname='+encodeURIComponent(nickname)+';path=/;';
+            document.cookie = 'nickname='+nickname+';path=/;';
         }
 
         DOM.modal.modal('hide').empty();
@@ -843,7 +840,7 @@
 
             li.append(pvt, username, points, roundrank, roundpointsel, guesstime);
             if (user.registered) {
-                var href = 'href="/user/'+encodeURIComponent(user.nickname)+'"';
+                var href = 'href="/user/'+user.nickname+'"';
                 pvt.after('<a class="icons registered" target="_blank" '+href+'></a>');
             }
             DOM.users.append(li);
@@ -901,12 +898,12 @@
 
     // Convert any URLs in text into clickable links
     var urlize = function(text) {
-        if (text.match(urlregex)) {
+        if (urlregex.test(text)) {
             var html = '';
             var splits = text.split(urlregex);
             for (var i=0; i<splits.length; i++) {
                 var escapedsplit = splits[i].encodeEntities();
-                if (splits[i].match(urlregex)) {
+                if (urlregex.test(splits[i])) {
                     html += '<a target="_blank" href="'+escapedsplit+'">'+escapedsplit+'</a>';
                     continue;
                 }

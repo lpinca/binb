@@ -24,8 +24,7 @@ block sections
                                 tr
                                     td #{i+1}
                                     td
-                                        a(href="/user/#{encodeURIComponent(user.username)}")
-                                            | #{user.username.replace(/&/g, '&amp;')}
+                                        a(href="/user/#{user.username}") #{user.username}
                                     td #{user.totpoints}
                     .loading
                         .loading-block
@@ -40,8 +39,7 @@ block sections
                                 tr
                                     td #{i+1}
                                     td
-                                        a(href="/user/#{encodeURIComponent(user.username)}")
-                                            | #{user.username.replace(/&/g, '&amp;')}
+                                        a(href="/user/#{user.username}") #{user.username}
                                     td 
                                         i.icon-time
                                         |  #{user.bestguesstime} sec

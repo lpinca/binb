@@ -1,7 +1,7 @@
 (function() {
     var appendResults = function(data, leaderboard, offset, type) {
         for (var i=0; i<data.length; i+=2) {
-            var link = $('<a href="/user/'+encodeURIComponent(data[i])+'"></a>').text(data[i])
+            var link = $('<a href="/user/'+data[i]+'"></a>').text(data[i])
                 , col1 = '<td>'+(++offset)+'</td>'
                 , col2 = $('<td></td>').append(link)
                 , col3 = (type === 'points')

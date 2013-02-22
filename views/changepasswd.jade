@@ -9,11 +9,11 @@ block nav
             a(href="/") Home
         li.dropdown
             a.dropdown-toggle(data-toggle="dropdown", href="#")
-                | Logged in as #{loggedin.replace(/&/g, '&amp;')} 
+                | Logged in as #{loggedin} 
                 span.caret
             ul.dropdown-menu
                 li
-                    a(href="/user/#{encodeURIComponent(loggedin)}", target="_blank") Profile
+                    a(href="/user/#{loggedin}", target="_blank") Profile
                 li
                     a(href="/logout") Logout
 
