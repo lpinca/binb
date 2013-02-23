@@ -1,35 +1,35 @@
 extends layout
 
 block title
-    title binb :: Reset password
+  title binb :: Reset password
 
 block brand
-    a.brand(href="#")
-        .icons.logo #{slogan}
+  a.brand(href="#")
+    .icons.logo #{slogan}
 
 block sections
-    section
-        .row
-            .span12.offset2
-                - if (locals.errors && errors.alert)
-                    .alert.alert-error
-                        a.close(data-dismiss="alert") &times;
-                        strong Oh snap!
-                        |  #{errors.alert}
-                form.form-horizontal.well(method="post", action="/resetpasswd?token=#{token}")
-                    fieldset
-                        - if (locals.errors && errors.password)
-                            .control-group.error
-                                label.control-label(for="password") New password
-                                .controls
-                                    input#password(type="password", name="password")
-                                    span.help-inline #{errors.password}
-                        - else
-                            .control-group
-                                label.control-label(for="password") New password
-                                .controls
-                                    input#password(type="password", name="password",
-                                        placeholder="enter your new password...")
-                        button.submit-button.btn.btn-primary(type="submit")
-                            i.icon-edit.icon-white
-                            |  Update
+  section
+    .row
+      .span12.offset2
+        - if (locals.errors && errors.alert)
+          .alert.alert-error
+            a.close(data-dismiss="alert") &times;
+            strong Oh snap!
+            |  #{errors.alert}
+        form.form-horizontal.well(method="post", action="/resetpasswd?token=#{token}")
+          fieldset
+            - if (locals.errors && errors.password)
+              .control-group.error
+                label.control-label(for="password") New password
+                .controls
+                  input#password(type="password", name="password")
+                  span.help-inline #{errors.password}
+            - else
+              .control-group
+                label.control-label(for="password") New password
+                .controls
+                  input#password(type="password", name="password",
+                    placeholder="enter your new password...")
+            button.submit-button.btn.btn-primary(type="submit")
+              i.icon-edit.icon-white
+              |  Update

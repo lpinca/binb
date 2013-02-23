@@ -1,65 +1,64 @@
 extends layout
 
 block title
-    title binb :: Change password
+  title binb :: Change password
 
 block nav
-    ul.nav.pull-right
+  ul.nav.pull-right
+    li
+      a(href="/") Home
+    li.dropdown
+      a.dropdown-toggle(data-toggle="dropdown", href="#") Logged in as #{loggedin} 
+        span.caret
+      ul.dropdown-menu
         li
-            a(href="/") Home
-        li.dropdown
-            a.dropdown-toggle(data-toggle="dropdown", href="#")
-                | Logged in as #{loggedin} 
-                span.caret
-            ul.dropdown-menu
-                li
-                    a(href="/user/#{loggedin}", target="_blank") Profile
-                li
-                    a(href="/logout") Logout
+          a(href="/user/#{loggedin}", target="_blank") Profile
+        li
+          a(href="/logout") Logout
 
 block sections
-    section
-        .row
-            .span12.offset2
-                form.form-horizontal.well(method="post",
-                    action="/changepasswd?followup=#{followup}")
-                    fieldset
-                        - if (locals.errors)
-                            - if (errors.oldpassword)
-                                .control-group.error
-                                    label.control-label(for="oldpassword") Old password
-                                    .controls
-                                        input#oldpassword(type="password", name="oldpassword")
-                                        span.help-inline #{errors.oldpassword}
-                            - else
-                                .control-group
-                                    label.control-label(for="oldpassword") Old password
-                                    .controls
-                                        input#oldpassword(type="password", name="oldpassword",
-                                            placeholder="enter your current password...")
-                            - if (errors.newpassword)
-                                .control-group.error
-                                    label.control-label(for="newpassword") New password
-                                    .controls
-                                        input#newpassword(type="password", name="newpassword")
-                                        span.help-inline #{errors.newpassword}
-                            - else
-                                .control-group
-                                    label.control-label(for="newpassword") New password
-                                    .controls
-                                        input#newpassword(type="password", name="newpassword",
-                                            placeholder="enter your new password...")
-                        - else
-                            .control-group
-                                label.control-label(for="oldpassword") Old password
-                                .controls
-                                    input#oldpassword(type="password", name="oldpassword",
-                                        placeholder="enter your current password...")
-                            .control-group
-                                label.control-label(for="password") New password
-                                .controls
-                                    input#newpassword(type="password", name="newpassword",
-                                        placeholder="enter your new password...")
-                        button.submit-button.btn.btn-primary(type="submit")
-                            i.icon-edit.icon-white
-                            |  Update
+  section
+    .row
+      .span12.offset2
+        form.form-horizontal.well(method="post",
+          action="/changepasswd?followup=#{followup}")
+          fieldset
+            - if (locals.errors)
+              - if (errors.oldpassword)
+                .control-group.error
+                  label.control-label(for="oldpassword") Old password
+                  .controls
+                    input#oldpassword(type="password", name="oldpassword")
+                    span.help-inline #{errors.oldpassword}
+              - else
+                .control-group
+                  label.control-label(for="oldpassword") Old password
+                  .controls
+                    input#oldpassword(type="password", name="oldpassword",
+                      placeholder="enter your current password...")
+              - if (errors.newpassword)
+                .control-group.error
+                  label.control-label(for="newpassword") New password
+                  .controls
+                    input#newpassword(type="password", name="newpassword")
+                    span.help-inline #{errors.newpassword}
+              - else
+                .control-group
+                  label.control-label(for="newpassword") New password
+                  .controls
+                    input#newpassword(type="password", name="newpassword",
+                      placeholder="enter your new password...")
+            - else
+              .control-group
+                label.control-label(for="oldpassword") Old password
+                .controls
+                  input#oldpassword(type="password", name="oldpassword",
+                    placeholder="enter your current password...")
+              .control-group
+                label.control-label(for="password") New password
+                .controls
+                  input#newpassword(type="password", name="newpassword",
+                    placeholder="enter your new password...")
+            button.submit-button.btn.btn-primary(type="submit")
+              i.icon-edit.icon-white
+              |  Update

@@ -1,88 +1,88 @@
 extends layout
 
 block title
-    title binb :: #{username} info
-    
+  title binb :: #{username} info
+  
 block brand
-    a.brand(href="#")
-        .icons.logo #{slogan}
+  a.brand(href="#")
+    .icons.logo #{slogan}
 
 block sections
-    section
-        .row
-            .span7.offset1
-                .profile #{username}
-                    .icons.img
-                div member since #{joindate}
-    section
-        .row
-            .span7.offset1
-                h4 Points
-                table.table.table-striped.table-bordered.stats
-                    tbody
-                        tr
-                            td Total
-                            td #{totpoints}
-                        tr
-                            td Best score
-                            td #{bestscore}
-                        tr
-                            td Guessed songs
-                            td #{guessed}
-                h4 Times
-                table.table.table-striped.table-bordered.stats
-                    tbody
-                        tr
-                            td Best guess time
-                            - if (bestguesstime !== "30.0")
-                                td #{bestguesstime} sec
-                            - else
-                                td N/A
-                        tr
-                            td Worst guess time
-                            - if (worstguesstime !== "0.0")
-                                td #{worstguesstime} sec
-                            - else
-                                td N/A
-                        tr
-                            td Mean guess time
-                            - if (typeof meanguesstime !== 'undefined')
-                                td #{meanguesstime} sec
-                            - else
-                                td N/A
-            .span7
-                h4 Awards
-                table.table.table-striped.table-bordered.stats
-                    tbody
-                        tr
-                            td Gold cups
-                            td
-                                .icons.cups.stand1
-                            td #{golds}
-                        tr
-                            td Silver cups
-                            td
-                                .icons.cups.stand2
-                            td #{silvers}
-                        tr
-                            td Bronze cups
-                            td
-                                .icons.cups.stand3
-                            td #{bronzes}
-                        tr
-                            td Victories
-                            td
-                                .icons.medals.rank1
-                            td #{victories}
-                        tr
-                            td Second places
-                            td
-                                .icons.medals.rank2
-                            td #{secondplaces}
-                        tr
-                            td Third places
-                            td
-                                .icons.medals.rank3
-                            td #{thirdplaces}
+  section
+    .row
+      .span7.offset1
+        .profile #{username}
+          .icons.img
+        div member since #{joindate}
+  section
+    .row
+      .span7.offset1
+        h4 Points
+        table.table.table-striped.table-bordered.stats
+          tbody
+            tr
+              td Total
+              td #{totpoints}
+            tr
+              td Best score
+              td #{bestscore}
+            tr
+              td Guessed songs
+              td #{guessed}
+        h4 Times
+        table.table.table-striped.table-bordered.stats
+          tbody
+            tr
+              td Best guess time
+              - if (bestguesstime !== "30.0")
+                td #{bestguesstime} sec
+              - else
+                td N/A
+            tr
+              td Worst guess time
+              - if (worstguesstime !== "0.0")
+                td #{worstguesstime} sec
+              - else
+                td N/A
+            tr
+              td Mean guess time
+              - if (typeof meanguesstime !== 'undefined')
+                td #{meanguesstime} sec
+              - else
+                td N/A
+      .span7
+        h4 Awards
+        table.table.table-striped.table-bordered.stats
+          tbody
+            tr
+              td Gold cups
+              td
+                .icons.cups.stand1
+              td #{golds}
+            tr
+              td Silver cups
+              td
+                .icons.cups.stand2
+              td #{silvers}
+            tr
+              td Bronze cups
+              td
+                .icons.cups.stand3
+              td #{bronzes}
+            tr
+              td Victories
+              td
+                .icons.medals.rank1
+              td #{victories}
+            tr
+              td Second places
+              td
+                .icons.medals.rank2
+              td #{secondplaces}
+            tr
+              td Third places
+              td
+                .icons.medals.rank3
+              td #{thirdplaces}
 
 block scripts

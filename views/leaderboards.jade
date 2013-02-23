@@ -1,53 +1,53 @@
 extends layout
 
 block title
-    title binb :: Leaderboards
+  title binb :: Leaderboards
 
 block brand
-    a.brand(href="#")
-        .icons.logo #{slogan}
+  a.brand(href="#")
+    .icons.logo #{slogan}
 
 block sections
-    section
-        .row
-            .span7.offset1
-                .highscores High Scores
-                    .icons.img
-    section
-        .row
-            .span7.offset1.relative
-                h4 Points
-                .leaderboard-wrapper
-                    table.table.table-striped.table-bordered.leaderboard
-                        tbody
-                            - each user, i in pointsleaderboard
-                                tr
-                                    td #{i+1}
-                                    td
-                                        a(href="/user/#{user.username}") #{user.username}
-                                    td #{user.totpoints}
-                    .loading
-                        .loading-block
-                        .loading-block
-                        .loading-block
-            .span7.relative
-                h4 Times
-                .leaderboard-wrapper
-                    table.table.table-striped.table-bordered.leaderboard
-                        tbody
-                            - each user, i in timesleaderboard
-                                tr
-                                    td #{i+1}
-                                    td
-                                        a(href="/user/#{user.username}") #{user.username}
-                                    td 
-                                        i.icon-time
-                                        |  #{user.bestguesstime} sec
-                    .loading
-                        .loading-block
-                        .loading-block
-                        .loading-block
+  section
+    .row
+      .span7.offset1
+        .highscores High Scores
+          .icons.img
+  section
+    .row
+      .span7.offset1.relative
+        h4 Points
+        .leaderboard-wrapper
+          table.table.table-striped.table-bordered.leaderboard
+            tbody
+              - each user, i in pointsleaderboard
+                tr
+                  td #{i+1}
+                  td
+                    a(href="/user/#{user.username}") #{user.username}
+                  td #{user.totpoints}
+          .loading
+            .loading-block
+            .loading-block
+            .loading-block
+      .span7.relative
+        h4 Times
+        .leaderboard-wrapper
+          table.table.table-striped.table-bordered.leaderboard
+            tbody
+              - each user, i in timesleaderboard
+                tr
+                  td #{i+1}
+                  td
+                    a(href="/user/#{user.username}") #{user.username}
+                  td 
+                    i.icon-time
+                    |  #{user.bestguesstime} sec
+          .loading
+            .loading-block
+            .loading-block
+            .loading-block
 
 block scripts
-    script(src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js")
-    script(src="/static/js/leaderboards.js")
+  script(src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js")
+  script(src="/static/js/leaderboards.js")

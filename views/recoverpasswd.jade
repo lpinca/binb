@@ -1,78 +1,78 @@
 extends layout
 
 block title
-    title binb :: Recover password
+  title binb :: Recover password
 
 block nav
-    ul.nav.pull-right
-        li
-            a(href="/") Home
-        li
-            a(href="/signup?followup=#{followup}") Sign up
-        li
-            a(href="/login?followup=#{followup}") Login
+  ul.nav.pull-right
+    li
+      a(href="/") Home
+    li
+      a(href="/signup?followup=#{followup}") Sign up
+    li
+      a(href="/login?followup=#{followup}") Login
 
 block sections
-    section
-        .row
-            .span12.offset2
-                - if (locals.success)
-                    .alert.alert-block.alert-success
-                        h4.alert-heading Success!
-                        | An email has been sent to you.<br>To start the password reset 
-                        | process, open this email and follow the given instructions.<br>
-                        | If you don't receive it in a reasonable amount of time, please 
-                        | use the support form on the left.
+  section
+    .row
+      .span12.offset2
+        - if (locals.success)
+          .alert.alert-block.alert-success
+            h4.alert-heading Success!
+            | An email has been sent to you.<br>To start the password reset 
+            | process, open this email and follow the given instructions.<br>
+            | If you don't receive it in a reasonable amount of time, please 
+            | use the support form on the left.
+        - else
+          - if (locals.errors && errors.alert)
+            .alert.alert-error
+              a.close(data-dismiss="alert") &times;
+              strong Oh snap!
+              |  #{errors.alert}
+          form.form-horizontal.well(method="post",
+            action="/recoverpasswd?followup=#{followup}")
+            fieldset
+              - if (locals.errors)
+                - if (errors.email)
+                  .control-group.error
+                    label.control-label(for="email") Email
+                    .controls
+                      input#email(type="text", name="email",
+                        value=oldvalues.email)
+                      span.help-inline #{errors.email}
                 - else
-                    - if (locals.errors && errors.alert)
-                        .alert.alert-error
-                            a.close(data-dismiss="alert") &times;
-                            strong Oh snap!
-                            |  #{errors.alert}
-                    form.form-horizontal.well(method="post",
-                        action="/recoverpasswd?followup=#{followup}")
-                        fieldset
-                            - if (locals.errors)
-                                - if (errors.email)
-                                    .control-group.error
-                                        label.control-label(for="email") Email
-                                        .controls
-                                            input#email(type="text", name="email",
-                                                value=oldvalues.email)
-                                            span.help-inline #{errors.email}
-                                - else
-                                    .control-group
-                                        label.control-label(for="email") Email
-                                        .controls
-                                            input#email(type="text", name="email",
-                                                value=oldvalues.email)
-                                - if (errors.captcha)
-                                    .control-group.error
-                                        label.control-label(for="captcha-input") Are you human?
-                                        .controls
-                                            img#captcha(src=captchaurl)
-                                            input#captcha-input(type="text", name="captcha",
-                                                maxlength="4")
-                                            span.help-inline #{errors.captcha}
-                                - else
-                                    .control-group
-                                        label.control-label(for="captcha-input") Are you human?
-                                        .controls
-                                            img#captcha(src=captchaurl)
-                                            input#captcha-input(type="text", name="captcha",
-                                                maxlength="4", placeholder="type what you see...")
-                            - else
-                                .control-group
-                                    label.control-label(for="email") Email
-                                    .controls
-                                        input#email(type="text", name="email",
-                                            placeholder="type the email you used to sign up...")
-                                .control-group
-                                    label.control-label(for="captcha-input") Are you human?
-                                    .controls
-                                        img#captcha(src=captchaurl)
-                                        input#captcha-input(type="text", name="captcha",
-                                            maxlength="4", placeholder="type what you see...")
-                            button.submit-button.btn.btn-primary(type="submit")
-                                i.icon-envelope.icon-white
-                                |  Send password reset link
+                  .control-group
+                    label.control-label(for="email") Email
+                    .controls
+                      input#email(type="text", name="email",
+                        value=oldvalues.email)
+                - if (errors.captcha)
+                  .control-group.error
+                    label.control-label(for="captcha-input") Are you human?
+                    .controls
+                      img#captcha(src=captchaurl)
+                      input#captcha-input(type="text", name="captcha",
+                        maxlength="4")
+                      span.help-inline #{errors.captcha}
+                - else
+                  .control-group
+                    label.control-label(for="captcha-input") Are you human?
+                    .controls
+                      img#captcha(src=captchaurl)
+                      input#captcha-input(type="text", name="captcha",
+                        maxlength="4", placeholder="type what you see...")
+              - else
+                .control-group
+                  label.control-label(for="email") Email
+                  .controls
+                    input#email(type="text", name="email",
+                      placeholder="type the email you used to sign up...")
+                .control-group
+                  label.control-label(for="captcha-input") Are you human?
+                  .controls
+                    img#captcha(src=captchaurl)
+                    input#captcha-input(type="text", name="captcha",
+                      maxlength="4", placeholder="type what you see...")
+              button.submit-button.btn.btn-primary(type="submit")
+                i.icon-envelope.icon-white
+                |  Send password reset link

@@ -1,61 +1,60 @@
 extends layout
 
 block title
-    title binb
+  title binb
 
 block nav
-    ul.nav.pull-right
-        li.active
-            a(href="/") Home
-        li
-            a(target="_blank", href="/leaderboards")
-                i.icon-list-alt.icon-white
-                |  Leaderboards
-        - if (locals.loggedin)
-            li.dropdown
-                a.dropdown-toggle(data-toggle="dropdown", href="#")
-                    | Logged in as #{loggedin} 
-                    span.caret
-                ul.dropdown-menu
-                    li
-                        a(href="/user/#{loggedin}", target="_blank") Profile
-                    li
-                        a(href="/changepasswd") Change password
-                    li
-                        a(href="/logout") Logout
-        - else
-            li
-                a(href="/signup") Sign up
-            li
-                a(href="/login") Login
+  ul.nav.pull-right
+    li.active
+      a(href="/") Home
+    li
+      a(target="_blank", href="/leaderboards")
+        i.icon-list-alt.icon-white
+        |  Leaderboards
+    - if (locals.loggedin)
+      li.dropdown
+        a.dropdown-toggle(data-toggle="dropdown", href="#") Logged in as #{loggedin} 
+          span.caret
+        ul.dropdown-menu
+          li
+            a(href="/user/#{loggedin}", target="_blank") Profile
+          li
+            a(href="/changepasswd") Change password
+          li
+            a(href="/logout") Logout
+    - else
+      li
+        a(href="/signup") Sign up
+      li
+        a(href="/login") Login
 
 block sections
-    section
-        .row
-            .span7
-                h3 What's this?
-                p binb is a realtime, multiplayer, competitive music listening game.
-            .span9
-                h3 How to play?
-                p All you have to do is to guess the song that is playing. A fixed number 
-                    | of songs will run and for each one correctly guessed you will earn an 
-                    | amount of points. That amount depends on the number of correct guesses 
-                    | (artist and/or title of the song) and on how fast you will be on 
-                    | answering compared to other players. At the end a scoreboard will 
-                    | report the best three players of the match. If you have read this 
-                    | far, what are you waiting? Click on a room below and prove your 
-                    | music knowledge!
-    section
-        .row
-            .span16
-                ul.thumbnails
-                    - each item in rooms
-                        li.span4
-                            a.thumbnail.relative(href=item)
-                                .room #{item} - 
-                                    span(id=item)
-                                    |  Players
+  section
+    .row
+      .span7
+        h3 What's this?
+        p binb is a realtime, multiplayer, competitive music listening game.
+      .span9
+        h3 How to play?
+        p All you have to do is to guess the song that is playing. A fixed number 
+          | of songs will run and for each one correctly guessed you will earn an 
+          | amount of points. That amount depends on the number of correct guesses 
+          | (artist and/or title of the song) and on how fast you will be on 
+          | answering compared to other players. At the end a scoreboard will 
+          | report the best three players of the match. If you have read this 
+          | far, what are you waiting? Click on a room below and prove your 
+          | music knowledge!
+  section
+    .row
+      .span16
+        ul.thumbnails
+          - each item in rooms
+            li.span4
+              a.thumbnail.relative(href=item)
+                .room #{item} - 
+                  span(id=item)
+                  |  Players
 
 append scripts    
-    script(src="/socket.io/socket.io.js")
-    script(src="/static/js/home.js")
+  script(src="/socket.io/socket.io.js")
+  script(src="/static/js/home.js")

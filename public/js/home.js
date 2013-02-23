@@ -1,31 +1,31 @@
 (function() {
-    if ($.browser.mozilla) {
-        // Block ESC button in firefox (breaks socket connections).
-        $(document).keypress(function(event) {
-            if(event.keyCode === 27) {
-                return false;
-            }
-        });
-    }
-    $.get('/artworks', function(data) {
-        $('.thumbnail').each(function(index) {
-            var i = index * 6;
-            var j = i + 6;
-            for(i; i < j; i++) {
-                $('<img src="'+data.results[i]+'" />').appendTo($(this));
-            }
-        });
+  if ($.browser.mozilla) {
+    // Block ESC button in firefox (breaks socket connections).
+    $(document).keypress(function(event) {
+      if(event.keyCode === 27) {
+        return false;
+      }
     });
-    var uri = window.location.protocol+'//'+window.location.host;
-    var socket = io.connect(uri, {'reconnect':false});
-    socket.on('connect', function() {
-        socket.emit('getoverview', function(data) {
-            for (var prop in data) {
-                $('#'+prop).text(data[prop]);
-            }
-        });
-        socket.on('updateoverview', function(room, players) {
-            $('#'+room).text(players);
-        });
+  }
+  $.get('/artworks', function(data) {
+    $('.thumbnail').each(function(index) {
+      var i = index * 6;
+      var j = i + 6;
+      for(i; i < j; i++) {
+        $('<img src="'+data.results[i]+'" />').appendTo($(this));
+      }
     });
+  });
+  var uri = window.location.protocol+'//'+window.location.host;
+  var socket = io.connect(uri, {'reconnect':false});
+  socket.on('connect', function() {
+    socket.emit('getoverview', function(data) {
+      for (var prop in data) {
+        $('#'+prop).text(data[prop]);
+      }
+    });
+    socket.on('updateoverview', function(room, players) {
+      $('#'+room).text(players);
+    });
+  });
 })();

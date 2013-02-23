@@ -1,102 +1,101 @@
 extends layout
 
 block title
-    title binb :: #{roomname}
+  title binb :: #{roomname}
 
 block brand
 
 block nav
-    ul.nav.pull-right
-        li
-            a(href="/") Home
-        li
-            a(target="_blank", href="/leaderboards")
-                i.icon-list-alt.icon-white
-                |  Leaderboards
-        li.active.dropdown
-            a.dropdown-toggle(data-toggle="dropdown",href="#") #{roomname} 
-                b.caret
-            ul.dropdown-menu
-                - each item in rooms
-                    - if (item !== roomname)
-                        li
-                            a(href=item)
-                                span.room-name #{item}
-                                i.icon-user.pull-right
-                                span.users-counter
-        - if (locals.loggedin)
-            li.dropdown
-                a.dropdown-toggle(data-toggle="dropdown", href="#")
-                    | Logged in as #{loggedin} 
-                    span.caret
-                ul.dropdown-menu
-                    li
-                        a(href="/user/#{loggedin}", target="_blank") Profile
-                    li
-                        a(href="/changepasswd?followup=/#{roomname}") Change password
-                    li
-                        a(href="/logout") Logout
-        - else
+  ul.nav.pull-right
+    li
+      a(href="/") Home
+    li
+      a(target="_blank", href="/leaderboards")
+        i.icon-list-alt.icon-white
+        |  Leaderboards
+    li.active.dropdown
+      a.dropdown-toggle(data-toggle="dropdown",href="#") #{roomname} 
+        b.caret
+      ul.dropdown-menu
+        - each item in rooms
+          - if (item !== roomname)
             li
-                a(href="/signup?followup=/#{roomname}") Sign up
-            li
-                a(href="/login?followup=/#{roomname}") Login
+              a(href=item)
+                span.room-name #{item}
+                i.icon-user.pull-right
+                span.users-counter
+    - if (locals.loggedin)
+      li.dropdown
+        a.dropdown-toggle(data-toggle="dropdown", href="#") Logged in as #{loggedin} 
+          span.caret
+        ul.dropdown-menu
+          li
+            a(href="/user/#{loggedin}", target="_blank") Profile
+          li
+            a(href="/changepasswd?followup=/#{roomname}") Change password
+          li
+            a(href="/logout") Logout
+    - else
+      li
+        a(href="/signup?followup=/#{roomname}") Sign up
+      li
+        a(href="/login?followup=/#{roomname}") Login
 
 block sections
-    section
-        .row
-            .span4.offset1
-                #cassette.relative
-                    #wheel-left.icons.wheel
-                    #tape-left
-                    #tape-right
-                    #wheel-right.icons.wheel
-                    #progress-bar
-                        #progress
-                    #countdown
-            .span2
-                #volume.relative
-            .span8
-                .page-header
-                    .icons.logo #{slogan}
-                    #total-tracks
-                        span
-                        |  tracks.
-                #summary.row
-                    .span2
-                        .title Rank
-                        .rank
-                    .span4
-                        .title Points
-                        .points
-                    .span2
-                        .title Track
-                        .track
-                p#feedback Waiting for connection...
-                input#guess.span8(type="text", tabindex="1",
-                    placeholder="guess the artist and/or title here")
-    section.relative
-        .row
-            #users-wrapper.span5.offset2
-                ul#users.unstyled
-            .span8
-                a#toggle-chat Hide chat
-                #chat-outer-wrapper
-                    #chat-wrapper.bordered
-                        ul#chat.unstyled
-                    #message-wrapper
-                        span#recipient
-                        input#message.span8(type="text", tabindex="2")
-                ul#tracks.unstyled
-        #disclaimer
-            div I do not own any right on the songs that are played here.
-            div Tracks are played using iTunes api preview.
+  section
+    .row
+      .span4.offset1
+        #cassette.relative
+          #wheel-left.icons.wheel
+          #tape-left
+          #tape-right
+          #wheel-right.icons.wheel
+          #progress-bar
+            #progress
+          #countdown
+      .span2
+        #volume.relative
+      .span8
+        .page-header
+          .icons.logo #{slogan}
+          #total-tracks
+            span
+            |  tracks.
+        #summary.row
+          .span2
+            .title Rank
+            .rank
+          .span4
+            .title Points
+            .points
+          .span2
+            .title Track
+            .track
+        p#feedback Waiting for connection...
+        input#guess.span8(type="text", tabindex="1",
+          placeholder="guess the artist and/or title here")
+  section.relative
+    .row
+      #users-wrapper.span5.offset2
+        ul#users.unstyled
+      .span8
+        a#toggle-chat Hide chat
+        #chat-outer-wrapper
+          #chat-wrapper.bordered
+            ul#chat.unstyled
+          #message-wrapper
+            span#recipient
+            input#message.span8(type="text", tabindex="2")
+        ul#tracks.unstyled
+    #disclaimer
+      div I do not own any right on the songs that are played here.
+      div Tracks are played using iTunes api preview.
 
 block media
-    #modal.modal.fade
-    #player
+  #modal.modal.fade
+  #player
 
 append scripts
-    script(src="/static/js/jquery.jplayer.min.js")
-    script(src="/socket.io/socket.io.js")
-    script(src="/static/js/app.js")
+  script(src="/static/js/jquery.jplayer.min.js")
+  script(src="/socket.io/socket.io.js")
+  script(src="/static/js/app.js")

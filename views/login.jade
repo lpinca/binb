@@ -1,75 +1,75 @@
 extends layout
 
 block title
-    title binb :: login
-        
+  title binb :: login
+    
 block nav
-    ul.nav.pull-right
-        li
-            a(href="/") Home
-        li
-            a(href="/signup?followup=#{followup}") Sign up
-        li.active
-            a(href="/login?followup=#{followup}") Login
+  ul.nav.pull-right
+    li
+      a(href="/") Home
+    li
+      a(href="/signup?followup=#{followup}") Sign up
+    li.active
+      a(href="/login?followup=#{followup}") Login
 
 block sections
-    section
-        .row
-            .span3
-                h3 New user?
-                a(href="/signup?followup=#{followup}") Click here to create an account.
-            .span13
-                - if (locals.errors && errors.alert)
-                    .alert.alert-error
-                        a.close(data-dismiss="alert") &times;
-                        strong Oh snap!
-                        |  #{errors.alert}
-                - else if (locals.success)
-                    .alert.alert-success
-                        a.close(data-dismiss="alert") &times;
-                        strong Well done!
-                        |  #{success}
-                form.form-horizontal.well(method="post", action="/login?followup=#{followup}")
-                    fieldset
-                        - if (locals.errors)
-                            - if (errors.username)
-                                .control-group.error
-                                    label.control-label(for="username") Name
-                                    .controls
-                                        input#username(type="text", name="username",
-                                            maxlength="15", value=oldvalues.username)
-                                        span.help-inline #{errors.username}
-                            - else
-                                .control-group
-                                    label.control-label(for="username") Name
-                                    .controls
-                                        input#username(type="text", name="username",
-                                            maxlength="15", value=oldvalues.username)
-                            - if (errors.password)
-                                .control-group.error
-                                    label.control-label(for="password") Password
-                                    .controls
-                                        input#password(type="password", name="password")
-                                        span.help-inline #{errors.password}
-                            - else
-                                .control-group
-                                    label.control-label(for="password") Password
-                                    .controls
-                                        input#password(type="password", name="password",
-                                            placeholder="enter your password...")
-                        - else
-                            .control-group
-                                label.control-label(for="username") Name
-                                .controls
-                                    input#username(type="text", name="username",
-                                        maxlength="15", placeholder="enter your nickname...")
-                            .control-group
-                                label.control-label(for="password") Password
-                                .controls
-                                    input#password(type="password", name="password",
-                                        placeholder="enter your password...")
-                        button.submit-button.btn.btn-primary(type="submit")
-                            i.icon-lock.icon-white
-                            |  Login
-                        a.forgot-passwd(href="/recoverpasswd?followup=#{followup}")
-                            | Forgot your password?
+  section
+    .row
+      .span3
+        h3 New user?
+        a(href="/signup?followup=#{followup}") Click here to create an account.
+      .span13
+        - if (locals.errors && errors.alert)
+          .alert.alert-error
+            a.close(data-dismiss="alert") &times;
+            strong Oh snap!
+            |  #{errors.alert}
+        - else if (locals.success)
+          .alert.alert-success
+            a.close(data-dismiss="alert") &times;
+            strong Well done!
+            |  #{success}
+        form.form-horizontal.well(method="post", action="/login?followup=#{followup}")
+          fieldset
+            - if (locals.errors)
+              - if (errors.username)
+                .control-group.error
+                  label.control-label(for="username") Name
+                  .controls
+                    input#username(type="text", name="username",
+                      maxlength="15", value=oldvalues.username)
+                    span.help-inline #{errors.username}
+              - else
+                .control-group
+                  label.control-label(for="username") Name
+                  .controls
+                    input#username(type="text", name="username",
+                      maxlength="15", value=oldvalues.username)
+              - if (errors.password)
+                .control-group.error
+                  label.control-label(for="password") Password
+                  .controls
+                    input#password(type="password", name="password")
+                    span.help-inline #{errors.password}
+              - else
+                .control-group
+                  label.control-label(for="password") Password
+                  .controls
+                    input#password(type="password", name="password",
+                      placeholder="enter your password...")
+            - else
+              .control-group
+                label.control-label(for="username") Name
+                .controls
+                  input#username(type="text", name="username",
+                    maxlength="15", placeholder="enter your nickname...")
+              .control-group
+                label.control-label(for="password") Password
+                .controls
+                  input#password(type="password", name="password",
+                    placeholder="enter your password...")
+            button.submit-button.btn.btn-primary(type="submit")
+              i.icon-lock.icon-white
+              |  Login
+            a.forgot-passwd(href="/recoverpasswd?followup=#{followup}")
+              | Forgot your password?
