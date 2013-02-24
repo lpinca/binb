@@ -8,6 +8,7 @@ var config = require('./config')
   , parseCookie = require('express/node_modules/cookie').parse
   , parseSignedCookies = require('express/node_modules/connect').utils.parseSignedCookies
   , redisstore = require('connect-redis')(express)
+  , secret = process.env.SITE_SECRET || 'shhhh, very secret'
   , site = require('./routes/site')
   , user = require('./routes/user')
   , usersdb = require('./lib/redis-clients').users;
@@ -25,7 +26,7 @@ app.set('view engine', 'jade');
 app.use('/static', express.static(pub, {maxAge: 2419200000})); // 4 weeks = 2419200000 ms
 app.use(express.favicon(pub + '/img/favicon.ico', {maxAge: 2419200000}));
 app.use(express.bodyParser());
-app.use(express.cookieParser(process.env.SITE_SECRET));
+app.use(express.cookieParser(secret));
 app.use(express.session({store: sessionstore, cookie: {maxAge: 14400000}})); // 4 h = 14400000 ms
 
 // Routes
@@ -75,7 +76,7 @@ io.set('authorization', function(data, accept) {
     return accept('no cookie transmitted', false);
   }
   var signedcookie = parseCookie(data.headers.cookie);
-  var cookie = parseSignedCookies(signedcookie, process.env.SITE_SECRET);
+  var cookie = parseSignedCookies(signedcookie, secret);
   sessionstore.get(cookie['connect.sid'], function(err, session) {
     if (err) {
       return accept(err.message, false);
