@@ -1,25 +1,28 @@
 {
   "analyze": false,
   "bundleDependencies": [
-    "async",
-    "connect-redis",
-    "express",
-    "jade",
-    "nodemailer",
-    "redis",
-    "socket.io"
+    "express"
   ],
   "dependencies": {
+    "async": "0.2.x",
     "canvas": "0.13.x",
-    "ws": "0.4.x"
+    "connect-redis": "1.4.x",
+    "express": "3.x",
+    "jade": "0.28.x",
+    "nodemailer": "0.3.x",
+    "redis": "0.7.x",
+    "socket.io": "0.9.x"
+  },
+  "devDependencies": {
+    "JSONStream": "0.4.x"
   },
   "engines": {
     "node": "0.8.x"
   },
   "name": "binb",
   "scripts": {
-    "start": "app.js"
+    "start": "node app.js"
   },
   "subdomain": "binb",
-  "version": "0.3.5-7"
+  "version": "0.3.5-8"
 }
