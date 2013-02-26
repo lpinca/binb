@@ -428,7 +428,7 @@
       prefix = (nickname === from) ? '(To '+to+')' : '(From '+prefix+')';
       msgspan.addClass('private');
     }
-    var msg = prefix+': '+chatmsg;
+    var msg = prefix+': '+chatmsg.replace(/<3/g, '♥');
     msgspan.html(urlize(msg));
     addChatEntry(msgspan);
   };
