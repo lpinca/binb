@@ -957,14 +957,12 @@
   setVariables();
   DOM.modal.modal({keyboard:false, show:false, backdrop:'static'});
   DOM.togglechat.click(hideChat);
-  if ($.browser.mozilla) {
-    // Block ESC button in firefox (breaks socket connections)
-    $(document).keypress(function(event) {
-      if(event.keyCode === 27) {
-        return false;
-      }
-    });
-  }
+  // Prevent Firefox from closing the websocket connection if the ESC key is pressed
+  $(document).keydown(function(e) {
+    if (e.keyCode === 27) {
+      e.preventDefault();
+    }
+  });
   socket = io.connect(uri, {'reconnect':false});
   socket.on('connect', function() {
     jplayer = $('#player').jPlayer({
