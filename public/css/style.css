@@ -129,6 +129,9 @@ form .clearfix {
 #join {
   margin-right: 45px;
 }
+.modal, .modal.fade.in {
+  top: 20%;
+}
 .modal-footer .divider, .modal-footer .divider span {
   position: absolute;
 }
@@ -136,7 +139,7 @@ form .clearfix {
   border-left: 1px solid #ddd;
   height: 38px;
   top: 9px;
-  left: 442px;
+  left: 446px;
 }
 .modal-footer .divider span {
   color: #aaa;
