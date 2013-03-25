@@ -251,19 +251,9 @@ exports.createAccount = function(req, res) {
     , mailkey = 'email:'+req.body.email
     , salt = crypto.randomBytes(6).toString('base64')
     , hash = crypto.createHash('sha256').update(salt+req.body.password).digest('hex')
-    , date = new Date()
-    , day = date.getDate()
-    , month = date.getMonth() + 1
-    , year = date.getFullYear();
+    , date = new Date().toISOString()
+    , user = new User(req.body.username, req.body.email, salt, hash, date);
 
-  if (day < 10) {
-    day = '0' + day;
-  }
-  if (month < 10) {
-    month = '0' + month;
-  }
-  var joindate = day+'/'+month+'/'+year;
-  var user = new User(req.body.username, req.body.email, salt, hash, joindate);
   // Add new user in the db
   db.hmset(userkey, user);
   db.set(mailkey, userkey);
@@ -390,10 +380,11 @@ exports.profile = function(req, res) {
     if (data === 1) {
       db.hgetall(key, function(e, obj) {
         obj.bestguesstime = (obj.bestguesstime/1000).toFixed(1);
-        obj.worstguesstime = (obj.worstguesstime/1000).toFixed(1);
+        obj.joindate = utils.britishFormat(new Date(obj.joindate));
         if (obj.guessed !== '0') {
           obj.meanguesstime = ((obj.totguesstime/obj.guessed)/1000).toFixed(1);
         }
+        obj.worstguesstime = (obj.worstguesstime/1000).toFixed(1);
         delete obj.email;
         delete obj.password;
         delete obj.salt;
