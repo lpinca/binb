@@ -46,7 +46,7 @@ app.get('/sliceleaderboard', user.sliceLeaderboard);
 app.get('/signup', site.validationErrors, site.signup);
 app.post('/signup', user.validateSignUp, user.userExists, user.emailExists, user.createAccount);
 app.get('/:room', site.room);
-app.get('/user/*', user.profile);
+app.get('/user/:username', user.profile);
 
 // HTTP server object
 var server = http.createServer(app);
