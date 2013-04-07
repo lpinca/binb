@@ -7,14 +7,14 @@
     "async": "0.2.x",
     "canvas": "0.13.x",
     "connect-redis": "1.4.x",
-    "express": "3.x",
+    "express": "3.1.x",
     "jade": "0.28.x",
     "nodemailer": "0.3.x",
     "redis": "0.7.x",
     "socket.io": "0.9.x"
   },
   "devDependencies": {
-    "JSONStream": "0.4.x"
+    "JSONStream": "0.6.x"
   },
   "engines": {
     "node": "0.8.x"
@@ -24,5 +24,5 @@
     "start": "node app.js"
   },
   "subdomain": "binb",
-  "version": "0.3.5-14"
+  "version": "0.3.5-15"
 }

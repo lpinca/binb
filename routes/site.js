@@ -5,8 +5,11 @@
 var async = require('async')
   , Captcha = require('../lib/captcha')
   , db = require('../lib/redis-clients').songs
-  , randomSlogan = require('../lib/utils').randomSlogan
-  , rooms = require('../config').rooms;
+  , randInt = require('../lib/prng').randInt
+  , rooms = require('../config').rooms
+  , utils = require('../lib/utils')
+  , randomSlogan = utils.randomSlogan
+  , trackscount = utils.trackscount;
 
 /**
  * Generate a task.
@@ -14,7 +17,8 @@ var async = require('async')
 
 var task = function(genre) {
   return function(callback) {
-    db.srandmember(genre, function(err, res) {
+    var index = randInt(trackscount[genre]);
+    db.zrange(genre, index, index, function(err, res) {
       db.hget('song:'+res, 'artworkUrl100', callback);
     });
   };

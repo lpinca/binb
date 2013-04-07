@@ -12,6 +12,7 @@ var artistIds = require('./artist-ids')
   , rc = require('redis').createClient()
   , rockIds = artistIds.rock
   , rooms = require('../config').rooms
+  , score
   , skip = 0 // Skip counter
   , songId = 0;
 
@@ -29,6 +30,7 @@ var options = {
 
 var updateRooms = function(artistId) {
   rooms = ['mixed'];
+  score = 0;
   if (artistId === popIds[0]) {
     rooms.push('hits', 'pop');
     // Set the skip counter (there is no need to update the rooms for the next pop artists)
@@ -64,9 +66,11 @@ parser.on('data', function(track) {
   );
 
   rooms.forEach(function(room) {
-    rc.sadd(room, songId);
+    var _score = (room === 'mixed') ? songId : score;
+    rc.zadd(room, _score, songId);
   });
 
+  score++;
   songId++;
 });
 
