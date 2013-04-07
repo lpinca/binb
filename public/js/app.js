@@ -301,48 +301,46 @@
 
   // Start cassette animation
   var cassetteAnimation = function(endtime, forward) {
-    var millisleft = endtime - Date.now()
-      , secleft = millisleft / 1000
-      , width
-      , deg
+    var deg
+      , factor
+      , millisleft = endtime - Date.now()
       , offsetleft
       , offsetright
-      , css;
-
-    if (forward) {
-      width = 148 - (148*secleft/30);
-      deg = 360 - (360*secleft/30);
-      offsetleft = 44 - 24*secleft/30;
-      offsetright = 130 - 24*secleft/30;
-      DOM.progress.width(width);
-      DOM.cassettewheels.css('transform', 'rotate('+deg+'deg)');
-      DOM.tapeleft.css('left', offsetleft+'px');
-      DOM.taperight.css('left', offsetright+'px');
-    }
-    else {
-      width = 148*secleft/5;
-      deg = 360*secleft/5;
-      offsetleft = 20 + 24*secleft/5;
-      offsetright = 106 + 24*secleft/5;
-      DOM.progress.width(width);
-      DOM.cassettewheels.css('transform', 'rotate('+deg+'deg)');
-      DOM.tapeleft.css('left', offsetleft+'px');
-      DOM.taperight.css('left', offsetright+'px');
-    }
-
-    if (forward) {
-      DOM.countdown.text(secleft.toFixed(1));
-      if (touchplay) {elapsedtime = 30 - Math.round(secleft);}
-    }
-    else {
-      DOM.countdown.text(Math.round(secleft));
-    }
+      , secleft = millisleft / 1000
+      , width;
 
     if (stopanimation || millisleft < 50) {
       return;
     }
 
-    setTimeout(function() {cassetteAnimation(endtime, forward);}, 50);
+    if (forward) {
+      if (touchplay) {
+        elapsedtime = 30 - Math.round(secleft);
+      }
+      DOM.countdown.text(secleft.toFixed(1));
+      factor = secleft / 30;
+      width = 148 - 148 * factor;
+      deg = 360 - 360 * factor;
+      offsetleft = 44 - 24 * factor;
+      offsetright = 130 - 24 * factor;
+    }
+    else {
+      DOM.countdown.text(Math.round(secleft));
+      factor = secleft / 5;
+      width = 148 * factor;
+      deg = 360 * factor;
+      offsetleft = 20 + 24 * factor;
+      offsetright = 106 + 24 * factor;
+    }
+
+    DOM.progress.width(width);
+    DOM.cassettewheels.css('transform', 'rotate('+deg+'deg)');
+    DOM.tapeleft.css('left', offsetleft+'px');
+    DOM.taperight.css('left', offsetright+'px');
+
+    setTimeout(function() {
+      cassetteAnimation(endtime, forward);
+    }, 50);
   };
 
   var clearPrivate = function() {
