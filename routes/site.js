@@ -19,7 +19,7 @@ var subTask = function(genre) {
   return function(callback) {
     var index = randInt(trackscount[genre]);
     db.zrange(genre, index, index, function(err, res) {
-      db.hget('song:'+res, 'artworkUrl100', callback);
+      db.hget('song:'+res[0], 'artworkUrl100', callback);
     });
   };
 };
