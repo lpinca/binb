@@ -12,10 +12,10 @@ var async = require('async')
   , trackscount = utils.trackscount;
 
 /**
- * Generate a task.
+ * Generate a sub-task.
  */
 
-var task = function(genre) {
+var subTask = function(genre) {
   return function(callback) {
     var index = randInt(trackscount[genre]);
     db.zrange(genre, index, index, function(err, res) {
@@ -29,18 +29,18 @@ var task = function(genre) {
  */
 
 exports.artworks = function(req, res) {
-  var tasks = [];
-  for (var i=0; i<rooms.length; i++) {
-    for (var j=0; j<6; j++) {
-      tasks.push(task(rooms[i]));
-    }
-  }
-  async.parallel(tasks, function(err, results) {
-    var obj = {
-      resultCount: results.length,
-      results: results
+  var tasks = {};
+  rooms.forEach(function(room) {
+    tasks[room] = function(callback) {
+      var subtasks = [];
+      for (var i = 0; i < 6; i++) {
+        subtasks.push(subTask(room));
+      }
+      async.parallel(subtasks, callback);
     };
-    res.json(obj);
+  });
+  async.parallel(tasks, function(err, results) {
+    res.json(results);
   });
 };
 

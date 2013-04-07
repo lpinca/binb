@@ -6,11 +6,10 @@
     }
   });
   $.get('/artworks', function(data) {
-    $('.thumbnail').each(function(index) {
-      var i = index * 6;
-      var j = i + 6;
-      for(i; i < j; i++) {
-        $('<img src="'+data.results[i]+'" />').appendTo($(this));
+    $('.thumbnail').each(function() {
+      var urls = data[$(this).attr('href')];
+      for (var i = 0; i < urls.length; i++) {
+        $('<img src="'+urls[i]+'" />').appendTo($(this));
       }
     });
   });
