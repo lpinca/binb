@@ -375,7 +375,7 @@ exports.resetPasswd = function(req, res) {
  */
 
 exports.profile = function(req, res) {
-  var key = 'user:'+req.params[0];
+  var key = 'user:'+req.params.username;
   db.exists(key, function(err, data) {
     if (data === 1) {
       db.hgetall(key, function(e, obj) {
