@@ -21,8 +21,9 @@
   },
   "name": "binb",
   "scripts": {
+    "predeploy": "make minify",
     "start": "node app.js"
   },
   "subdomain": "binb",
-  "version": "0.3.5-18"
+  "version": "0.3.6"
 }
