@@ -5,6 +5,7 @@
     , historycursor = 0
     , historyvalues = []
     , ignoredplayers = {}
+    , isplaying
     , jplayer
     , nickname
     , pvtmsgto
@@ -115,6 +116,7 @@
       touchplay.removeClass('btn-success').addClass('btn-danger disabled');
       touchplay.html('<i class="icon-play icon-white"></i> Wait');
     }
+    isplaying = false;
     cassetteAnimation(Date.now()+5000, false);
 
     var artistName = data.artistName.replace(/"/g, '&quot;')
@@ -615,6 +617,8 @@
     }
     jplayer.jPlayer('unmute');
     jplayer.jPlayer('play');
+    DOM.guessbox.val('');
+    isplaying = true;
     updateUsers(data.users);
     cassetteAnimation(Date.now()+30000, true);
     if (data.counter === 1) {
@@ -662,7 +666,12 @@
         case 13: // return
           var guess = $.trim(DOM.guessbox.val());
           if (guess !== '') {
-            socket.emit('guess', guess.toLowerCase());
+            if (isplaying) {
+              socket.emit('guess', guess.toLowerCase());
+            }
+            else {
+              addFeedback('You have to wait the next song...');
+            }
             historyvalues.push(guess);
             if (historyvalues.length > 20) {
               historyvalues.splice(0, 1);
@@ -687,6 +696,10 @@
       }
     });
 
+    DOM.guessbox.on('paste', function(event) {
+      event.preventDefault();
+    });
+
     DOM.guessbox.focus();
 
     socket.on('artistmatched', function() {
@@ -699,9 +712,6 @@
     socket.on('gameover', gameOver);
     socket.on('loadtrack', loadTrack);
     socket.on('newuser', userJoin);
-    socket.on('noguesstime', function() {
-      addFeedback('You have to wait the next song...');
-    });
     socket.on('nomatch', function() {
       addFeedback(nmstrings[Math.floor(Math.random()*nmstrings.length)], 'wrong');
     });
@@ -729,6 +739,7 @@
 
   var setStatus = function(data) {
     if (data.status === 0) {
+      isplaying = true;
       cassetteAnimation(Date.now()+data.timeleft, true);
     }
     else if (data.status === 1) {
@@ -961,7 +972,10 @@
       e.preventDefault();
     }
   });
-  socket = io.connect(uri, {'reconnect':false});
+  socket = io.connect(uri, {
+    'force new connection': true,
+    'reconnect': false
+  });
   socket.on('connect', function() {
     jplayer = $('#player').jPlayer({
       ready: jplayerReady,
