@@ -40,7 +40,7 @@ exports.sliceLeaderboard = function(req, res) {
   var begin = parseInt(req.query.begin, 10)
     , by = req.query.by;
   if (isNaN(begin) || begin > 180 || (by !== 'points' && by !== 'times')) {
-    return res.send(412);
+    return res.send(400);
   }
   var end = begin + 29;
   if (by === 'points') {
@@ -61,7 +61,7 @@ exports.sliceLeaderboard = function(req, res) {
 exports.validateChangePasswd = function(req, res, next) {
   if (!req.session.user || req.body.oldpassword === undefined ||
     req.body.newpassword === undefined) {
-    return res.send(412);
+    return res.send(400);
   }
   
   var errors = {};
@@ -69,7 +69,10 @@ exports.validateChangePasswd = function(req, res, next) {
   if (req.body.oldpassword.trim() === '') {
     errors.oldpassword = "can't be empty";
   }
-  if (req.body.newpassword.length < 6) {
+  if (req.body.newpassword.trim() === '') {
+    errors.newpassword = "can't be empty";
+  }
+  else if (req.body.newpassword.length < 6) {
     errors.newpassword = 'must be at least 6 characters long';
   }
   else if(req.body.newpassword === req.body.oldpassword) {
@@ -118,7 +121,7 @@ exports.changePasswd = function(req, res) {
 
 exports.validateLogin = function(req, res, next) {
   if (req.body.username === undefined || req.body.password === undefined) {
-    return res.send(412);
+    return res.send(400);
   }
 
   var errors = {};
@@ -187,7 +190,7 @@ exports.logout = function(req, res) {
 exports.validateSignUp = function(req, res, next) {
   if (req.body.username === undefined || req.body.email === undefined ||
     req.body.password === undefined || req.body.captcha === undefined) {
-    return res.send(412);
+    return res.send(400);
   }
 
   var errors = {};
@@ -201,7 +204,10 @@ exports.validateSignUp = function(req, res, next) {
   if (!utils.isEmail(req.body.email)) {
     errors.email = 'is not an email address';
   }
-  if (req.body.password.length < 6) {
+  if (req.body.password.trim() === '') {
+    errors.password = "can't be empty";
+  }
+  else if (req.body.password.length < 6) {
     errors.password = 'must be at least 6 characters long';
   }
   if (req.body.captcha !== req.session.captchacode) {
@@ -274,7 +280,7 @@ exports.createAccount = function(req, res) {
  
 exports.validateRecoverPasswd = function(req, res, next) {
   if (req.body.email === undefined || req.body.captcha === undefined) {
-    return res.send(412);
+    return res.send(400);
   }
 
   var errors = {};
@@ -329,13 +335,16 @@ exports.sendEmail = function(req, res) {
 
 exports.resetPasswd = function(req, res) {
   if (req.body.password === undefined) {
-    return res.send(412);
+    return res.send(400);
   }
   
   var errors = {};
   
   // Validate new password
-  if (req.body.password.length < 6) {
+  if (req.body.password.trim() === '') {
+    errors.password = "can't be empty";
+  }
+  else if (req.body.password.length < 6) {
     errors.password = 'must be at least 6 characters long';
   }
   // Check token availability
