@@ -322,17 +322,17 @@
       DOM.countdown.text(secleft.toFixed(1));
       factor = secleft / 30;
       width = 148 - 148 * factor;
-      deg = 360 - 360 * factor;
-      offsetleft = 44 - 24 * factor;
-      offsetright = 130 - 24 * factor;
+      deg = -360 + 360 * factor;
+      offsetleft = 20 + 24 * factor;
+      offsetright = 106 + 24 * factor;
     }
     else {
       DOM.countdown.text(Math.round(secleft));
       factor = secleft / 5;
       width = 148 * factor;
-      deg = 360 * factor;
-      offsetleft = 20 + 24 * factor;
-      offsetright = 106 + 24 * factor;
+      deg = -360 * factor;
+      offsetleft = 44 - 24 * factor;
+      offsetright = 130 - 24 * factor;
     }
 
     DOM.progress.width(width);

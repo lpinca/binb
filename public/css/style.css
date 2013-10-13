@@ -399,7 +399,7 @@ form .clearfix {
   height: 70px;
   width: 70px;
   position: absolute;
-  top: 25px;
+  top: 26px;
   background-color: black;
   -webkit-border-radius: 70px;
   -moz-border-radius: 70px;
@@ -407,10 +407,10 @@ form .clearfix {
   z-index: -1;
 }
 #tape-left {
-  left: 20px;
+  left: 44px;
 }
 #tape-right {
-  left: 106px;
+  left: 130px;
 }
 #progress-bar, #progress {
   height: 7px;
