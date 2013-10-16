@@ -20,10 +20,14 @@
     "node": "0.10.x"
   },
   "name": "binb",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lpinca/binb.git"
+  },
   "scripts": {
     "predeploy": "make minify",
     "start": "node app.js"
   },
   "subdomain": "binb",
-  "version": "0.3.6-9"
+  "version": "0.3.6-10"
 }
