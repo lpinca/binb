@@ -11,7 +11,7 @@
     , pvtmsgto
     , subscriber = false
     , roundpoints = 0
-    , roomname = window.location.pathname.replace('/', '')
+    , roomname = window.location.pathname.replace(/\//g, '')
     , socket
     , stopanimation = false
     , touchplay
@@ -392,21 +392,19 @@
     html += '<th><div class="icons cups stand3"></div></th><th>Guessed</th><th>Mean time</th>';
     html += '</thead><tbody>';
 
-    for(var i=0;i<3;i++) {
-      if (podium[i]) {
-        html += '<tr><td><div class="icons medals rank'+(i+1)+'"></div></td>';
-        html += '<td class="name">'+podium[i].nickname+'</td>';
-        html += '<td>'+podium[i].points+'</td>';
-        html += '<td>'+podium[i].golds+'</td><td>'+podium[i].silvers+'</td>';
-        html += '<td>'+podium[i].bronzes+'</td><td>'+podium[i].guessed+'</td>';
-        var meantime = "N/A";
-        if (podium[i].guessed !== 0) {
-          meantime = podium[i].totguesstime / podium[i].guessed;
-          meantime = (meantime / 1000).toFixed(1)+' s';
-        }
-        html += '<td>'+meantime+'</td></tr>';
+    podium.forEach(function(player, i) {
+      html += '<tr><td><div class="icons medals rank'+(i+1)+'"></div></td>';
+      html += '<td class="name">'+player.nickname+'</td>';
+      html += '<td>'+player.points+'</td>';
+      html += '<td>'+player.golds+'</td><td>'+player.silvers+'</td>';
+      html += '<td>'+player.bronzes+'</td><td>'+player.guessed+'</td>';
+      var meantime = "N/A";
+      if (player.guessed !== 0) {
+        meantime = player.totguesstime / player.guessed;
+        meantime = (meantime / 1000).toFixed(1)+' s';
       }
-    }
+      html += '<td>'+meantime+'</td></tr>';
+    });
 
     html +='</tbody></table></div>';
     html += '<div class="modal-footer align-left">A new game will start in ';
