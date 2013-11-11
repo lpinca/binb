@@ -173,10 +173,10 @@ io.sockets.on('connection', function(socket) {
 var Room = require('./lib/room')({io: io, sockets: sockets})
   , rooms = Object.create(null); // The Object that contains all the room instances
 
-for (var i=0; i<config.rooms.length; i++) {
-  rooms[config.rooms[i]] = new Room(config.rooms[i]);
-  rooms[config.rooms[i]].start();
-}
+config.rooms.forEach(function(room) {
+  room = rooms[room] = new Room(room);
+  room.start();
+});
 
 // Begin accepting connections
 server.listen(config.port, function() {
