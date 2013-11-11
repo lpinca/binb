@@ -27,7 +27,11 @@ app.use('/static', express.static(pub, {maxAge: 2419200000})); // 4 weeks = 2419
 app.use(express.favicon(pub + '/img/favicon.ico', {maxAge: 2419200000}));
 app.use(express.urlencoded());
 app.use(express.cookieParser(secret));
-app.use(express.session({store: sessionstore, cookie: {maxAge: 14400000}})); // 4 h = 14400000 ms
+app.use(express.session({
+  cookie: {maxAge: 14400000}, // 4 h = 14400000 ms
+  rolling: true,
+  store: sessionstore
+}));
 
 // Routes
 app.get('/', site.home);
