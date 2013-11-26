@@ -1,3 +1,6 @@
 db/
 node_modules/
 .npmignore
+public/js/app.min.js
+public/js/home.min.js
+public/js/leaderboards.min.js
