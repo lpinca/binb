@@ -4,3 +4,4 @@ node_modules/
 public/js/app.min.js
 public/js/home.min.js
 public/js/leaderboards.min.js
+public/js/primus.min.js

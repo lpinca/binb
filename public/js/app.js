@@ -12,11 +12,11 @@
     , subscriber = false
     , roundpoints = 0
     , roomname = window.location.pathname.replace(/\//g, '')
-    , socket
+    , primus
     , stopanimation = false
     , touchplay
     , urlregex = /(https?:\/\/[\-A-Za-z0-9+&@#\/%?=~_()|!:,.;]*[\-A-Za-z0-9+&@#\/%=~_()|])/
-    , uri = window.location.protocol+'//'+window.location.host; // Socket.IO server URI
+    , uri = window.location.protocol+'//'+window.location.host; // Primus server URI
 
   var amstrings = [
     'Yes, that\'s the artist. What about the title?'
@@ -444,8 +444,8 @@
       outcome.text('(From binb): '+args[0]+' is already ignored.');
       return addChatEntry(outcome);
     }
-    socket.emit('ignore', args[0], function(player) {
-      if (player) {
+    primus.send('ignore', args[0], function(ignored, player) {
+      if (ignored) {
         ignoredplayers[player] = true;
         outcome.text('(From binb): '+player+' is now ignored.');
         return addChatEntry(outcome);
@@ -457,14 +457,14 @@
 
   // Submitted name was invalid
   var invalidNickName = function(feedback) {
-    joinAnonymously(feedback+'<br/>Try with another one:');
+    joinAnonymous(feedback+'<br/>Try with another one:');
   };
 
   // Prompt for name and send it
-  var joinAnonymously = function(msg) {
+  var joinAnonymous = function(msg) {
     if (/nickname\s*\=/.test(document.cookie) && !msg) {
       nickname = document.cookie.replace(/.*nickname\s*\=\s*([^;]*);?.*/, '$1');
-      return socket.emit('joinanonymously', nickname, roomname);
+      return primus.send('joinanonymous', nickname, roomname);
     }
 
     if (DOM.modal.hasClass('in')) {
@@ -490,7 +490,7 @@
     button.click(function() {
       if ($.trim(login.val()) !== '') {
         nickname = login.val();
-        socket.emit('joinanonymously', nickname, roomname);
+        primus.send('joinanonymous', nickname, roomname);
       }
       else {
         var txt = 'Nickname can\'t be empty.';
@@ -512,13 +512,13 @@
   };
 
   var jplayerReady = function() {
-    socket.emit('loggedin', function(data) {
-      if (data) {
-        nickname = data;
+    primus.send('loggedin', function(isloggedin, loggedinas) {
+      if (isloggedin) {
+        nickname = loggedinas;
         subscriber = true;
-        return socket.emit('joinroom', roomname);
+        return primus.send('joinauthenticated', roomname);
       }
-      joinAnonymously();
+      joinAnonymous();
     });
     if (!$.jPlayer.platform.mobile && !$.jPlayer.platform.tablet) {
       return addVolumeControl();
@@ -544,8 +544,10 @@
       return addChatEntry(outcome);
     }
     var why = args[1] || '';
-    socket.emit('kick', args[0], why, function() {
-      addChatEntry(outcome);
+    primus.send('kick', args[0], why, function(success) {
+      if (!success) {
+        addChatEntry(outcome);
+      }
     });
   };
 
@@ -627,6 +629,16 @@
     addFeedback('What is this song?');
   };
 
+  // Return a function that will add a random text from the given set, with the given style
+  var randomFeedback = function(set, style) {
+    var card = set.length;
+    return function() {
+      var index =  Math.floor(Math.random() * card)
+        , text = set[index];
+      addFeedback(text, style);
+    };
+  };
+
   // Successfully joined the room
   var ready = function(usersData, trackscount, loggedin) {
     if (!loggedin && !/nickname\s*\=/.test(document.cookie)) {
@@ -646,13 +658,13 @@
         var val = $.trim(DOM.messagebox.val());
         if (val !== '') {
           if (pvtmsgto) {
-            socket.emit('sendchatmsg', val, pvtmsgto);
+            primus.send('sendchatmsg', val, pvtmsgto);
           }
           else if (/^\/[^ ]/.test(val)) {
             slashCommandHandler(val);
           }
           else {
-            socket.emit('sendchatmsg', val);
+            primus.send('sendchatmsg', val);
           }
         }
         DOM.messagebox.val('');
@@ -665,7 +677,7 @@
           var guess = $.trim(DOM.guessbox.val());
           if (guess !== '') {
             if (isplaying) {
-              socket.emit('guess', guess.toLowerCase());
+              primus.send('guess', guess.toLowerCase());
             }
             else {
               addFeedback('You have to wait the next song...');
@@ -700,30 +712,22 @@
 
     DOM.guessbox.focus();
 
-    socket.on('artistmatched', function() {
-      addFeedback(amstrings[Math.floor(Math.random()*amstrings.length)], 'correct');
-    });
-    socket.on('bothmatched', function() {
-      addFeedback(bmstrings[Math.floor(Math.random()*bmstrings.length)], 'correct');
-    });
-    socket.on('chatmsg', getChatMessage);
-    socket.on('gameover', gameOver);
-    socket.on('loadtrack', loadTrack);
-    socket.on('newuser', userJoin);
-    socket.on('nomatch', function() {
-      addFeedback(nmstrings[Math.floor(Math.random()*nmstrings.length)], 'wrong');
-    });
-    socket.on('playtrack', playTrack);
-    socket.on('stoptrying', function() {
+    primus.on('artistmatched', randomFeedback(amstrings, 'correct'));
+    primus.on('bothmatched', randomFeedback(bmstrings, 'correct'));
+    primus.on('chatmsg', getChatMessage);
+    primus.on('gameover', gameOver);
+    primus.on('loadtrack', loadTrack);
+    primus.on('newuser', userJoin);
+    primus.on('nomatch', randomFeedback(nmstrings, 'wrong'));
+    primus.on('playtrack', playTrack);
+    primus.on('stoptrying', function() {
       addFeedback('You guessed both artist and title. Please wait...');
     });
-    socket.on('titlematched', function() {
-      addFeedback(tmstrings[Math.floor(Math.random()*tmstrings.length)], 'correct');
-    });
-    socket.on('trackinfo', addTrackInfo);
-    socket.on('updateusers', updateUsers);
-    socket.on('userleft', userLeft);
-    socket.emit('getstatus', setStatus);
+    primus.on('titlematched', randomFeedback(tmstrings, 'correct'));
+    primus.on('trackinfo', addTrackInfo);
+    primus.on('updateusers', updateUsers);
+    primus.on('userleft', userLeft);
+    primus.send('getstatus', setStatus);
   };
 
   // Show the number of players inside each room
@@ -818,7 +822,7 @@
       return addChatEntry(outcome);
     }
     delete ignoredplayers[args[0]];
-    socket.emit('unignore', args[0]);
+    primus.send('unignore', args[0]);
     outcome.text('(From binb): '+args[0]+' is no longer ignored.');
     addChatEntry(outcome);
   };
@@ -970,11 +974,8 @@
       e.preventDefault();
     }
   });
-  socket = io.connect(uri, {
-    'force new connection': true,
-    'reconnect': false
-  });
-  socket.on('connect', function() {
+  primus = Primus.connect(uri, {'strategy': 'none'});
+  primus.on('open', function() {
     jplayer = $('#player').jPlayer({
       ready: jplayerReady,
       swfPath: '/static/swf/',
@@ -982,12 +983,12 @@
       preload: 'auto',
       volume: 1
     });
-    socket.on('alreadyinaroom', alreadyInARoom);
-    socket.on('disconnect', disconnect);
-    socket.on('invalidnickname', invalidNickName);
-    socket.on('ready', ready);
-    socket.on('updateoverview', updateRoomsOverview);
-    socket.emit('getoverview', roomsOverview);
+    primus.on('alreadyinaroom', alreadyInARoom);
+    primus.on('invalidnickname', invalidNickName);
+    primus.on('ready', ready);
+    primus.on('updateoverview', updateRoomsOverview);
+    primus.send('getoverview', roomsOverview);
   });
+  primus.on('close', disconnect);
 
 })();

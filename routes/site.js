@@ -4,12 +4,11 @@
 
 var async = require('async')
   , Captcha = require('../lib/captcha')
+  , config = require('../config')
   , db = require('../lib/redis-clients').songs
   , randInt = require('../lib/prng').randInt
-  , rooms = require('../config').rooms
-  , utils = require('../lib/utils')
-  , randomSlogan = utils.randomSlogan
-  , trackscount = utils.trackscount;
+  , randomSlogan = require('../lib/utils').randomSlogan
+  , rooms = require('../lib/rooms').rooms;
 
 /**
  * Generate a sub-task.
@@ -17,7 +16,7 @@ var async = require('async')
 
 var subTask = function(genre) {
   return function(callback) {
-    var index = randInt(trackscount[genre]);
+    var index = randInt(rooms[genre].tracksCount());
     db.zrange(genre, index, index, function(err, res) {
       db.hget('song:'+res[0], 'artworkUrl100', callback);
     });
@@ -30,7 +29,7 @@ var subTask = function(genre) {
 
 exports.artworks = function(req, res) {
   var tasks = {};
-  rooms.forEach(function(room) {
+  config.rooms.forEach(function(room) {
     tasks[room] = function(callback) {
       var subtasks = [];
       for (var i = 0; i < 6; i++) {
@@ -58,7 +57,7 @@ exports.changePasswd = function(req, res) {
 exports.home = function(req, res) {
   res.render('home', {
     loggedin: req.session.user,
-    rooms: rooms,
+    rooms: config.rooms,
     slogan: randomSlogan()
   });
 };
@@ -88,11 +87,11 @@ exports.resetPasswd = function(req, res) {
 };
 
 exports.room = function(req, res) {
-  if (~rooms.indexOf(req.params.room)) {
+  if (~config.rooms.indexOf(req.params.room)) {
     return res.render('room', {
       loggedin: req.session.user,
       roomname: req.params.room,
-      rooms: rooms,
+      rooms: config.rooms,
       slogan: randomSlogan()
     });
   }

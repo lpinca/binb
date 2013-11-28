@@ -14,14 +14,14 @@
     });
   });
   var uri = window.location.protocol+'//'+window.location.host;
-  var socket = io.connect(uri, {'reconnect':false});
-  socket.on('connect', function() {
-    socket.emit('getoverview', function(data) {
+  var primus = Primus.connect(uri, {'strategy': 'none'});
+  primus.on('open', function() {
+    primus.send('getoverview', function(data) {
       for (var prop in data) {
         $('#'+prop).text(data[prop]);
       }
     });
-    socket.on('updateoverview', function(room, players) {
+    primus.on('updateoverview', function(room, players) {
       $('#'+room).text(players);
     });
   });

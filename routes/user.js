@@ -313,7 +313,7 @@ exports.sendEmail = function(req, res) {
       db.setex('token:'+token, 14400, data, function(err, reply) {
         mailer.sendEmail(req.body.email, token, function(err, response) {
           if (err) {
-            console.log('error sending email: '+err.message);
+            console.error(err);
           }
         });
       });
