@@ -26,18 +26,18 @@ Point your browser to `http://127.0.0.1:8138` and have fun!
 
 ## Browser compatibiliy
 
-Ideal setup is a browser with websocket support and able to decode .m4a format natively. 
+binb requires a browser that supports the WebSocket protocol.
 
-For this reason binb is optimized for Google Chrome but also works in all major browsers.
+Refer to this [table](http://caniuse.com/websockets) for details on compatibility.
 
 ## Shout-Outs
 
 - Thanks to [beatquest.fm](http://beatquest.fm) for inspiration.
-- Thanks to [nodejitsu](http://nodejitsu.com/) for application hosting.
+- Thanks to [nodejitsu](http://nodejitsu.com/) for hosting the application.
 
 ## Bug tracker
 
-Have a bug? Please create an [issue](https://github.com/lpinca/binb/issues) here on GitHub, with a description of the problem, browser and operating system information and how to reproduce the problem.
+Have a bug? Please create an [issue](https://github.com/lpinca/binb/issues) here on GitHub, with a description of the problem, how to reproduce it and in what browser it occurred.
 
 ## Copyright and license
 
