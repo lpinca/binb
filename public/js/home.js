@@ -1,10 +1,4 @@
 (function() {
-  // Prevent Firefox from closing the websocket connection if the ESC key is pressed
-  $(document).keydown(function(e) {
-    if (e.keyCode === 27) {
-      e.preventDefault();
-    }
-  });
   $.get('/artworks', function(data) {
     $('.thumbnail').each(function() {
       var urls = data[$(this).attr('href')];

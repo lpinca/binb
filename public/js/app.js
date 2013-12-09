@@ -968,12 +968,7 @@
   setVariables();
   DOM.modal.modal({keyboard:false, show:false, backdrop:'static'});
   DOM.togglechat.click(hideChat);
-  // Prevent Firefox from closing the websocket connection if the ESC key is pressed
-  $(document).keydown(function(e) {
-    if (e.keyCode === 27) {
-      e.preventDefault();
-    }
-  });
+
   primus = Primus.connect(uri, {'strategy': 'none'});
   primus.on('open', function() {
     jplayer = $('#player').jPlayer({
