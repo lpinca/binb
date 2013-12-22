@@ -30,5 +30,5 @@
     "start": "node app.js"
   },
   "subdomain": "binb",
-  "version": "0.3.6-19"
+  "version": "0.3.6-20"
 }
