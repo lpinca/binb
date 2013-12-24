@@ -22,9 +22,15 @@ for (var i=0; i<rooms.length; i++) {
  * Show two lists of users, one ordered by points and one by best guess time (limit set to 30).
  */
 
-exports.leaderboards = function(req, res) {
-  db.zrevrange('users', 0, 29, 'withscores', function(err, pointsresults) {
-    db.sort(utils.sortParams(0), function(e, timesresults) {
+exports.leaderboards = function(req, res, next) {
+  db.zrevrange(['users', 0, 29, 'withscores'], function(err, pointsresults) {
+    if (err) {
+      return next(err);
+    }
+    db.sort(utils.sortParams(0), function(err, timesresults) {
+      if (err) {
+        return next(err);
+      }
       var leaderboards = utils.buildLeaderboards(pointsresults, timesresults);
       res.locals.slogan = utils.randomSlogan();
       res.render('leaderboards', leaderboards);
@@ -36,7 +42,7 @@ exports.leaderboards = function(req, res) {
  * Get 30 users from the ranking, starting at index `begin`.
  */
 
-exports.sliceLeaderboard = function(req, res) {
+exports.sliceLeaderboard = function(req, res, next) {
   var begin = parseInt(req.query.begin, 10)
     , by = req.query.by;
   if (isNaN(begin) || begin > 180 || (by !== 'points' && by !== 'times')) {
@@ -44,13 +50,19 @@ exports.sliceLeaderboard = function(req, res) {
   }
   var end = begin + 29;
   if (by === 'points') {
-    db.zrevrange('users', begin, end, 'withscores', function(err, results) {
-      res.json(results);
+    db.zrevrange(['users', begin, end, 'withscores'], function(err, results) {
+      if (err) {
+        return next(err);
+      }
+      res.send(results);
     });
     return;
   }
   db.sort(utils.sortParams(begin), function(err, results) {
-    res.json(results);
+    if (err) {
+      return next(err);
+    }
+    res.send(results);
   });
 };
 
@@ -88,10 +100,16 @@ exports.validateChangePasswd = function(req, res, next) {
 };
 
 exports.checkOldPasswd = function(req, res, next) {
-  var key = 'user:'+req.session.user;
-  db.hmget(key, 'salt', 'password', function(err, data) {
-    var hash = crypto.createHash('sha256').update(data[0]+req.body.oldpassword).digest('hex');
-    if (hash !== data[1]) {
+  var key = 'user:' + req.session.user;
+  db.hmget([key, 'salt', 'password'], function(err, data) {
+    if (err) {
+      return next(err);
+    }
+    var digest
+      , hash = crypto.createHash('sha256');
+    hash.update(data[0] + req.body.oldpassword);
+    digest = hash.digest('hex');
+    if (digest !== data[1]) {
       req.session.errors = {oldpassword: 'is incorrect'};
       return res.redirect(req.url);
     }
@@ -99,13 +117,19 @@ exports.checkOldPasswd = function(req, res, next) {
   });
 };
 
-exports.changePasswd = function(req, res) {
-  var followup = ~safeurls.indexOf(req.query.followup) ? req.query.followup : '/'
+exports.changePasswd = function(req, res, next) {
+  var digest
+    , followup = ~safeurls.indexOf(req.query.followup) ? req.query.followup : '/'
     , user = req.session.user
-    , key = 'user:'+user
-    , salt = crypto.randomBytes(6).toString('base64')
-    , password = crypto.createHash('sha256').update(salt+req.body.newpassword).digest('hex');
-  db.hmset(key, 'salt', salt, 'password', password, function(err, data) {
+    , key = 'user:' + user
+    , hash = crypto.createHash('sha256')
+    , salt = crypto.randomBytes(6).toString('base64');
+  hash.update(salt + req.body.newpassword);
+  digest = hash.digest('hex');
+  db.hmset([key, 'salt', salt, 'password', digest], function(err, data) {
+    if (err) {
+      return next(err);
+    }
     // Regenerate the session
     req.session.regenerate(function() {
       req.session.cookie.maxAge = 604800000; // One week
@@ -142,9 +166,12 @@ exports.validateLogin = function(req, res, next) {
 };
 
 exports.checkUser = function(req, res, next) {
-  var key = 'user:'+req.body.username;
-  db.exists(key, function(err, data) {
-    if (data === 1) {
+  var key = 'user:' + req.body.username;
+  db.exists([key], function(err, exists) {
+    if (err) {
+      return next(err);
+    }
+    if (exists) {
       // User exists, proceed with authentication
       return next();
     }
@@ -153,11 +180,17 @@ exports.checkUser = function(req, res, next) {
   });
 };
 
-exports.authenticate = function(req, res) {
-  var key = 'user:'+req.body.username;
-  db.hmget(key, 'salt', 'password', function(err, data) {
-    var hash = crypto.createHash('sha256').update(data[0]+req.body.password).digest('hex');
-    if (hash === data[1]) {
+exports.authenticate = function(req, res, next) {
+  var key = 'user:' + req.body.username;
+  db.hmget([key, 'salt', 'password'], function(err, data) {
+    if (err) {
+      return next(err);
+    }
+    var digest
+      , hash = crypto.createHash('sha256');
+    hash.update(data[0] + req.body.password);
+    digest = hash.digest('hex');
+    if (digest === data[1]) {
       var followup = ~safeurls.indexOf(req.query.followup) ? req.query.followup : '/';
       // Authentication succeeded, regenerate the session
       req.session.regenerate(function() {
@@ -229,9 +262,12 @@ exports.validateSignUp = function(req, res, next) {
 };
 
 exports.userExists = function(req, res, next) {
-  var key = 'user:'+req.body.username;
-  db.exists(key, function(err, data) {
-    if (data === 1) {
+  var key = 'user:' + req.body.username;
+  db.exists([key], function(err, exists) {
+    if (err) {
+      return next(err);
+    }
+    if (exists) {
       // User already exists
       req.session.errors = {alert: 'A user with that name already exists.'};
       return res.redirect(req.url);
@@ -241,9 +277,12 @@ exports.userExists = function(req, res, next) {
 };
 
 exports.emailExists = function(req, res, next) {
-  var key = 'email:'+req.body.email;
-  db.exists(key, function(err, data) {
-    if (data === 1) {
+  var key = 'email:' + req.body.email;
+  db.exists([key], function(err, exists) {
+    if (err) {
+      return next(err);
+    }
+    if (exists) {
       // Email already exists
       req.session.errors = {alert: 'A user with that email already exists.'};
       return res.redirect(req.url);
@@ -252,25 +291,35 @@ exports.emailExists = function(req, res, next) {
   });
 };
 
-exports.createAccount = function(req, res) {
-  var userkey = 'user:'+req.body.username
-    , mailkey = 'email:'+req.body.email
+exports.createAccount = function(req, res, next) {
+  var digest
+    , hash = crypto.createHash('sha256')
+    , mailkey = 'email:' + req.body.email
     , salt = crypto.randomBytes(6).toString('base64')
-    , hash = crypto.createHash('sha256').update(salt+req.body.password).digest('hex')
-    , date = new Date().toISOString()
-    , user = new User(req.body.username, req.body.email, salt, hash, date);
+    , userkey = 'user:' + req.body.username;
+  hash.update(salt + req.body.password);
+  digest = hash.digest('hex');
+  var date = new Date().toISOString()
+    , user = new User(req.body.username, req.body.email, salt, digest, date);
 
-  // Add new user in the db
-  db.hmset(userkey, user);
-  db.set(mailkey, userkey);
-  db.zadd('users', 0, req.body.username);
-  db.sadd('emails', req.body.email);
   // Delete old fields values
   delete req.session.oldvalues;
-  res.render('login', {
-    followup: req.query.followup || '/',
-    slogan: utils.randomSlogan(),
-    success: 'You successfully created your account. You are now ready to login.'
+
+  // Add new user in the db
+  var multi = db.multi();
+  multi.hmset(userkey, user);
+  multi.set(mailkey, userkey);
+  multi.zadd('users', 0, req.body.username);
+  multi.sadd('emails', req.body.email);
+  multi.exec(function(err, replies) {
+    if (err) {
+      return next(err);
+    }
+    res.render('login', {
+      followup: req.query.followup || '/',
+      slogan: utils.randomSlogan(),
+      success: 'You successfully created your account. You are now ready to login.'
+    });
   });
 };
 
@@ -302,27 +351,34 @@ exports.validateRecoverPasswd = function(req, res, next) {
   next();
 };
 
-exports.sendEmail = function(req, res) {
-  var key = 'email:'+req.body.email;
-  db.get(key, function(err, data) {
-    if (data !== null) {
-      // Email exists, generate a secure random token
+exports.sendEmail = function(req, res, next) {
+  var key = 'email:' + req.body.email;
+  db.get([key], function(err, data) {
+    if (err) {
+      return next(err);
+    }
+    if (data) {
       delete req.session.captchacode;
+      delete req.session.oldvalues;
+      // Email exists, generate a secure random token
       var token = crypto.randomBytes(48).toString('hex');
       // Token expires after 4 hours
-      db.setex('token:'+token, 14400, data, function(err, reply) {
+      db.setex(['token:' + token, 14400, data], function(err, reply) {
+        if (err) {
+          return next(err);
+        }
         mailer.sendEmail(req.body.email, token, function(err, response) {
           if (err) {
             console.error(err.message);
           }
         });
+        res.render('recoverpasswd', {
+          followup: req.query.followup || '/',
+          slogan: utils.randomSlogan(),
+          success: true
+        });
       });
-      delete req.session.oldvalues;
-      return res.render('recoverpasswd', {
-        followup: req.query.followup || '/',
-        slogan: utils.randomSlogan(),
-        success: true
-      });
+      return;
     }
     req.session.errors = {alert: 'The email address you specified could not be found'};
     res.redirect(req.url);
@@ -333,7 +389,7 @@ exports.sendEmail = function(req, res) {
  * Reset user password.
  */
 
-exports.resetPasswd = function(req, res) {
+exports.resetPasswd = function(req, res, next) {
   if (req.body.password === undefined) {
     return res.send(400);
   }
@@ -357,15 +413,22 @@ exports.resetPasswd = function(req, res) {
     return res.redirect(req.url);
   }
   
-  var key = 'token:'+req.query.token;
-  db.get(key, function(err, user) {
-    if (user !== null) {
-      // Delete the token
-      db.del(key);
-      // Update password
-      var salt = crypto.randomBytes(6).toString('base64');
-      var password = crypto.createHash('sha256').update(salt+req.body.password).digest('hex');
-      db.hmset(user, 'salt', salt, 'password', password, function(err, data) {
+  var key = 'token:' + req.query.token;
+  db.get([key], function(err, user) {
+    if (err) {
+      return next(err);
+    }
+    if (user) {
+      db.del(key); // Delete the token
+      var digest
+        , hash = crypto.createHash('sha256')
+        , salt = crypto.randomBytes(6).toString('base64');
+      hash.update(salt + req.body.password);
+      digest = hash.digest('hex');
+      db.hmset([user, 'salt', salt, 'password', digest], function(err, data) {
+        if (err) {
+          return next(err);
+        }
         res.render('login', {
           followup: '/',
           slogan: utils.randomSlogan(),
@@ -383,23 +446,31 @@ exports.resetPasswd = function(req, res) {
  * Show user profile.
  */
 
-exports.profile = function(req, res) {
-  var key = 'user:'+req.params.username;
-  db.exists(key, function(err, data) {
-    if (data === 1) {
-      db.hgetall(key, function(e, obj) {
-        obj.bestguesstime = (obj.bestguesstime/1000).toFixed(1);
-        obj.joindate = utils.britishFormat(new Date(obj.joindate));
-        if (obj.guessed !== '0') {
-          obj.meanguesstime = ((obj.totguesstime/obj.guessed)/1000).toFixed(1);
+exports.profile = function(req, res, next) {
+  var key = 'user:' + req.params.username;
+  db.exists([key], function(err, exists) {
+    if (err) {
+      return next(err);
+    }
+    if (exists) {
+      db.hgetall([key], function(err, user) {
+        if (err) {
+          return next(err);
         }
-        obj.worstguesstime = (obj.worstguesstime/1000).toFixed(1);
-        delete obj.email;
-        delete obj.password;
-        delete obj.salt;
-        delete obj.totguesstime;
+        var joindate = new Date(user.joindate);
+        user.bestguesstime = (user.bestguesstime / 1000).toFixed(1);
+        user.joindate = utils.britishFormat(joindate);
+        if (user.guessed !== '0') {
+          user.meanguesstime = user.totguesstime / user.guessed;
+          user.meanguesstime = (user.meanguesstime / 1000).toFixed(1);
+        }
+        user.worstguesstime = (user.worstguesstime / 1000).toFixed(1);
+        delete user.email;
+        delete user.password;
+        delete user.salt;
+        delete user.totguesstime;
         res.locals.slogan = utils.randomSlogan();
-        res.render('user', obj);
+        res.render('user', user);
       });
       return;
     }

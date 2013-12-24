@@ -17,8 +17,11 @@ var async = require('async')
 var subTask = function(genre) {
   return function(callback) {
     var index = randInt(rooms[genre].tracksCount());
-    db.zrange(genre, index, index, function(err, res) {
-      db.hget('song:'+res[0], 'artworkUrl100', callback);
+    db.zrange([genre, index, index], function(err, res) {
+      if (err) {
+        return callback(err);
+      }
+      db.hget(['song:' + res[0], 'artworkUrl100'], callback);
     });
   };
 };
@@ -27,7 +30,7 @@ var subTask = function(genre) {
  * Extract at random in each room, some album covers and return the result as a JSON.
  */
 
-exports.artworks = function(req, res) {
+exports.artworks = function(req, res, next) {
   var tasks = {};
   config.rooms.forEach(function(room) {
     tasks[room] = function(callback) {
@@ -39,7 +42,10 @@ exports.artworks = function(req, res) {
     };
   });
   async.parallel(tasks, function(err, results) {
-    res.json(results);
+    if (err) {
+      return next(err);
+    }
+    res.send(results);
   });
 };
 

@@ -2,7 +2,8 @@
  * Module dependencies.
  */
 
-var express = require('express')
+var errorHandler = require('./lib/middleware/errorHandler')
+  , express = require('express')
   , http = require('http')
   , port = require('./config').port
   , redisstore = require('connect-redis')(express)
@@ -31,6 +32,8 @@ app.use(express.session({
   rolling: true,
   store: sessionstore
 }));
+app.use(app.router);
+app.use(errorHandler);
 
 // Routes
 app.get('/', site.home);
