@@ -1,5 +1,6 @@
 db/
 node_modules/
+.DS_Store
 .npmignore
 public/js/app.min.js
 public/js/home.min.js
