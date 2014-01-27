@@ -11,12 +11,12 @@
     , pvtmsgto
     , subscriber = false
     , roundpoints = 0
-    , roomname = window.location.pathname.replace(/\//g, '')
+    , roomname = location.pathname.replace(/\//g, '')
     , primus
     , stopanimation = false
     , touchplay
     , urlregex = /(https?:\/\/[\-A-Za-z0-9+&@#\/%?=~_()|!:,.;]*[\-A-Za-z0-9+&@#\/%=~_()|])/
-    , uri = window.location.protocol+'//'+window.location.host; // Primus server URI
+    , uri = location.protocol + '//' + location.host; // Primus server URI
 
   var amstrings = [
     'Yes, that\'s the artist. What about the title?'
@@ -398,7 +398,7 @@
       html += '<td>'+player.points+'</td>';
       html += '<td>'+player.golds+'</td><td>'+player.silvers+'</td>';
       html += '<td>'+player.bronzes+'</td><td>'+player.guessed+'</td>';
-      var meantime = "N/A";
+      var meantime = 'N/A';
       if (player.guessed !== 0) {
         meantime = player.totguesstime / player.guessed;
         meantime = (meantime / 1000).toFixed(1)+' s';
@@ -474,7 +474,7 @@
 
     var html = '<div class="modal-header">';
     html += '<h3>You are joining the '+roomname+' room</h3></div>';
-    html += '<div class="modal-body"><p>'+(msg || "What's your name?")+'</p></div>';
+    html += '<div class="modal-body"><p>'+(msg || 'What\'s your name?')+'</p></div>';
     html += '<div class="modal-footer relative">';
     html += '<input id="login" maxlength="15" type="text" name="nickname" />';
     html += '<button id="join" class="btn btn-success">';
@@ -966,10 +966,14 @@
 
   // Set up the app
   setVariables();
-  DOM.modal.modal({keyboard:false, show:false, backdrop:'static'});
+  DOM.modal.modal({
+    backdrop: 'static',
+    keyboard: false,
+    show: false
+  });
   DOM.togglechat.click(hideChat);
 
-  primus = Primus.connect(uri, {'strategy': 'none'});
+  primus = Primus.connect(uri, {strategy: false});
   primus.on('open', function() {
     jplayer = $('#player').jPlayer({
       ready: jplayerReady,
