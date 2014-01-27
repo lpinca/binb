@@ -13,6 +13,9 @@ Unless previously installed you'll need the following packages:
 - [Cairo](http://cairographics.org/)
 
 Please use their sites to get detailed installation instructions.
+You also need `UglifyJS` installed globally:
+
+    $ npm install uglify-js -g
 
 ### Install binb
 
