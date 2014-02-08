@@ -19,34 +19,48 @@
     , uri = location.protocol + '//' + location.host; // Primus server URI
 
   var amstrings = [
-    'Yes, that\'s the artist. What about the title?'
+    'Do you also know the title?'
     , 'Exactly, now tell me the title!'
-    , 'Do you also know the title?'
+    , 'Yes, that\'s the artist. What about the title?'
   ];
 
   var bmstrings = [
-    'Yeah true! do you like this track?'
+    'Congratulations'
+    , 'Exactly'
+    , 'Excellent'
     , 'Good job!'
     , 'Great!'
-    , 'Very well done!'
-    , 'Exactly!'
-    , 'Excellent!'
+    , 'I\'m proud of you'
+    , 'Keep it up!'
+    , 'Perfect'
+    , 'Super duper'
+    , 'That\'s it!'
+    , 'Very well done'
     , 'Woohoo!'
+    , 'Yeah true, do you like this track?'
+    , 'Yes, you\'re right'
+    , 'You make it look easy'
+    , 'You remembered'
+    , 'You rock!'
   ];
 
   var nmstrings = [
-    'Nope, sorry!'
-    , 'No way!'
+    'Are you kidding?'
+    , 'Don\'t give up'
     , 'Fail'
-    , 'Nope'
+    , 'Haha, what?!'
+    , 'Incorrect answer'
+    , 'It is not that hard',
+    , 'Keep trying'
+    , 'No way!'
     , 'No'
+    , 'Nope'
+    , 'Nope, sorry!'
+    , 'Oh, come on!'
     , 'That\'s wrong'
-    , 'What?!'
-    , 'Wrong', 'Haha, what?!'
-    , 'You kidding?'
-    , 'Don\'t make me laugh'
-    , 'You mad?'
     , 'Try again'
+    , 'What?!'
+    , 'Wrong'
   ];
 
   var states = [
@@ -57,9 +71,9 @@
   ];
 
   var tmstrings = [
-    'Yes, you guessed the title. Who is the artist?'
+    'Correct, do you also know the artist?'
     , 'Now tell me the artist!'
-    , 'Correct, do you also know the artist?'
+    , 'Yes, you guessed the title. Who is the artist?'
   ];
 
   String.prototype.encodeEntities = function() {
