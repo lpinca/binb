@@ -50,7 +50,7 @@
     , 'Fail'
     , 'Haha, what?!'
     , 'Incorrect answer'
-    , 'It is not that hard',
+    , 'It is not that hard'
     , 'Keep trying'
     , 'No way!'
     , 'No'
