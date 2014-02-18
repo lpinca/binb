@@ -958,6 +958,12 @@
   };
 
   var slashcommands = {
+    clear: {
+      fn: function() {
+        DOM.chat.empty();
+      },
+      minargs: 0
+    },
     ignore: {
       checkrecipient: true, // Assume that the first argument (argv[0]) is the recipient
       fn: ignorePlayer,
