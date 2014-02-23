@@ -7,9 +7,9 @@
     "express": "3.4.x",
     "jade": "1.1.x",
     "nodemailer": "0.6.x",
-    "primus": "1.5.x",
-    "primus-emitter": "2.0.x",
-    "primus-rooms": "2.3.x",
+    "primus": "2.0.x",
+    "primus-emitter": "3.0.x",
+    "primus-rooms": "3.0.x",
     "redis": "0.10.x",
     "uglify-js": "2.4.x",
     "ws": "0.4.x"
@@ -30,5 +30,5 @@
     "start": "node app.js"
   },
   "subdomain": "binb",
-  "version": "0.4.4"
+  "version": "0.4.5"
 }
