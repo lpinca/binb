@@ -5,7 +5,7 @@
     "canvas": "1.1.x",
     "connect-redis": "1.4.x",
     "express": "3.4.x",
-    "jade": "1.1.x",
+    "jade": "1.2.x",
     "nodemailer": "0.6.x",
     "primus": "2.0.x",
     "primus-emitter": "3.0.x",
@@ -15,7 +15,7 @@
     "ws": "0.4.x"
   },
   "devDependencies": {
-    "JSONStream": "0.7.x"
+    "JSONStream": "0.8.x"
   },
   "engines": {
     "node": "0.10.x"
@@ -30,5 +30,5 @@
     "start": "node app.js"
   },
   "subdomain": "binb",
-  "version": "0.4.5"
+  "version": "0.4.5-1"
 }
