@@ -2,13 +2,17 @@
  * Module dependencies.
  */
 
-var errorHandler = require('./lib/middleware/errorHandler')
+var cookieParser = require('cookie-parser')
+  , errorHandler = require('./lib/middleware/errorHandler')
   , express = require('express')
+  , favicon = require('static-favicon')
   , http = require('http')
   , port = require('./config').port
-  , redisstore = require('connect-redis')(express)
+  , session = require('express-session')
+  , RedisStore = require('connect-redis')(session)
   , secret = process.env.SITE_SECRET || 'shhhh, very secret'
   , site = require('./routes/site')
+  , urlencoded = require('body-parser').urlencoded
   , user = require('./routes/user')
   , usersdb = require('./lib/redis-clients').users;
 
@@ -18,22 +22,20 @@ var errorHandler = require('./lib/middleware/errorHandler')
 
 var app = express()
   , pub = __dirname + '/public' // Path to public directory
-  , sessionstore = new redisstore({client: usersdb})
+  , sessionstore = new RedisStore({client: usersdb})
   , server = http.createServer(app); // HTTP server object
 
 // Configuration
 app.set('view engine', 'jade');
 app.use('/static', express.static(pub, {maxAge: 2419200000})); // 4 weeks = 2419200000 ms
-app.use(express.favicon(pub + '/img/favicon.ico', {maxAge: 2419200000}));
-app.use(express.urlencoded());
-app.use(express.cookieParser(secret));
-app.use(express.session({
+app.use(favicon(pub + '/img/favicon.ico', {maxAge: 2419200000}));
+app.use(urlencoded());
+app.use(cookieParser(secret));
+app.use(session({
   cookie: {maxAge: 14400000}, // 4 h = 14400000 ms
   rolling: true,
   store: sessionstore
 }));
-app.use(app.router);
-app.use(errorHandler);
 
 // Routes
 app.get('/', site.home);
@@ -53,6 +55,8 @@ app.get('/signup', site.validationErrors, site.signup);
 app.post('/signup', user.validateSignUp, user.userExists, user.emailExists, user.createAccount);
 app.get('/:room', site.room);
 app.get('/user/:username', user.profile);
+
+app.use(errorHandler);
 
 /**
  * Setting up the rooms.
