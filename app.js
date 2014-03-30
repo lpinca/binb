@@ -2,8 +2,7 @@
  * Module dependencies.
  */
 
-var cookieParser = require('cookie-parser')
-  , errorHandler = require('./lib/middleware/errorHandler')
+var errorHandler = require('./lib/middleware/errorHandler')
   , express = require('express')
   , favicon = require('static-favicon')
   , http = require('http')
@@ -11,6 +10,7 @@ var cookieParser = require('cookie-parser')
   , session = require('express-session')
   , RedisStore = require('connect-redis')(session)
   , secret = process.env.SITE_SECRET || 'shhhh, very secret'
+  , cookieParser = require('cookie-parser')(secret)
   , site = require('./routes/site')
   , urlencoded = require('body-parser').urlencoded
   , user = require('./routes/user')
@@ -30,7 +30,7 @@ app.set('view engine', 'jade');
 app.use('/static', express.static(pub, {maxAge: 2419200000})); // 4 weeks = 2419200000 ms
 app.use(favicon(pub + '/img/favicon.ico', {maxAge: 2419200000}));
 app.use(urlencoded());
-app.use(cookieParser(secret));
+app.use(cookieParser);
 app.use(session({
   cookie: {maxAge: 14400000}, // 4 h = 14400000 ms
   rolling: true,
@@ -63,7 +63,7 @@ app.use(errorHandler);
  */
 
 require('./lib/rooms')({
-  secret: secret,
+  parser: cookieParser,
   server: server,
   sessionstore: sessionstore
 });
