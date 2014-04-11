@@ -997,7 +997,7 @@
   primus.on('open', function() {
     jplayer = $('#player').jPlayer({
       ready: jplayerReady,
-      swfPath: '/static/swf/',
+      swfPath: '//cdn.jsdelivr.net/jplayer/2.6/Jplayer.swf',
       supplied: 'm4a',
       preload: 'auto',
       volume: 1
