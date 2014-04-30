@@ -1,7 +1,7 @@
 {
   "analyze": false,
   "dependencies": {
-    "async": "0.7.x",
+    "async": "0.8.x",
     "body-parser": "1.0.x",
     "canvas": "1.1.x",
     "connect-redis": "2.0.x",
@@ -34,5 +34,5 @@
     "start": "node app.js"
   },
   "subdomain": "binb",
-  "version": "0.4.7-1"
+  "version": "0.4.7-2"
 }
