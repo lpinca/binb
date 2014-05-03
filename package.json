@@ -14,7 +14,7 @@
     "primus-emitter": "3.0.x",
     "primus-rooms": "3.0.x",
     "redis": "0.10.x",
-    "static-favicon": "1.0.x",
+    "serve-favicon": "2.0.x",
     "uglify-js": "2.4.x",
     "ws": "0.4.x"
   },
@@ -34,5 +34,5 @@
     "start": "node app.js"
   },
   "subdomain": "binb",
-  "version": "0.4.7-2"
+  "version": "0.4.7-3"
 }

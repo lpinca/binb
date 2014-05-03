@@ -4,7 +4,7 @@
 
 var errorHandler = require('./lib/middleware/errorHandler')
   , express = require('express')
-  , favicon = require('static-favicon')
+  , favicon = require('serve-favicon')
   , http = require('http')
   , port = require('./config').port
   , session = require('express-session')
