@@ -16,7 +16,7 @@ var async = require('async')
 
 var subTask = function(genre) {
   return function(callback) {
-    var index = randInt(rooms[genre].tracksCount());
+    var index = randInt(rooms[genre].trackscount);
     db.zrange([genre, index, index], function(err, res) {
       if (err) {
         return callback(err);

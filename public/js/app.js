@@ -471,14 +471,15 @@
 
   // Submitted name was invalid
   var invalidNickName = function(feedback) {
-    joinAnonymous(feedback+'<br/>Try with another one:');
+    feedback = '<span class="label label-important">' + feedback + '</span>';
+    joinUnauthenticated(feedback + '<br/>Try with another one:');
   };
 
   // Prompt for name and send it
-  var joinAnonymous = function(msg) {
+  var joinUnauthenticated = function(msg) {
     if (/nickname\s*\=/.test(document.cookie) && !msg) {
       nickname = document.cookie.replace(/.*nickname\s*\=\s*([^;]*);?.*/, '$1');
-      return primus.send('joinanonymous', nickname, roomname);
+      return primus.send('joinunauthenticated', nickname, roomname);
     }
 
     if (DOM.modal.hasClass('in')) {
@@ -504,11 +505,10 @@
     button.click(function() {
       if ($.trim(login.val()) !== '') {
         nickname = login.val();
-        primus.send('joinanonymous', nickname, roomname);
+        primus.send('joinunauthenticated', nickname, roomname);
       }
       else {
-        var txt = 'Nickname can\'t be empty.';
-        invalidNickName('<span class="label label-important">'+txt+'</span>');
+        invalidNickName('Nickname can\'t be empty.');
       }
       login.val('');
     });
@@ -532,7 +532,7 @@
         subscriber = true;
         return primus.send('joinauthenticated', roomname);
       }
-      joinAnonymous();
+      joinUnauthenticated();
     });
     if (!$.jPlayer.platform.mobile && !$.jPlayer.platform.tablet) {
       return addVolumeControl();
@@ -672,13 +672,13 @@
         var val = $.trim(DOM.messagebox.val());
         if (val !== '') {
           if (pvtmsgto) {
-            primus.send('sendchatmsg', val, pvtmsgto);
+            primus.send('chatmsg', val, pvtmsgto);
           }
           else if (/^\/[^ ]/.test(val)) {
             slashCommandHandler(val);
           }
           else {
-            primus.send('sendchatmsg', val);
+            primus.send('chatmsg', val);
           }
         }
         DOM.messagebox.val('');
