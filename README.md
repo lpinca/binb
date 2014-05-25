@@ -14,6 +14,11 @@ Unless previously installed you'll need the following packages:
 
 Please use their sites to get detailed installation instructions.
 
+#####Possible Errors
+    /usr/bin/env: node: No such file or directory
+Make sure you have Node.js installed. Some package managers name the binary nodejs. You can symlink it to make it work.
+`sudo ln -s /usr/bin/nodejs /usr/bin/node`
+
 You also need `UglifyJS` installed globally:
 
     $ npm install uglify-js -g
