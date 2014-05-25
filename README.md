@@ -21,7 +21,7 @@ You also need `UglifyJS` installed globally:
 ### Install binb
 
 Once you have redis server up and running type:
-    
+
     $ make install
 
 Then run `$ npm start` or `$ node app.js` to start the app.

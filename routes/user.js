@@ -69,13 +69,13 @@ exports.sliceLeaderboard = function(req, res, next) {
 /**
  * Change password middlewares.
  */
- 
+
 exports.validateChangePasswd = function(req, res, next) {
   if (!req.session.user || req.body.oldpassword === undefined ||
     req.body.newpassword === undefined) {
     return res.send(400);
   }
-  
+
   var errors = {};
 
   if (req.body.oldpassword.trim() === '') {
@@ -90,12 +90,12 @@ exports.validateChangePasswd = function(req, res, next) {
   else if(req.body.newpassword === req.body.oldpassword) {
     errors.newpassword = "can't be changed to the old one";
   }
-  
+
   if (errors.oldpassword || errors.newpassword) {
     req.session.errors = errors;
     return res.redirect(req.url);
   }
-  
+
   next();
 };
 
@@ -156,7 +156,7 @@ exports.validateLogin = function(req, res, next) {
   if (req.body.password.trim() === '') {
     errors.password = "can't be empty";
   }
-  
+
   req.session.oldvalues = {username: req.body.username};
   if (errors.username || errors.password) {
     req.session.errors = errors;
@@ -246,18 +246,18 @@ exports.validateSignUp = function(req, res, next) {
   if (req.body.captcha !== req.session.captchacode) {
     errors.captcha = 'no match';
   }
-  
+
   // Save old values to repopulate the fields in case of future errors
   req.session.oldvalues = {
     username: req.body.username,
     email: req.body.email
   };
-  
+
   if (errors.username || errors.email || errors.password || errors.captcha) {
     req.session.errors = errors;
     return res.redirect(req.url);
   }
-  
+
   next();
 };
 
@@ -326,28 +326,28 @@ exports.createAccount = function(req, res, next) {
 /**
  * Recover password middlewares.
  */
- 
+
 exports.validateRecoverPasswd = function(req, res, next) {
   if (req.body.email === undefined || req.body.captcha === undefined) {
     return res.send(400);
   }
 
   var errors = {};
-  
+
   if (!utils.isEmail(req.body.email)) {
     errors.email = 'is not an email address';
   }
   if (req.body.captcha !== req.session.captchacode) {
     errors.captcha = 'no match';
   }
-  
+
   req.session.oldvalues = {email: req.body.email};
-  
+
   if (errors.email || errors.captcha) {
     req.session.errors = errors;
     return res.redirect(req.url);
   }
-  
+
   next();
 };
 
@@ -393,9 +393,9 @@ exports.resetPasswd = function(req, res, next) {
   if (req.body.password === undefined) {
     return res.send(400);
   }
-  
+
   var errors = {};
-  
+
   // Validate new password
   if (req.body.password.trim() === '') {
     errors.password = "can't be empty";
@@ -407,12 +407,12 @@ exports.resetPasswd = function(req, res, next) {
   if (!req.query.token) {
     errors.alert = 'Missing token.';
   }
-  
+
   if (errors.password || errors.alert) {
     req.session.errors = errors;
     return res.redirect(req.url);
   }
-  
+
   var key = 'token:' + req.query.token;
   db.get([key], function(err, user) {
     if (err) {
