@@ -706,7 +706,8 @@
           break;
         case 38: // up-arrow
           if (historycursor > 0) {
-            DOM.guessbox.val(historyvalues[--historycursor]);
+            DOM.guessbox.val(historyvalues[--historycursor]); 
+	    return false;
           }
           break;
         case 40: // down-arrow
