@@ -706,7 +706,8 @@
           break;
         case 38: // up-arrow
           if (historycursor > 0) {
-            DOM.guessbox.val(historyvalues[--historycursor]);
+            DOM.guessbox.val(historyvalues[--historycursor]); 
+	    return false;
           }
           // Prevent default action to keep the cursor at the end of the word
           return false;
