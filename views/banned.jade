@@ -1,0 +1,16 @@
+extends layout
+
+block title
+  title binb :: banned
+
+block sections
+  section
+    .row
+      .span12.offset2
+        .alert.alert-error.alert-block
+          h4.alert-heading Error!
+          | Yuo have been banned.
+          br
+          | Your ban will expire in #{ttl} minutes.
+
+block scripts

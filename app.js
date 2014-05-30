@@ -2,7 +2,8 @@
  * Module dependencies.
  */
 
-var errorHandler = require('./lib/middleware/errorHandler')
+var banHandler = require('./lib/middleware/ban-handler')
+  , errorHandler = require('./lib/middleware/error-handler')
   , express = require('express')
   , favicon = require('serve-favicon')
   , http = require('http')
@@ -29,6 +30,7 @@ var app = express()
 app.set('view engine', 'jade');
 app.use('/static', express.static(pub, {maxAge: 2419200000})); // 4 weeks = 2419200000 ms
 app.use(favicon(pub + '/img/favicon.ico', {maxAge: 2419200000}));
+app.use(banHandler);
 app.use(urlencoded());
 app.use(cookieParser);
 app.use(session({
