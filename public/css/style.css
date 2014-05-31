@@ -672,6 +672,7 @@ form .clearfix {
   width: 446px;
   margin: 4px 6px;
   overflow: auto;
+  word-wrap: break-word;
 }
 .bordered {
   border: 1px solid #ccc;
