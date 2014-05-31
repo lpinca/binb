@@ -92,10 +92,12 @@ form .clearfix {
 }
 .well {
   background-color: #DDDDDD;
-  margin-bottom: 18px;
 }
 .alert {
   margin-bottom: 9px;
+}
+.ban, .leaderboard-wrapper, .well, #summary {
+  margin-bottom: 18px;
 }
 .submit-button {
   margin-left: 120px;
@@ -194,7 +196,6 @@ form .clearfix {
 .leaderboard-wrapper {
   height: 349px;
   overflow: auto;
-  margin-bottom: 18px;
   -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
   border-radius: 4px;
@@ -554,7 +555,6 @@ form .clearfix {
 }
 #summary {
   text-align: center;
-  margin-bottom: 18px;
 }
 #users-wrapper {
   margin-left: 120px;

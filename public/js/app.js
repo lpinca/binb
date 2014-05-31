@@ -551,20 +551,6 @@
     });
   };
 
-  // Kick a player
-  var kickPlayer = function(args, outcome) {
-    outcome.append('you are not allowed to kick a player.');
-    if (!subscriber) {
-      return addChatEntry(outcome);
-    }
-    var why = args[1] || '';
-    primus.send('kick', args[0], why, function(success) {
-      if (!success) {
-        addChatEntry(outcome);
-      }
-    });
-  };
-
   var loadTrack = function(previewUrl) {
     jplayer.jPlayer('mute');
     jplayer.jPlayer('setMedia', {m4a: previewUrl});
@@ -641,6 +627,44 @@
     }
     DOM.track.text(data.counter+'/'+data.tot);
     addFeedback('What is this song?');
+  };
+
+  // Return a function that will kick or ban a player
+  var punishPlayer = function(punishment) {
+    return function(tokens, outcome) {
+      outcome.append('you are not allowed to ' + punishment + ' a player.');
+      if (!subscriber) {
+        return addChatEntry(outcome);
+      }
+
+      var args = [punishment, tokens[0]];
+
+      if (punishment === 'kick') {
+        args.push(tokens[1] || '');
+      }
+      else if (!tokens[1]) {
+        args.push('', '');
+      }
+      else if (!tokens[2]) {
+        if (/^[1-9][0-9]*$/.test(tokens[1])) {
+          args.push('', tokens[1]);
+        }
+        else {
+          args.push(tokens[1], '');
+        }
+      }
+      else {
+        args.push(tokens[1], tokens[2]);
+      }
+
+      args.push(function(success) {
+        if (!success) {
+          addChatEntry(outcome);
+        }
+      });
+
+      primus.send.apply(primus, args);
+    };
   };
 
   // Return a function that will add a random text from the given set, with the given style
@@ -830,6 +854,20 @@
     addChatEntry(outcome);
   };
 
+  // Unban a player
+  var unbanPlayer = function(args, outcome) {
+    outcome.append('you are not allowed to unban a player.');
+    if (!subscriber) {
+      return addChatEntry(outcome);
+    }
+
+    primus.send('unban', args[0], function(success) {
+      if (!success) {
+        addChatEntry(outcome);
+      }
+    });
+  };
+
   // Remove a player from the ignore list
   var unignorePlayer = function(args, outcome) {
     if (!ignoredplayers[args[0]]) {
@@ -959,6 +997,12 @@
   };
 
   var slashcommands = {
+    ban: {
+      checkrecipient: true,
+      fn: punishPlayer('ban'),
+      minargs: 1,
+      usage: 'usage: /ban &lt;player&gt; [&lt;message&gt;] [&lt;duration&gt;]'
+    },
     clear: {
       fn: function() {
         DOM.chat.empty();
@@ -966,22 +1010,27 @@
       minargs: 0
     },
     ignore: {
-      checkrecipient: true, // Assume that the first argument (argv[0]) is the recipient
+      checkrecipient: true,
       fn: ignorePlayer,
       minargs: 1,
-      usage: 'usage: /ignore &lt;player name&gt;'
+      usage: 'usage: /ignore &lt;player&gt;'
     },
     kick: {
       checkrecipient: true,
-      fn: kickPlayer,
+      fn: punishPlayer('kick'),
       minargs: 1,
-      usage: 'usage: /kick &lt;player name&gt; [message]'
+      usage: 'usage: /kick &lt;player&gt; [&lt;message&gt;]'
+    },
+    unban: {
+      fn: unbanPlayer,
+      minargs: 1,
+      usage: 'usage: /unban &lt;IP&gt;|:list'
     },
     unignore: {
       checkrecipient: true,
       fn: unignorePlayer,
       minargs: 1,
-      usage: 'usage: /unignore &lt;player name&gt;'
+      usage: 'usage: /unignore &lt;player&gt;'
     }
   };
 
@@ -1004,11 +1053,11 @@
       volume: 1
     });
     primus.on('alreadyinaroom', alreadyInARoom);
+    primus.on('close', disconnect);
     primus.on('invalidnickname', invalidNickName);
     primus.on('ready', ready);
     primus.on('updateoverview', updateRoomsOverview);
     primus.send('getoverview', roomsOverview);
   });
-  primus.on('close', disconnect);
 
 })();
