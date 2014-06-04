@@ -1024,7 +1024,7 @@
     unban: {
       fn: unbanPlayer,
       minargs: 1,
-      usage: 'usage: /unban &lt;IP&gt;|:list'
+      usage: 'usage: /unban &lt;IP&gt;|list'
     },
     unignore: {
       checkrecipient: true,
