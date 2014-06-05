@@ -79,16 +79,16 @@ exports.validateChangePasswd = function(req, res, next) {
   var errors = {};
 
   if (req.body.oldpassword.trim() === '') {
-    errors.oldpassword = "can't be empty";
+    errors.oldpassword = 'can\'t be empty';
   }
   if (req.body.newpassword.trim() === '') {
-    errors.newpassword = "can't be empty";
+    errors.newpassword = 'can\'t be empty';
   }
   else if (req.body.newpassword.length < 6) {
     errors.newpassword = 'must be at least 6 characters long';
   }
   else if(req.body.newpassword === req.body.oldpassword) {
-    errors.newpassword = "can't be changed to the old one";
+    errors.newpassword = 'can\'t be changed to the old one';
   }
 
   if (errors.oldpassword || errors.newpassword) {
@@ -126,7 +126,7 @@ exports.changePasswd = function(req, res, next) {
     , salt = crypto.randomBytes(6).toString('base64');
   hash.update(salt + req.body.newpassword);
   digest = hash.digest('hex');
-  db.hmset([key, 'salt', salt, 'password', digest], function(err, data) {
+  db.hmset([key, 'salt', salt, 'password', digest], function(err) {
     if (err) {
       return next(err);
     }
@@ -151,10 +151,10 @@ exports.validateLogin = function(req, res, next) {
   var errors = {};
 
   if (req.body.username.trim() === '') {
-    errors.username = "can't be empty";
+    errors.username = 'can\'t be empty';
   }
   if (req.body.password.trim() === '') {
-    errors.password = "can't be empty";
+    errors.password = 'can\'t be empty';
   }
 
   req.session.oldvalues = {username: req.body.username};
@@ -238,7 +238,7 @@ exports.validateSignUp = function(req, res, next) {
     errors.email = 'is not an email address';
   }
   if (req.body.password.trim() === '') {
-    errors.password = "can't be empty";
+    errors.password = 'can\'t be empty';
   }
   else if (req.body.password.length < 6) {
     errors.password = 'must be at least 6 characters long';
@@ -311,7 +311,7 @@ exports.createAccount = function(req, res, next) {
   multi.set(mailkey, userkey);
   multi.zadd('users', 0, req.body.username);
   multi.sadd('emails', req.body.email);
-  multi.exec(function(err, replies) {
+  multi.exec(function(err) {
     if (err) {
       return next(err);
     }
@@ -363,11 +363,11 @@ exports.sendEmail = function(req, res, next) {
       // Email exists, generate a secure random token
       var token = crypto.randomBytes(48).toString('hex');
       // Token expires after 4 hours
-      db.setex(['token:' + token, 14400, data], function(err, reply) {
+      db.setex(['token:' + token, 14400, data], function(err) {
         if (err) {
           return next(err);
         }
-        mailer.sendEmail(req.body.email, token, function(err, response) {
+        mailer.sendEmail(req.body.email, token, function(err) {
           if (err) {
             console.error(err.message);
           }
@@ -398,7 +398,7 @@ exports.resetPasswd = function(req, res, next) {
 
   // Validate new password
   if (req.body.password.trim() === '') {
-    errors.password = "can't be empty";
+    errors.password = 'can\'t be empty';
   }
   else if (req.body.password.length < 6) {
     errors.password = 'must be at least 6 characters long';
@@ -425,7 +425,7 @@ exports.resetPasswd = function(req, res, next) {
         , salt = crypto.randomBytes(6).toString('base64');
       hash.update(salt + req.body.password);
       digest = hash.digest('hex');
-      db.hmset([user, 'salt', salt, 'password', digest], function(err, data) {
+      db.hmset([user, 'salt', salt, 'password', digest], function(err) {
         if (err) {
           return next(err);
         }
