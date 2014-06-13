@@ -13,10 +13,9 @@
     , roundpoints = 0
     , roomname = location.pathname.replace(/\//g, '')
     , primus
-    , stopanimation = false
+    , timer
     , touchplay
-    , urlregex = /(https?:\/\/[\-A-Za-z0-9+&@#\/%?=~_()|!:,.;]*[\-A-Za-z0-9+&@#\/%=~_()|])/
-    , uri = location.protocol + '//' + location.host; // Primus server URI
+    , urlregex = /(https?:\/\/[\-A-Za-z0-9+&@#\/%?=~_()|!:,.;]*[\-A-Za-z0-9+&@#\/%=~_()|])/;
 
   var amstrings = [
     'Do you also know the title?'
@@ -127,20 +126,20 @@
   // Add track info
   var addTrackInfo = function(data) {
     if (touchplay) {
-      touchplay.removeClass('btn-success').addClass('btn-danger disabled');
-      touchplay.html('<i class="icon-play icon-white"></i> Wait');
+      touchplay
+        .html('<i class="icon-play icon-white"></i> Wait')
+        .removeClass('btn-success')
+        .addClass('btn-danger disabled');
     }
+
     isplaying = false;
-    cassetteAnimation(Date.now()+5000, false);
+    clearInterval(timer);
+    cassetteAnimation(Date.now() + 5000, false);
 
     var artistName = data.artistName.replace(/"/g, '&quot;')
       , trackName = data.trackName.replace(/"/g, '&quot;')
       , attrs = ''
       , rp = '';
-
-    var html = '<li class="bordered"><img class="artwork" src="'+data.artworkUrl+'"/>';
-    html += '<div class="info"><div class="artist" title="'+artistName+'">'+artistName+'</div>';
-    html += '<div class="title" title="'+trackName+'">'+trackName+'</div></div>';
 
     if (roundpoints > 0) {
       rp = '+'+roundpoints;
@@ -149,6 +148,10 @@
         attrs += 'class="icons round-rank stand'+stand+'"';
       }
     }
+
+    var html = '<li class="bordered"><img class="artwork" src="'+data.artworkUrl+'"/>';
+    html += '<div class="info"><div class="artist" title="'+artistName+'">'+artistName+'</div>';
+    html += '<div class="title" title="'+trackName+'">'+trackName+'</div></div>';
     html += '<div '+attrs+'></div><div class="round-points">'+rp+'</div>';
     html += '<a class="icons" target="itunes_store" href="'+data.trackViewUrl+'"></a></li>';
 
@@ -319,44 +322,48 @@
   var cassetteAnimation = function(endtime, forward) {
     var deg
       , factor
-      , millisleft = endtime - Date.now()
+      , millisleft
       , offsetleft
       , offsetright
-      , secleft = millisleft / 1000
+      , secleft
+      , step
       , width;
 
-    if (stopanimation || millisleft < 50) {
-      return;
-    }
+    (step = function() {
+      millisleft = endtime - Date.now();
+      secleft = millisleft / 1000;
 
-    if (forward) {
-      if (touchplay) {
-        elapsedtime = 30 - Math.round(secleft);
+      if (millisleft < 50) {
+        return clearInterval(timer);
       }
-      DOM.countdown.text(secleft.toFixed(1));
-      factor = secleft / 30;
-      width = 148 - 148 * factor;
-      deg = -360 + 360 * factor;
-      offsetleft = 20 + 24 * factor;
-      offsetright = 106 + 24 * factor;
-    }
-    else {
-      DOM.countdown.text(Math.round(secleft));
-      factor = secleft / 5;
-      width = 148 * factor;
-      deg = -360 * factor;
-      offsetleft = 44 - 24 * factor;
-      offsetright = 130 - 24 * factor;
-    }
 
-    DOM.progress.width(width);
-    DOM.cassettewheels.css('transform', 'rotate('+deg+'deg)');
-    DOM.tapeleft.css('left', offsetleft+'px');
-    DOM.taperight.css('left', offsetright+'px');
+      if (forward) {
+        if (touchplay) {
+          elapsedtime = 30 - Math.round(secleft);
+        }
+        DOM.countdown.text(secleft.toFixed(1));
+        factor = secleft / 30;
+        width = 148 - 148 * factor;
+        deg = -360 + 360 * factor;
+        offsetleft = 20 + 24 * factor;
+        offsetright = 106 + 24 * factor;
+      }
+      else {
+        DOM.countdown.text(Math.round(secleft));
+        factor = secleft / 5;
+        width = 148 * factor;
+        deg = -360 * factor;
+        offsetleft = 44 - 24 * factor;
+        offsetright = 130 - 24 * factor;
+      }
 
-    setTimeout(function() {
-      cassetteAnimation(endtime, forward);
-    }, 50);
+      DOM.progress.width(width);
+      DOM.cassettewheels.css('transform', 'rotate('+deg+'deg)');
+      DOM.tapeleft.css('left', offsetleft+'px');
+      DOM.taperight.css('left', offsetright+'px');
+    })();
+
+    timer = setInterval(step, 50);
   };
 
   var clearPrivate = function() {
@@ -389,7 +396,7 @@
 
   // Let the user know when he/she has disconnected
   var disconnect = function() {
-    stopanimation = true;
+    clearInterval(timer);
     jplayer.jPlayer('stop');
     var errorspan = $('<span class="error">ERROR: You have disconnected.</span>');
     addChatEntry(errorspan);
@@ -612,20 +619,26 @@
   // Play a track
   var playTrack = function(data) {
     if (touchplay) {
-      touchplay.removeClass('btn-danger disabled').addClass('btn-success');
-      touchplay.html('<i class="icon-play icon-white"></i> Play');
+      touchplay
+        .html('<i class="icon-play icon-white"></i> Play')
+        .removeClass('btn-danger disabled')
+        .addClass('btn-success');
     }
+
     jplayer.jPlayer('unmute');
     jplayer.jPlayer('play');
     DOM.guessbox.val('');
     isplaying = true;
+    clearInterval(timer);
+    cassetteAnimation(Date.now() + 30000, true);
     updateUsers(data.users);
-    cassetteAnimation(Date.now()+30000, true);
+
     if (data.counter === 1) {
       DOM.modal.modal('hide').empty();
       DOM.tracks.empty();
     }
-    DOM.track.text(data.counter+'/'+data.tot);
+
+    DOM.track.text(data.counter + '/' + data.tot);
     addFeedback('What is this song?');
   };
 
@@ -781,11 +794,12 @@
   var setStatus = function(data) {
     if (data.status === 0) {
       isplaying = true;
-      cassetteAnimation(Date.now()+data.timeleft, true);
+      cassetteAnimation(Date.now() + data.timeleft, true);
     }
     else if (data.status === 1) {
       loadTrack(data.previewUrl);
     }
+
     addFeedback(states[data.status]);
   };
 
@@ -1043,7 +1057,7 @@
   });
   DOM.togglechat.click(hideChat);
 
-  primus = Primus.connect(uri, {strategy: false});
+  primus = Primus.connect({ strategy: false });
   primus.on('open', function() {
     jplayer = $('#player').jPlayer({
       ready: jplayerReady,
