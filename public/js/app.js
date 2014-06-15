@@ -1,21 +1,39 @@
 (function() {
 
-  var elapsedtime = 0
-    , DOM = {}
+  var $cassettewheels = $('#cassette .wheel')
+    , $chat = $('#chat')
+    , $chatwrapper = $('#chat-outer-wrapper')
+    , $countdown = $('#countdown')
+    , $feedback = $('#feedback')
+    , $guessbox = $('#guess')
+    , $jplayer
+    , $messagebox = $('#message')
+    , $modal = $('#modal')
+    , $points = $('#summary .points')
+    , $progress = $('#progress')
+    , $rank = $('#summary .rank')
+    , $recipient = $('#recipient')
+    , $tapeleft = $('#tape-left')
+    , $taperight = $('#tape-right')
+    , $togglechat = $('#toggle-chat')
+    , $touchplay
+    , $track = $('#summary .track')
+    , $tracks = $('#tracks')
+    , $users = $('#users')
+    , elapsedtime = 0
     , historycursor = 0
     , historyvalues = []
     , ignoredplayers = {}
     , isplaying
-    , jplayer
     , nickname
-    , pvtmsgto
-    , subscriber = false
-    , roundpoints = 0
-    , roomname = location.pathname.replace(/\//g, '')
     , primus
+    , pvtmsgto
+    , roomname = location.pathname.replace(/\//g, '')
+    , roundpoints = 0
+    , subscriber = false
     , timer
-    , touchplay
-    , urlregex = /(https?:\/\/[\-A-Za-z0-9+&@#\/%?=~_()|!:,.;]*[\-A-Za-z0-9+&@#\/%=~_()|])/;
+    , urlregex = /(https?:\/\/[\-A-Za-z0-9+&@#\/%?=~_()|!:,.;]*[\-A-Za-z0-9+&@#\/%=~_()|])/
+    , userscounters = {};
 
   var amstrings = [
     'Do you also know the title?'
@@ -80,56 +98,59 @@
   };
 
   // Add a chat entry, whether message, notification, etc.
-  var addChatEntry = function(childNode) {
-    var li = $('<li class="entry"></li>');
-    li.append(childNode);
-    DOM.chat.append(li);
-    DOM.chat[0].scrollTop = DOM.chat[0].scrollHeight;
+  var addChatEntry = function($childNode) {
+    var $entry = $('<li class="entry"></li>');
+    $entry.append($childNode);
+    $chat.append($entry);
+    $chat[0].scrollTop = $chat[0].scrollHeight;
   };
 
   var addFeedback = function(txt, style) {
-    if (typeof style === 'string') {
-      var fbspan = $('<span class="'+style+'"></span>');
-      fbspan.text(txt);
-      DOM.feedback.html(fbspan);
-      DOM.guessbox.addClass(style);
-      setTimeout(function() {DOM.guessbox.removeClass(style);}, 350);
-      return;
+    $feedback.removeClass().text(txt);
+
+    if (style) {
+      $feedback.addClass(style);
+      $guessbox.addClass(style);
+
+      setTimeout(function() {
+        $guessbox.removeClass(style);
+      }, 350);
     }
-    DOM.feedback.text(txt);
   };
 
   var addPrivate = function(usrname) {
+    $messagebox.focus();
+
     if (pvtmsgto) {
       clearPrivate();
     }
+
     if (nickname === usrname) {
       return;
     }
-    DOM.recipient.css('margin-right', '4px');
-    DOM.recipient.text('To '+usrname+':');
-    var width = DOM.recipient.outerWidth(true) + 1;
-    DOM.recipient.hide();
-    DOM.messagebox.animate({'width':'-='+width+'px'}, 'fast', function() {
-      DOM.recipient.show();
+
+    pvtmsgto = usrname;
+
+    $recipient.css('margin-right', '4px');
+    $recipient.text('To ' + usrname + ':');
+    var width = $recipient.outerWidth(true) + 1;
+    $recipient.hide();
+    $messagebox.animate({ 'width': '-=' + width + 'px' }, 'fast', function() {
+      $recipient.show();
     });
-    var el = $('.name').filter(function(index) {
+
+    var $el = $('.name').filter(function() {
       return $(this).text() === usrname;
     });
-    el.prevAll('.private').show();
-    el.unbind('click');
-    el.click(clearPrivate);
-    pvtmsgto = usrname;
-    DOM.messagebox.focus();
+    $el.prevAll('.private').show();
+    $el.off('click').on('click', clearPrivate);
   };
 
   // Add track info
   var addTrackInfo = function(data) {
-    if (touchplay) {
-      touchplay
-        .html('<i class="icon-play icon-white"></i> Wait')
-        .removeClass('btn-success')
-        .addClass('btn-danger disabled');
+    if ($touchplay) {
+      $touchplay.removeClass('btn-success').addClass('btn-danger disabled');
+      $touchplay.html('<i class="icon-play icon-white"></i> Wait');
     }
 
     isplaying = false;
@@ -142,60 +163,75 @@
       , rp = '';
 
     if (roundpoints > 0) {
-      rp = '+'+roundpoints;
+      rp = '+' + roundpoints;
       if (roundpoints > 3) {
         var stand = 7 - roundpoints;
-        attrs += 'class="icons round-rank stand'+stand+'"';
+        attrs += 'class="icons round-rank stand' + stand + '"';
       }
     }
 
-    var html = '<li class="bordered"><img class="artwork" src="'+data.artworkUrl+'"/>';
-    html += '<div class="info"><div class="artist" title="'+artistName+'">'+artistName+'</div>';
-    html += '<div class="title" title="'+trackName+'">'+trackName+'</div></div>';
-    html += '<div '+attrs+'></div><div class="round-points">'+rp+'</div>';
-    html += '<a class="icons" target="itunes_store" href="'+data.trackViewUrl+'"></a></li>';
+    var html = [
+      '<li class="bordered">'
+      , '<img class="artwork" src="' + data.artworkUrl + '"/>'
+      , '<div class="info">'
+      , '<div class="artist" title="' + artistName + '">' + artistName + '</div>'
+      , '<div class="title" title="' + trackName + '">' + trackName + '</div>'
+      , '</div>'
+      , '<div ' + attrs + '></div>'
+      , '<div class="round-points">' + rp + '</div>'
+      , '<a class="icons" target="itunes_store" href="' + data.trackViewUrl + '"></a>'
+      , '</li>'
+    ].join('');
 
-    DOM.tracks.prepend($(html));
+    $tracks.prepend(html);
   };
 
   var addVolumeControl = function() {
-    var volumebutton = $('<div id="volume-button">'+
-      '<a class="button"><div id="icon" class="icons volume-high"></div></a>'+
-      '<div id="volume-slider">'+ // Outer background
-        '<div id="volume-total"></div>'+ // Rail
-        '<div id="volume-current"></div>'+ // Current volume
-        '<div id="volume-handle"></div>'+ // Handle
-      '</div></div>').appendTo('#volume');
+    var html = [
+      '<div id="volume-button">'
+      , '<a class="button">'
+      , '<div id="icon" class="icons volume-high"></div>'
+      , '</a>'
+      , '<div id="volume-slider">'        // Outer background
+      , '<div id="volume-total"></div>'   // Rail
+      , '<div id="volume-current"></div>' // Current volume
+      , '<div id="volume-handle"></div>'  // Handle
+      , '</div>'
+      , '</div>'
+    ].join('');
 
-    var clicked = false
-      , icon = volumebutton.find('#icon')
+    var $volumebutton = $(html)
+      , $icon = $volumebutton.find('#icon')
+      , $volumecurrent = $volumebutton.find('#volume-current')
+      , $volumehandle = $volumebutton.find('#volume-handle')
+      , $volumeslider = $volumebutton.find('#volume-slider')
+      , $volumetotal = $volumebutton.find('#volume-total')
+      , clicked = false
       , mouseisdown = false
       , mouseisover = false
-      , oldvalue = 1
-      , volumecurrent = volumebutton.find('#volume-current')
-      , volumehandle = volumebutton.find('#volume-handle')
-      , volumeslider = volumebutton.find('#volume-slider')
-      , volumetotal = volumebutton.find('#volume-total');
+      , oldvalue = 1;
 
-    var handleIcon = function (volume) {
+    $volumebutton.appendTo('#volume');
+
+    var handleIcon = function(volume) {
       if (volume === 0) {
-        icon.removeClass().addClass('icons volume-none');
+        $icon.removeClass().addClass('icons volume-none');
       }
       else if (volume <= 0.33) {
-        icon.removeClass().addClass('icons volume-low');
+        $icon.removeClass().addClass('icons volume-low');
       }
       else if (volume <= 0.66) {
-        icon.removeClass().addClass('icons volume-medium');
+        $icon.removeClass().addClass('icons volume-medium');
       }
       else {
-        icon.removeClass().addClass('icons volume-high');
+        $icon.removeClass().addClass('icons volume-high');
       }
     };
 
     var handleVolumeMove = function(e) {
-      var railheight = volumetotal.height()
-        , totaloffset = volumetotal.offset()
-        , totalTop = parseInt(volumetotal.css('top').replace(/px/, ''), 10)
+      var railheight = $volumetotal.height()
+        , totaloffset = $volumetotal.offset()
+        , totalTop = parseInt($volumetotal.css('top').replace(/px/, ''), 10)
         , newy = e.pageY - totaloffset.top
         , volume = (railheight - newy) / railheight;
 
@@ -208,9 +244,9 @@
         newy = railheight;
       }
 
-      volumecurrent.height(railheight - newy);
-      volumecurrent.css('top', newy + totalTop);
-      volumehandle.css('top', totalTop + newy - (volumehandle.height() / 2));
+      $volumecurrent.height(railheight - newy);
+      $volumecurrent.css('top', newy + totalTop);
+      $volumehandle.css('top', totalTop + newy - ($volumehandle.height() / 2));
 
       volume = Math.max(0, volume);
       volume = Math.min(volume, 1);
@@ -218,75 +254,67 @@
       setVolume(volume);
     };
 
-    var loadFromCookie = function() {
-      if (/volume\s*\=/.test(document.cookie)) {
-        var value = document.cookie.replace(/.*volume\s*\=\s*([^;]*);?.*/, '$1');
-        value = parseFloat(value);
-        positionVolumeHandle(value);
-        setVolume(value);
-        return;
-      }
-      positionVolumeHandle(1);
-    };
-
     var positionVolumeHandle = function(volume) {
-      if (!volumeslider.is(':visible')) {
-        volumeslider.show();
+      if (!$volumeslider.is(':visible')) {
+        $volumeslider.show();
         positionVolumeHandle(volume);
-        volumeslider.hide();
-        return;
+        return $volumeslider.hide();
       }
-      var totalheight = volumetotal.height();
-      var totalposition = volumetotal.position();
-      var newtop = totalheight - (totalheight * volume);
-      volumecurrent.height(totalheight - newtop );
-      volumecurrent.css('top', totalposition.top + newtop);
-      volumehandle.css('top', totalposition.top + newtop - (volumehandle.height() / 2));
+
+      var totalheight = $volumetotal.height()
+        , totalposition = $volumetotal.position()
+        , newtop = totalheight - (totalheight * volume);
+
+      $volumecurrent.height(totalheight - newtop );
+      $volumecurrent.css('top', totalposition.top + newtop);
+      $volumehandle.css('top', totalposition.top + newtop - ($volumehandle.height() / 2));
     };
 
     var setCookie = function(volume) {
       var d = new Date();
       d.setTime(d.getTime() + 31536000000); // One year in milliseconds
-      document.cookie = 'volume='+volume+';path=/;expires='+d.toGMTString()+';';
+      document.cookie = 'volume=' + volume + ';path=/;expires=' + d.toGMTString() + ';';
     };
 
     var setVolume = function(volume) {
       handleIcon(volume);
-      jplayer.jPlayer('volume', volume);
+      $jplayer.jPlayer('volume', volume);
       oldvalue = volume;
       setCookie(volume);
     };
 
-    volumebutton.find('.button').click(function() {
+    $volumebutton.find('.button').on('click', function() {
       if (!clicked) {
         clicked = true;
+
         if (oldvalue !== 0) {
           handleIcon(0);
-          jplayer.jPlayer('volume', 0);
+          $jplayer.jPlayer('volume', 0);
           positionVolumeHandle(0);
         }
+        return;
       }
-      else {
-        clicked = false;
-        if (oldvalue !== 0) {
-          handleIcon(oldvalue);
-          jplayer.jPlayer('volume', oldvalue);
-          positionVolumeHandle(oldvalue);
-        }
+
+      clicked = false;
+
+      if (oldvalue !== 0) {
+        handleIcon(oldvalue);
+        $jplayer.jPlayer('volume', oldvalue);
+        positionVolumeHandle(oldvalue);
       }
     });
 
-    volumebutton.hover(function() {
+    $volumebutton.hover(function() {
       mouseisover = true;
-      volumeslider.show();
+      $volumeslider.show();
     }, function() {
       mouseisover = false;
       if (!mouseisdown) {
-        volumeslider.hide();
+        $volumeslider.hide();
       }
     });
 
-    volumeslider.on('mouseover', function() {
+    $volumeslider.on('mouseover', function() {
       mouseisover = true;
     }).on('mousedown', function(e) {
       handleVolumeMove(e);
@@ -294,10 +322,10 @@
       return false;
     });
 
-    $(document).on('mouseup', function(e) {
+    $(document).on('mouseup', function() {
       mouseisdown = false;
       if (!mouseisover) {
-        volumeslider.hide();
+        $volumeslider.hide();
       }
     }).on('mousemove', function(e) {
       if (mouseisdown) {
@@ -305,17 +333,35 @@
       }
     });
 
-    loadFromCookie();
+    (function() {
+      if (/volume\s*\=/.test(document.cookie)) {
+        var value = document.cookie.replace(/.*volume\s*\=\s*([^;]*);?.*/, '$1');
+        value = parseFloat(value);
+        positionVolumeHandle(value);
+        return setVolume(value);
+      }
+
+      positionVolumeHandle(1);
+    })();
   };
 
   // Called when a registered user already in a room, tries to enter in another room
   var alreadyInARoom = function() {
-    var html = '<div class="modal-header"><h3>Already in a room</h3></div>';
-    html += '<div class="modal-body"><div class="alert alert-error alert-block">';
-    html += '<h4 class="alert-heading">Warning!</h4>You are already in a room.<br/>';
-    html += 'Leave the other room and refresh this page or close this one.</div></div>';
-    $(html).appendTo(DOM.modal);
-    DOM.modal.modal('show');
+    var html = [
+      '<div class="modal-header">'
+      , '<h3>Already in a room</h3>'
+      , '</div>'
+      , '<div class="modal-body">'
+      , '<div class="alert alert-error alert-block">'
+      , '<h4 class="alert-heading">Warning!</h4>'
+      , 'You are already in a room.<br/>'
+      , 'Leave the other room and refresh this page or close this one.'
+      , '</div>'
+      , '</div>'
+    ].join('');
+
+    $(html).appendTo($modal);
+    $modal.modal('show');
   };
 
   // Start cassette animation
@@ -338,10 +384,10 @@
       }
 
       if (forward) {
-        if (touchplay) {
+        if ($touchplay) {
           elapsedtime = 30 - Math.round(secleft);
         }
-        DOM.countdown.text(secleft.toFixed(1));
+        $countdown.text(secleft.toFixed(1));
         factor = secleft / 30;
         width = 148 - 148 * factor;
         deg = -360 + 360 * factor;
@@ -349,7 +395,7 @@
         offsetright = 106 + 24 * factor;
       }
       else {
-        DOM.countdown.text(Math.round(secleft));
+        $countdown.text(Math.round(secleft));
         factor = secleft / 5;
         width = 148 * factor;
         deg = -360 * factor;
@@ -357,82 +403,107 @@
         offsetright = 130 - 24 * factor;
       }
 
-      DOM.progress.width(width);
-      DOM.cassettewheels.css('transform', 'rotate('+deg+'deg)');
-      DOM.tapeleft.css('left', offsetleft+'px');
-      DOM.taperight.css('left', offsetright+'px');
+      $cassettewheels.css('transform', 'rotate(' + deg + 'deg)');
+      $progress.width(width);
+      $tapeleft.css('left', offsetleft + 'px');
+      $taperight.css('left', offsetright + 'px');
     })();
 
     timer = setInterval(step, 50);
   };
 
   var clearPrivate = function() {
-    var width = DOM.recipient.outerWidth(true) + 1;
-    DOM.recipient.css('margin-right', '0');
-    DOM.recipient.text('');
-    DOM.messagebox.animate({'width':'+='+width+'px'}, 'fast');
-    var el = $('.name').filter(function(index) {
+    var width = $recipient.outerWidth(true) + 1;
+    $recipient.css('margin-right', '0');
+    $recipient.text('');
+    $messagebox.animate({ 'width': '+=' + width + 'px' }, 'fast');
+
+    var $el = $('.name').filter(function() {
       return $(this).text() === pvtmsgto;
     });
-    el.prevAll('.private').hide();
-    el.unbind('click');
-    el.click(function() {
+    $el.prevAll('.private').hide();
+    $el.off('click').on('click', function() {
       addPrivate($(this).text());
     });
-    pvtmsgto = null;
-    DOM.messagebox.focus();
+
+    pvtmsgto = '';
+    $messagebox.focus();
   };
 
   // Game over countdown
   var countDown = function(endtime) {
-    var millisleft = endtime - Date.now();
-    var secleft = millisleft / 1000;
+    var millisleft = endtime - Date.now()
+      , secleft = millisleft / 1000;
+
     $('.modal-footer span').text(Math.round(secleft));
+
     if (millisleft < 200) {
       return;
     }
-    setTimeout(function() {countDown(endtime);}, 200);
+
+    setTimeout(function() {
+      countDown(endtime);
+    }, 200);
   };
 
   // Let the user know when he/she has disconnected
   var disconnect = function() {
     clearInterval(timer);
-    jplayer.jPlayer('stop');
-    var errorspan = $('<span class="error">ERROR: You have disconnected.</span>');
-    addChatEntry(errorspan);
+    $jplayer.jPlayer('stop');
+    addChatEntry($('<span class="error">ERROR: You have disconnected.</span>'));
     addFeedback('Something wrong happened');
-    DOM.users.empty();
+    $users.empty();
   };
 
   var gameOver = function(podium) {
-    var html = '<div class="modal-header"><h3>Game Over</h3></div>';
-    html += '<div class="modal-body"><table class="table table-striped scoreboard">';
-    html += '<thead><tr><th>#</th><th>Name</th><th>Points</th>';
-    html += '<th><div class="icons cups stand1"></div></th>';
-    html += '<th><div class="icons cups stand2"></div></th>';
-    html += '<th><div class="icons cups stand3"></div></th><th>Guessed</th><th>Mean time</th>';
-    html += '</thead><tbody>';
+    var html = [
+      '<div class="modal-header">'
+      , '<h3>Game Over</h3>'
+      , '</div>'
+      , '<div class="modal-body">'
+      , '<table class="table table-striped scoreboard">'
+      , '<thead>'
+      , '<tr>'
+      , '<th>#</th>'
+      , '<th>Name</th>'
+      , '<th>Points</th>'
+      , '<th><div class="icons cups stand1"></div></th>'
+      , '<th><div class="icons cups stand2"></div></th>'
+      , '<th><div class="icons cups stand3"></div></th>'
+      , '<th>Guessed</th>'
+      , '<th>Mean time</th>'
+      , '</tr>'
+      , '</thead>'
+      , '<tbody>'
+    ];
 
     podium.forEach(function(player, i) {
-      html += '<tr><td><div class="icons medals rank'+(i+1)+'"></div></td>';
-      html += '<td class="name">'+player.nickname+'</td>';
-      html += '<td>'+player.points+'</td>';
-      html += '<td>'+player.golds+'</td><td>'+player.silvers+'</td>';
-      html += '<td>'+player.bronzes+'</td><td>'+player.guessed+'</td>';
+      html.push('<tr>');
+      html.push('<td><div class="icons medals rank' + (i + 1) + '"></div></td>');
+      html.push('<td class="name">' + player.nickname + '</td>');
+      html.push('<td>' + player.points + '</td>');
+      html.push('<td>' + player.golds + '</td>');
+      html.push('<td>' + player.silvers + '</td>');
+      html.push('<td>' + player.bronzes + '</td>');
+      html.push('<td>' + player.guessed + '</td>');
+
       var meantime = 'N/A';
       if (player.guessed !== 0) {
         meantime = player.totguesstime / player.guessed;
-        meantime = (meantime / 1000).toFixed(1)+' s';
+        meantime = (meantime / 1000).toFixed(1) + ' s';
       }
-      html += '<td>'+meantime+'</td></tr>';
+
+      html.push('<td>' +meantime + '</td>');
+      html.push('</tr>');
     });
 
-    html +='</tbody></table></div>';
-    html += '<div class="modal-footer align-left">A new game will start in ';
-    html += '<span></span> second/s</div>';
-    DOM.modal.append($(html));
-    DOM.modal.modal('show');
-    countDown(Date.now()+10000);
+    html.push('</tbody>', '</table>', '</div>');
+    html.push('<div class="modal-footer align-left">');
+    html.push('A new game will start in <span></span> second/s');
+    html.push('</div>');
+
+    $modal.append(html.join('')).modal('show');
+    countDown(Date.now() + 10000);
   };
 
   // Receive a chat message
@@ -440,39 +511,44 @@
     if (ignoredplayers[from]) {
       return;
     }
-    var prefix = from;
-    var msgspan = $('<span class="message"></span>');
+
+    var $message = $('<span class="message"></span>')
+      , prefix = from;
+
     if (to) {
       // Private Message
-      prefix = (nickname === from) ? '(To '+to+')' : '(From '+prefix+')';
-      msgspan.addClass('private');
+      prefix = '(' + (nickname === from ? 'To ' + to : 'From ' + prefix) + ')';
+      $message.addClass('private');
     }
-    var msg = prefix+': '+chatmsg.replace(/<3/g, '♥');
-    msgspan.html(urlize(msg));
-    addChatEntry(msgspan);
+
+    var msg = prefix + ': ' + chatmsg.replace(/<3/g, '♥');
+    $message.html(urlize(msg));
+    addChatEntry($message);
   };
 
   var hideChat = function() {
-    DOM.togglechat.text('Show chat').unbind('click');
-    DOM.chatwrapper.toggle(300);
-    DOM.tracks.animate({maxHeight:'434px'}, 300);
-    DOM.togglechat.click(showChat);
+    $chatwrapper.toggle(300);
+    $togglechat.text('Show chat');
+    $togglechat.off('click').on('click', showChat);
+    $tracks.animate({ maxHeight: '434px' }, 300);
   };
 
   // Put a player in the ignore list
-  var ignorePlayer = function(args, outcome) {
+  var ignorePlayer = function(args, $outcome) {
     if (ignoredplayers[args[0]]) {
-      outcome.text('(From binb): '+args[0]+' is already ignored.');
-      return addChatEntry(outcome);
+      $outcome.text('(From binb): ' + args[0] + ' is already ignored.');
+      return addChatEntry($outcome);
     }
+
     primus.send('ignore', args[0], function(ignored, player) {
       if (ignored) {
         ignoredplayers[player] = true;
-        outcome.text('(From binb): '+player+' is now ignored.');
-        return addChatEntry(outcome);
+        $outcome.text('(From binb): ' + player + ' is now ignored.');
+        return addChatEntry($outcome);
       }
-      outcome.append('player not found.');
-      addChatEntry(outcome);
+
+      $outcome.append('player not found.');
+      addChatEntry($outcome);
     });
   };
 
@@ -489,46 +565,57 @@
       return primus.send('joinunauthenticated', nickname, roomname);
     }
 
-    if (DOM.modal.hasClass('in')) {
+    if ($modal.hasClass('in')) {
       $('.modal-body p').html(msg);
       return $('#login').focus();
     }
 
-    var html = '<div class="modal-header">';
-    html += '<h3>You are joining the '+roomname+' room</h3></div>';
-    html += '<div class="modal-body"><p>'+(msg || 'What\'s your name?')+'</p></div>';
-    html += '<div class="modal-footer relative">';
-    html += '<input id="login" maxlength="15" type="text" name="nickname" />';
-    html += '<button id="join" class="btn btn-success">';
-    html += '<i class="icon-user icon-white"></i> Join the game</button>';
-    html += '<span class="divider"><span>or</span></span>';
-    html += '<a class="btn btn-primary" href="/login?followup=/'+roomname+'">';
-    html += '<i class="icon-lock icon-white"></i> Login</a></div>';
+    var html = [
+      '<div class="modal-header">'
+      , '<h3>You are joining the ' + roomname + ' room</h3>'
+      , '</div>'
+      , '<div class="modal-body">'
+      , '<p>' + (msg || 'What\'s your name?') + '</p>'
+      , '</div>'
+      , '<div class="modal-footer relative">'
+      , '<input id="login" maxlength="15" type="text" name="nickname" />'
+      , '<button id="join" class="btn btn-success">'
+      , '<i class="icon-user icon-white"></i> Join the game'
+      , '</button>'
+      , '<span class="divider">'
+      , '<span>or</span>'
+      , '</span>'
+      , '<a class="btn btn-primary" href="/login?followup=/' + roomname + '">'
+      , '<i class="icon-lock icon-white"></i> Login'
+      , '</a>'
+      , '</div>'
+    ].join('');
 
-    $(html).appendTo(DOM.modal);
-    var login = $('#login');
-    var button = $('#join');
+    $(html).appendTo($modal);
 
-    button.click(function() {
-      if ($.trim(login.val()) !== '') {
-        nickname = login.val();
-        primus.send('joinunauthenticated', nickname, roomname);
+    var $button = $('#join')
+      , $login = $('#login');
+
+    $button.on('click', function() {
+      var value = $login.val();
+      $login.val('');
+
+      if ($.trim(value)) {
+        nickname = value;
+        return primus.send('joinunauthenticated', nickname, roomname);
       }
-      else {
-        invalidNickName('Nickname can\'t be empty.');
-      }
-      login.val('');
+
+      invalidNickName('Nickname can\'t be empty.');
     });
 
-    login.keyup(function(event) {
+    $login.on('keyup', function(event) {
       if (event.keyCode === 13) {
-        button.click();
+        $button.click();
       }
     });
 
-    DOM.modal.modal('show');
-    DOM.modal.on('shown', function() {
-      login.focus();
+    $modal.modal('show').on('shown', function() {
+      $login.focus();
     });
   };
 
@@ -539,28 +626,38 @@
         subscriber = true;
         return primus.send('joinauthenticated', roomname);
       }
+
       joinUnauthenticated();
     });
+
     if (!$.jPlayer.platform.mobile && !$.jPlayer.platform.tablet) {
       return addVolumeControl();
     }
-    var touchbackdrop = $('<div id="touch-backdrop">'+
-      '<button id="touch-play" class="btn btn-danger disabled">'+
-        '<i class="icon-play icon-white"></i> Wait'+
-      '</button></div>').appendTo('#cassette');
-    touchplay = $('#touch-play');
-    touchplay.click(function() {
+
+    var html = [
+      '<div id="touch-backdrop">'
+      , '<button id="touch-play" class="btn btn-danger disabled">'
+      , '<i class="icon-play icon-white"></i> Wait'
+      , '</button>'
+      , '</div>'
+    ].join('');
+
+    var $touchbackdrop = $(html);
+    $touchbackdrop.appendTo('#cassette');
+
+    $touchplay = $('#touch-play');
+    $touchplay.on('click', function() {
       if (!$(this).hasClass('btn-danger')) {
-        touchplay = null;
-        jplayer.jPlayer('play', elapsedtime);
-        touchbackdrop.remove();
+        $jplayer.jPlayer('play', elapsedtime);
+        $touchbackdrop.remove();
+        $touchplay = null;
       }
     });
   };
 
   var loadTrack = function(previewUrl) {
-    jplayer.jPlayer('mute');
-    jplayer.jPlayer('setMedia', {m4a: previewUrl});
+    $jplayer.jPlayer('mute');
+    $jplayer.jPlayer('setMedia', { m4a: previewUrl });
   };
 
   /**
@@ -573,18 +670,22 @@
     var inquotes = false
       , token = ''
       , tokens = [];
+
     for (var i = 0; i < input.length; i++) {
       if (input[i] === '\\') {
         if (++i === input.length) {
           throw new Error('SyntaxError: Unexpected end of input');
         }
+
         if (input[i] === '\\' || input[i] === '"' || !inquotes) {
           token += input[i];
           continue;
         }
+
         token += '\\'+input[i];
         continue;
       }
+
       if (input[i] === '"') {
         inquotes = !inquotes;
         var j = i + 1;
@@ -595,6 +696,7 @@
         }
         continue;
       }
+
       if (input[i] === ' ') {
         if (inquotes) {
           token += ' ';
@@ -605,49 +707,51 @@
         }
         continue;
       }
+
       token += input[i];
     }
+
     if (inquotes) {
       throw new Error('SyntaxError: Unexpected end of input');
     }
+
     if (token.length) {
       tokens.push(token);
     }
+
     return tokens;
   };
 
   // Play a track
   var playTrack = function(data) {
-    if (touchplay) {
-      touchplay
-        .html('<i class="icon-play icon-white"></i> Play')
-        .removeClass('btn-danger disabled')
-        .addClass('btn-success');
+    if ($touchplay) {
+      $touchplay.html('<i class="icon-play icon-white"></i> Play');
+      $touchplay.removeClass('btn-danger disabled').addClass('btn-success');
     }
 
-    jplayer.jPlayer('unmute');
-    jplayer.jPlayer('play');
-    DOM.guessbox.val('');
+    $jplayer.jPlayer('unmute');
+    $jplayer.jPlayer('play');
+    $guessbox.val('');
     isplaying = true;
     clearInterval(timer);
     cassetteAnimation(Date.now() + 30000, true);
     updateUsers(data.users);
 
     if (data.counter === 1) {
-      DOM.modal.modal('hide').empty();
-      DOM.tracks.empty();
+      $modal.modal('hide').empty();
+      $tracks.empty();
     }
 
-    DOM.track.text(data.counter + '/' + data.tot);
+    $track.text(data.counter + '/' + data.tot);
     addFeedback('What is this song?');
   };
 
   // Return a function that will kick or ban a player
   var punishPlayer = function(punishment) {
-    return function(tokens, outcome) {
-      outcome.append('you are not allowed to ' + punishment + ' a player.');
+    return function(tokens, $outcome) {
+      $outcome.append('you are not allowed to ' + punishment + ' a player.');
       if (!subscriber) {
-        return addChatEntry(outcome);
+        return addChatEntry($outcome);
       }
 
       var args = [punishment, tokens[0]];
@@ -672,7 +776,7 @@
 
       args.push(function(success) {
         if (!success) {
-          addChatEntry(outcome);
+          addChatEntry($outcome);
         }
       });
 
@@ -683,9 +787,11 @@
   // Return a function that will add a random text from the given set, with the given style
   var randomFeedback = function(set, style) {
     var card = set.length;
+
     return function() {
       var index =  Math.floor(Math.random() * card)
         , text = set[index];
+
       addFeedback(text, style);
     };
   };
@@ -693,76 +799,74 @@
   // Successfully joined the room
   var ready = function(usersData, trackscount, loggedin) {
     if (!loggedin && !/nickname\s*\=/.test(document.cookie)) {
-      document.cookie = 'nickname='+nickname+';path=/;';
+      document.cookie = 'nickname=' + nickname + ';path=/;';
     }
 
-    DOM.modal.modal('hide').empty();
+    $modal.modal('hide').empty();
     $('#total-tracks span').text(trackscount);
-    var msg = nickname+' joined the game';
-    var joinspan = $('<span class="join"></span>');
-    joinspan.text(msg);
-    addChatEntry(joinspan);
+
+    var $entry = $('<span class="join">' + nickname + ' joined the game</span>');
+    addChatEntry($entry);
     updateUsers(usersData);
 
-    DOM.messagebox.keydown(function(event) {
+    $messagebox.on('keydown', function(event) {
       if (event.keyCode === 13) {
-        var val = $.trim(DOM.messagebox.val());
-        if (val !== '') {
+        var value = $.trim($messagebox.val());
+        $messagebox.val('');
+
+        if (value) {
           if (pvtmsgto) {
-            primus.send('chatmsg', val, pvtmsgto);
+            return primus.send('chatmsg', value, pvtmsgto);
           }
-          else if (/^\/[^ ]/.test(val)) {
-            slashCommandHandler(val);
+
+          if (/^\/[^ ]/.test(value)) {
+            return slashCommandHandler(value);
           }
-          else {
-            primus.send('chatmsg', val);
-          }
+
+          primus.send('chatmsg', value);
         }
-        DOM.messagebox.val('');
       }
     });
 
-    DOM.guessbox.keydown(function(event) {
+    $guessbox.on('keydown', function(event) {
       switch (event.keyCode) {
         case 13: // return
-          var guess = $.trim(DOM.guessbox.val());
-          if (guess !== '') {
-            if (isplaying) {
-              primus.send('guess', guess.toLowerCase());
-            }
-            else {
-              addFeedback('You have to wait the next song...');
-            }
+          var guess = $.trim($guessbox.val());
+          $guessbox.val('');
+
+          if (guess) {
             historyvalues.push(guess);
             if (historyvalues.length > 20) {
               historyvalues.splice(0, 1);
             }
             historycursor = historyvalues.length;
+
+            if (isplaying) {
+              return primus.send('guess', guess.toLowerCase());
+            }
+
+            addFeedback('You have to wait the next song...');
           }
-          DOM.guessbox.val('');
+
           break;
         case 38: // up-arrow
           if (historycursor > 0) {
-            DOM.guessbox.val(historyvalues[--historycursor]);
+            $guessbox.val(historyvalues[--historycursor]);
           }
+
           // Prevent default action to keep the cursor at the end of the word
           return false;
         case 40: // down-arrow
           if (historycursor < historyvalues.length - 1) {
-            DOM.guessbox.val(historyvalues[++historycursor]);
+            return $guessbox.val(historyvalues[++historycursor]);
           }
-          else {
-            historycursor = historyvalues.length;
-            DOM.guessbox.val('');
-          }
+
+          historycursor = historyvalues.length;
+          $guessbox.val('');
       }
-    });
-
-    DOM.guessbox.on('paste', function(event) {
+    }).on('paste', function(event) {
       event.preventDefault();
-    });
-
-    DOM.guessbox.focus();
+    }).focus();
 
     primus.on('artistmatched', randomFeedback(amstrings, 'correct'));
     primus.on('bothmatched', randomFeedback(bmstrings, 'correct'));
@@ -784,11 +888,13 @@
 
   // Show the number of players inside each room
   var roomsOverview = function(data) {
-    for (var prop in data) {
-      if (prop !== roomname) {
-        DOM.userscounters[prop].text(data[prop]);
-      }
-    }
+    $('.users-counter').each(function() {
+      var room = $(this).prevAll('.room-name').text();
+      userscounters[room] = $(this);
+      $(this).text(data[room]);
+    });
+
+    primus.on('updateoverview', updateRoomsOverview);
   };
 
   var setStatus = function(data) {
@@ -803,210 +909,194 @@
     addFeedback(states[data.status]);
   };
 
-  var setVariables = function() {
-    DOM.cassettewheels = $('#cassette .wheel');
-    DOM.chat = $('#chat');
-    DOM.chatwrapper = $('#chat-outer-wrapper');
-    DOM.countdown = $('#countdown');
-    DOM.feedback = $('#feedback');
-    DOM.guessbox = $('#guess');
-    DOM.messagebox = $('#message');
-    DOM.modal = $('#modal');
-    DOM.points = $('#summary .points');
-    DOM.progress = $('#progress');
-    DOM.rank = $('#summary .rank');
-    DOM.recipient = $('#recipient');
-    DOM.tapeleft = $('#tape-left');
-    DOM.taperight = $('#tape-right');
-    DOM.togglechat = $('#toggle-chat');
-    DOM.track = $('#summary .track');
-    DOM.tracks = $('#tracks');
-    DOM.users = $('#users');
-    DOM.userscounters = {};
-    $('.users-counter').each(function() {
-      DOM.userscounters[$(this).prevAll('.room-name').text()] = $(this);
-    });
-  };
-
   var showChat = function() {
-    DOM.togglechat.text('Hide chat').unbind('click');
-    DOM.chatwrapper.toggle(300);
-    DOM.tracks.animate({maxHeight:'240px'}, 300, function() {
-      DOM.chat[0].scrollTop = DOM.chat[0].scrollHeight;
+    $chatwrapper.toggle(300);
+    $togglechat.text('Hide chat');
+    $togglechat.off('click').on('click', hideChat);
+    $tracks.animate({ maxHeight: '240px' }, 300, function() {
+      $chat[0].scrollTop = $chat[0].scrollHeight;
     });
-    DOM.togglechat.click(hideChat);
   };
 
   var slashCommandHandler = function(line) {
-    var args;
-    var outcome = $('<span class="message private">(From binb): </span>');
+    var $outcome = $('<span class="message private">(From binb): </span>')
+      , args;
 
     try {
       args = parseCommand(line);
     }
     catch (err) {
-      outcome.append(err.message);
-      return addChatEntry(outcome);
+      $outcome.append(err.message);
+      return addChatEntry($outcome);
     }
 
-    var cmdname = args.shift();
-    var command = slashcommands[cmdname.substr(1)];
+    var cmdname = args.shift()
+      , command = slashcommands[cmdname.substr(1)];
 
     if (command) {
       if (args.length < command.minargs) {
-        outcome.append(command.usage);
-        return addChatEntry(outcome);
+        $outcome.append(command.usage);
+        return addChatEntry($outcome);
       }
+
       if (command.checkrecipient && (!args[0] || args[0] === nickname)) {
-        outcome.append('invalid argument.');
-        return addChatEntry(outcome);
+        $outcome.append('invalid argument.');
+        return addChatEntry($outcome);
       }
-      return command.fn(args, outcome);
+
+      return command.fn(args, $outcome);
     }
 
-    outcome.text('(From binb): unknown command '+cmdname+'.');
-    addChatEntry(outcome);
+    $outcome.text('(From binb): unknown command ' + cmdname + '.');
+    addChatEntry($outcome);
   };
 
   // Unban a player
-  var unbanPlayer = function(args, outcome) {
-    outcome.append('you are not allowed to unban a player.');
+  var unbanPlayer = function(args, $outcome) {
+    $outcome.append('you are not allowed to unban a player.');
     if (!subscriber) {
-      return addChatEntry(outcome);
+      return addChatEntry($outcome);
     }
 
     primus.send('unban', args[0], function(success) {
       if (!success) {
-        addChatEntry(outcome);
+        addChatEntry($outcome);
       }
     });
   };
 
   // Remove a player from the ignore list
-  var unignorePlayer = function(args, outcome) {
+  var unignorePlayer = function(args, $outcome) {
     if (!ignoredplayers[args[0]]) {
-      outcome.text('(From binb): you have not ignored '+args[0]+'.');
-      return addChatEntry(outcome);
+      $outcome.text('(From binb): you have not ignored ' + args[0] + '.');
+      return addChatEntry($outcome);
     }
+
     delete ignoredplayers[args[0]];
     primus.send('unignore', args[0]);
-    outcome.text('(From binb): '+args[0]+' is no longer ignored.');
-    addChatEntry(outcome);
+    $outcome.text('(From binb): ' + args[0] + ' is no longer ignored.');
+    addChatEntry($outcome);
   };
 
   // Update the list of players
   var updateUsers = function(usersData) {
-    DOM.users.empty();
+    $users.empty();
 
     var users = [];
     for (var key in usersData) {
       users.push(usersData[key]);
     }
-    users.sort(function(a, b) {return b.points - a.points;});
+    users.sort(function(a, b) {
+      return b.points - a.points;
+    });
 
     // Flag to test if our private recipient is in the list of active users
     var found = false;
-    for (var i=0; i<users.length; i++) {
-      var user = users[i]
-        , li = $('<li></li>')
-        , pvt = $('<span class="private label label-info">P</span>')
-        , username = $('<span class="name"></span>').text(user.nickname)
-        , points = $('<span class="points">('+user.points+')</span>')
-        , roundrank = $('<span></span>')
-        , roundpointsel = $('<span class="round-points"></span>')
-        , guesstime = $('<span class="guess-time"></span>');
 
-      li.append(pvt, username, points, roundrank, roundpointsel, guesstime);
+    users.forEach(function(user, index) {
+      var $guesstime = $('<span class="guess-time"></span>')
+        , $li = $('<li></li>')
+        , $pnts = $('<span class="points">(' + user.points + ')</span>')
+        , $pvt = $('<span class="private label label-info">P</span>')
+        , $roundpoints = $('<span class="round-points"></span>')
+        , $roundrank = $('<span></span>')
+        , $username = $('<span class="name">' + user.nickname + '</span>');
+
+      $li.append($pvt, $username, $pnts, $roundrank, $roundpoints, $guesstime);
+
       if (user.registered) {
-        var href = 'href="/user/'+user.nickname+'"';
-        pvt.after('<a class="icons registered" target="_blank" '+href+'></a>');
+        var href = 'href="/user/' + user.nickname + '"';
+        $pvt.after('<a class="icons registered" target="_blank" ' + href + '></a>');
       }
-      DOM.users.append(li);
+
+      $users.append($li);
 
       if (pvtmsgto === user.nickname) {
-        pvt.show();
-        username.click(clearPrivate);
+        $pvt.show();
+        $username.on('click', clearPrivate);
         found = true;
       }
       else {
-        username.click(function() {
+        $username.on('click', function() {
           addPrivate($(this).text());
         });
       }
 
       if (nickname === user.nickname) {
-        username.addClass('you');
+        $points.text(user.points);
+        $rank.text(index + 1);
+        $username.addClass('you');
         roundpoints = user.roundpoints;
-        DOM.rank.text(i+1);
-        DOM.points.text(user.points);
       }
 
       if (user.roundpoints > 0) {
-        roundpointsel.text('+'+user.roundpoints);
+        $roundpoints.text('+' + user.roundpoints);
+
         if (user.roundpoints === 1) {
-          username.addClass('matched');
+          $username.addClass('matched');
         }
         else {
+          $username.addClass('correct');
+
           if (user.roundpoints > 3) {
-            var stand = 7 - user.roundpoints;
-            roundrank.addClass('icons round-rank stand'+stand);
-            var gtime = (user.guesstime / 1000).toFixed(1);
-            guesstime.text(gtime+' s');
+            $guesstime.text((user.guesstime / 1000).toFixed(1) +' s');
+            $roundrank.addClass('icons round-rank stand' + (7 - user.roundpoints));
           }
-          username.addClass('correct');
         }
       }
-    }
+    });
 
     if (!found && pvtmsgto) {
-      var width = DOM.recipient.outerWidth(true) + 1;
-      DOM.recipient.css('margin-right', '0');
-      DOM.recipient.text('');
-      DOM.messagebox.animate({'width':'+='+width+'px'}, 'fast');
-      pvtmsgto = null;
-      DOM.messagebox.focus();
+      pvtmsgto = '';
+
+      var width = $recipient.outerWidth(true) + 1;
+      $recipient.css('margin-right', '0');
+      $recipient.text('');
+      $messagebox.animate({ 'width': '+=' + width + 'px' }, 'fast');
     }
   };
 
   var updateRoomsOverview = function(room, players) {
     if (room !== roomname) {
-      DOM.userscounters[room].text(players);
+      userscounters[room].text(players);
     }
   };
 
   // Convert any URLs in text into clickable links
   var urlize = function(text) {
     if (urlregex.test(text)) {
-      var html = '';
-      var splits = text.split(urlregex);
-      for (var i=0; i<splits.length; i++) {
+      var html = ''
+        , splits = text.split(urlregex);
+
+      for (var i = 0; i < splits.length; i++) {
         var escapedsplit = splits[i].encodeEntities();
+
         if (urlregex.test(splits[i])) {
-          html += '<a target="_blank" href="'+escapedsplit+'">'+escapedsplit+'</a>';
+          html += '<a target="_blank" href="' + escapedsplit + '">' +
+            escapedsplit + '</a>';
           continue;
         }
+
         html += escapedsplit;
       }
+
       return html;
     }
+
     return text.encodeEntities();
   };
 
   // A new player has joined the game
   var userJoin = function(username, usersData) {
-    var joinmsg = username+' joined the game';
-    var joinspan = $('<span class="join"></span>');
-    joinspan.text(joinmsg);
-    addChatEntry(joinspan);
+    var $entry = $('<span class="join">' + username +' joined the game</span>');
+    addChatEntry($entry);
     updateUsers(usersData);
   };
 
   // A player has left the game
   var userLeft = function(username, usersData) {
-    var leftmsg = username+' left the game';
-    var leftspan = $('<span class="left"></span>');
-    leftspan.text(leftmsg);
-    addChatEntry(leftspan);
+    var $entry = $('<span class="left">' + username +' left the game</span>');
+    addChatEntry($entry);
     updateUsers(usersData);
   };
 
@@ -1019,7 +1109,7 @@
     },
     clear: {
       fn: function() {
-        DOM.chat.empty();
+        $chat.empty();
       },
       minargs: 0
     },
@@ -1048,18 +1138,18 @@
     }
   };
 
-  // Set up the app
-  setVariables();
-  DOM.modal.modal({
+  $modal.modal({
     backdrop: 'static',
     keyboard: false,
     show: false
   });
-  DOM.togglechat.click(hideChat);
 
+  $togglechat.click(hideChat);
+
+  // Open the realtime connection
   primus = Primus.connect({ strategy: false });
   primus.on('open', function() {
-    jplayer = $('#player').jPlayer({
+    $jplayer = $('#player').jPlayer({
       ready: jplayerReady,
       swfPath: '//cdn.jsdelivr.net/jplayer/2.6/Jplayer.swf',
       supplied: 'm4a',
@@ -1070,7 +1160,6 @@
     primus.on('close', disconnect);
     primus.on('invalidnickname', invalidNickName);
     primus.on('ready', ready);
-    primus.on('updateoverview', updateRoomsOverview);
     primus.send('getoverview', roomsOverview);
   });
 

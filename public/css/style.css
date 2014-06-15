@@ -692,10 +692,10 @@ form .clearfix {
 #feedback {
   text-align: center;
 }
-#feedback .correct, #users .correct{
+#feedback.correct, #users .correct{
   color: #46A546;
 }
-#feedback .wrong, #chat .error {
+#feedback.wrong, #chat .error {
   color: #C43C35;
 }
 #guess.correct {

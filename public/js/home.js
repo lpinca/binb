@@ -7,8 +7,8 @@
       }
     });
   });
-  var uri = location.protocol + '//' + location.host;
-  var primus = Primus.connect(uri, {strategy: false});
+
+  var primus = Primus.connect({ strategy: false });
   primus.on('open', function() {
     primus.send('getoverview', function(data) {
       for (var prop in data) {
