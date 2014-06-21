@@ -31,7 +31,7 @@ app.set('view engine', 'jade');
 app.use('/static', express.static(pub, {maxAge: 2419200000})); // 4 weeks = 2419200000 ms
 app.use(favicon(pub + '/img/favicon.ico', {maxAge: 2419200000}));
 app.use(banHandler);
-app.use(urlencoded());
+app.use(urlencoded({extended: false}));
 app.use(cookieParser);
 app.use(session({
   cookie: {maxAge: 14400000}, // 4 h = 14400000 ms
