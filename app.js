@@ -36,6 +36,7 @@ app.use(cookieParser);
 app.use(session({
   cookie: {maxAge: 14400000}, // 4 h = 14400000 ms
   rolling: true,
+  secret: secret,
   store: sessionstore
 }));
 
