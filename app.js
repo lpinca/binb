@@ -35,7 +35,9 @@ app.use(urlencoded({extended: false}));
 app.use(cookieParser);
 app.use(session({
   cookie: {maxAge: 14400000}, // 4 h = 14400000 ms
+  resave: true,
   rolling: true,
+  saveUninitialized: true,
   secret: secret,
   store: sessionstore
 }));
