@@ -10,7 +10,7 @@
     "express-session": "1.6.x",
     "forwarded-for": "0.0.x",
     "jade": "1.4.x",
-    "nodemailer": "0.7.x",
+    "nodemailer": "1.0.x",
     "primus": "2.3.x",
     "primus-emitter": "3.0.x",
     "primus-rooms": "3.0.x",
