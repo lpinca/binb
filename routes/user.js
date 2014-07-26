@@ -4,6 +4,7 @@
 
 var crypto = require('crypto')
   , db = require('../lib/redis-clients').users
+  , http = require('http')
   , mailer = require('../lib/email/mailer')
   , rooms = require('../config').rooms
   , User = require('../lib/user')
@@ -46,7 +47,7 @@ exports.sliceLeaderboard = function(req, res, next) {
   var begin = parseInt(req.query.begin, 10)
     , by = req.query.by;
   if (isNaN(begin) || begin > 180 || (by !== 'points' && by !== 'times')) {
-    return res.send(400);
+    return res.status(400).send(http.STATUS_CODES[400]);
   }
   var end = begin + 29;
   if (by === 'points') {
@@ -73,7 +74,7 @@ exports.sliceLeaderboard = function(req, res, next) {
 exports.validateChangePasswd = function(req, res, next) {
   if (!req.session.user || req.body.oldpassword === undefined ||
     req.body.newpassword === undefined) {
-    return res.send(400);
+    return res.status(400).send(http.STATUS_CODES[400]);
   }
 
   var errors = {};
@@ -145,7 +146,7 @@ exports.changePasswd = function(req, res, next) {
 
 exports.validateLogin = function(req, res, next) {
   if (req.body.username === undefined || req.body.password === undefined) {
-    return res.send(400);
+    return res.status(400).send(http.STATUS_CODES[400]);
   }
 
   var errors = {};
@@ -223,7 +224,7 @@ exports.logout = function(req, res) {
 exports.validateSignUp = function(req, res, next) {
   if (req.body.username === undefined || req.body.email === undefined ||
     req.body.password === undefined || req.body.captcha === undefined) {
-    return res.send(400);
+    return res.status(400).send(http.STATUS_CODES[400]);
   }
 
   var errors = {};
@@ -329,7 +330,7 @@ exports.createAccount = function(req, res, next) {
 
 exports.validateRecoverPasswd = function(req, res, next) {
   if (req.body.email === undefined || req.body.captcha === undefined) {
-    return res.send(400);
+    return res.status(400).send(http.STATUS_CODES[400]);
   }
 
   var errors = {};
@@ -391,7 +392,7 @@ exports.sendEmail = function(req, res, next) {
 
 exports.resetPasswd = function(req, res, next) {
   if (req.body.password === undefined) {
-    return res.send(400);
+    return res.status(400).send(http.STATUS_CODES[400]);
   }
 
   var errors = {};
@@ -474,6 +475,6 @@ exports.profile = function(req, res, next) {
       });
       return;
     }
-    res.send(404);
+    res.status(404).send(http.STATUS_CODES[404]);
   });
 };

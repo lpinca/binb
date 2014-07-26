@@ -6,6 +6,7 @@ var async = require('async')
   , Captcha = require('../lib/captcha')
   , config = require('../config')
   , db = require('../lib/redis-clients').songs
+  , http = require('http')
   , randInt = require('../lib/prng').randInt
   , randomSlogan = require('../lib/utils').randomSlogan
   , rooms = require('../lib/rooms').rooms;
@@ -101,7 +102,7 @@ exports.room = function(req, res) {
       slogan: randomSlogan()
     });
   }
-  res.send(404);
+  res.status(404).send(http.STATUS_CODES[404]);
 };
 
 exports.signup = function(req, res) {
