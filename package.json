@@ -2,15 +2,15 @@
   "analyze": false,
   "dependencies": {
     "async": "0.9.x",
-    "body-parser": "1.5.x",
+    "body-parser": "1.6.x",
     "canvas": "1.1.x",
     "connect-redis": "2.0.x",
     "cookie-parser": "1.3.x",
-    "express": "4.7.x",
+    "express": "4.8.x",
     "express-session": "1.7.x",
     "forwarded-for": "0.0.x",
     "jade": "1.5.x",
-    "nodemailer": "1.0.x",
+    "nodemailer": "1.1.x",
     "primus": "2.4.x",
     "primus-emitter": "3.0.x",
     "primus-rooms": "3.0.x",
@@ -20,7 +20,7 @@
     "ws": "0.4.x"
   },
   "devDependencies": {
-    "JSONStream": "0.8.x"
+    "JSONStream": "0.9.x"
   },
   "engines": {
     "node": "0.10.x"
@@ -35,5 +35,5 @@
     "start": "node app.js"
   },
   "subdomain": "binb",
-  "version": "0.5.2-1"
+  "version": "0.5.2-2"
 }
