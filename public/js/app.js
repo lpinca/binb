@@ -1032,10 +1032,13 @@
       if (user.roundpoints > 0) {
         $roundpoints.text('+' + user.roundpoints);
 
-        if (user.roundpoints === 1) {
-          $username.addClass('matched');
+        if (user.matched == "artist") {
+          $username.addClass('matchedartist');
         }
-        else {
+        if (user.matched == "title") {
+          $username.addClass('matchedtitle');
+        }
+        if (user.roundpoints > 1) {
           $username.addClass('correct');
 
           if (user.roundpoints > 3) {
