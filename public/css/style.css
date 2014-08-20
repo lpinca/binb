@@ -334,7 +334,10 @@ form .clearfix {
   font-size: 12px;
   margin-right: 4px;
 }
-.matched {
+.matchedartist {
+  color: #1502c2;
+}
+.matchedtitle {
   color: #f3a22f;
 }
 .cups, .medals {

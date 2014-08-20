@@ -1032,16 +1032,15 @@
       if (user.roundpoints > 0) {
         $roundpoints.text('+' + user.roundpoints);
 
-        if (user.roundpoints === 1) {
-          $username.addClass('matched');
+        if (user.matched === 'artist' || user.matched === 'title') {
+          return $username.addClass('matched' + user.matched);
         }
-        else {
-          $username.addClass('correct');
 
-          if (user.roundpoints > 3) {
-            $guesstime.text((user.guesstime / 1000).toFixed(1) +' s');
-            $roundrank.addClass('icons round-rank stand' + (7 - user.roundpoints));
-          }
+        $username.addClass('correct');
+
+        if (user.roundpoints > 3) {
+          $guesstime.text((user.guesstime / 1000).toFixed(1) +' s');
+          $roundrank.addClass('icons round-rank stand' + (7 - user.roundpoints));
         }
       }
     });
