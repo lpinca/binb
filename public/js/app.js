@@ -521,7 +521,8 @@
       // Private Message
       if (nickname === from ) {
         prefix = '(To ' + to + ')';
-      } else {
+      }
+      else {
         prefix = '(From ' + from + ')';
         replyto = from;
       }
