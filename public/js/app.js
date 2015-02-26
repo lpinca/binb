@@ -974,7 +974,7 @@
       return addChatEntry($outcome);
     }
     if($.inArray(replyto, usersnicks) === -1) {
-      $outcome.text('(From binb): They aren\'t here anymore.');
+      $outcome.text('(From binb):' + replyto + ' isn\'t here anymore.');
       return addChatEntry($outcome);
     }
     return addPrivate(replyto); 
