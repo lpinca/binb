@@ -519,7 +519,7 @@
 
     if (to) {
       // Private Message
-      if(nickname === from ) {
+      if (nickname === from ) {
         prefix = '(To ' + to + ')';
       } else {
         prefix = '(From ' + from + ')';
