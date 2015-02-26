@@ -961,7 +961,7 @@
   // Send a private message to a user
   var privateMessage = function(args, $outcome) {
     if($.inArray(args[0], usersnicks) === -1) {
-      $outcome.text('(From binb): There\'s noone with that name here.');
+      $outcome.text('(From binb): There\'s noone here by that name.');
       return addChatEntry($outcome);
     }
     return addPrivate(args[0]);
