@@ -28,12 +28,14 @@
     , nickname
     , primus
     , pvtmsgto
+    , replyto
     , roomname = location.pathname.replace(/\//g, '')
     , roundpoints = 0
     , subscriber = false
     , timer
     , urlregex = /(https?:\/\/[\-A-Za-z0-9+&@#\/%?=~_()|!:,.;]*[\-A-Za-z0-9+&@#\/%=~_()|])/
-    , userscounters = {};
+    , userscounters = {}
+    , usersnicks = [];
 
   var amstrings = [
     'Do you also know the title?'
@@ -517,7 +519,13 @@
 
     if (to) {
       // Private Message
-      prefix = '(' + (nickname === from ? 'To ' + to : 'From ' + prefix) + ')';
+      if (nickname === from ) {
+        prefix = '(To ' + to + ')';
+      }
+      else {
+        prefix = '(From ' + from + ')';
+        replyto = from;
+      }
       $message.addClass('private');
     }
 
@@ -815,12 +823,12 @@
         $messagebox.val('');
 
         if (value) {
-          if (pvtmsgto) {
-            return primus.send('chatmsg', value, pvtmsgto);
-          }
-
           if (/^\/[^ ]/.test(value)) {
             return slashCommandHandler(value);
+          }
+
+          if (pvtmsgto) {
+            return primus.send('chatmsg', value, pvtmsgto);
           }
 
           primus.send('chatmsg', value);
@@ -951,6 +959,28 @@
     addChatEntry($outcome);
   };
 
+  // Send a private message to a user
+  var privateMessage = function(args, $outcome) {
+    if ($.inArray(args[0], usersnicks) === -1) {
+      $outcome.text('(From binb): There\'s noone here by that name.');
+      return addChatEntry($outcome);
+    }
+    return addPrivate(args[0]);
+  };
+
+  // Reply to the last player who sent you a private message
+  var replyToPrivate = function(args, $outcome) {
+    if (!replyto) {
+      $outcome.text('(From binb): There\'s noone to reply to.');
+      return addChatEntry($outcome);
+    }
+    if ($.inArray(replyto, usersnicks) === -1) {
+      $outcome.text('(From binb):' + replyto + ' isn\'t here anymore.');
+      return addChatEntry($outcome);
+    }
+    return addPrivate(replyto);
+  };
+
   // Unban a player
   var unbanPlayer = function(args, $outcome) {
     $outcome.append('you are not allowed to unban a player.');
@@ -992,6 +1022,8 @@
 
     // Flag to test if our private recipient is in the list of active users
     var found = false;
+
+    usersnicks = [];
 
     users.forEach(function(user, index) {
       var $guesstime = $('<span class="guess-time"></span>')
@@ -1043,6 +1075,7 @@
           $roundrank.addClass('icons round-rank stand' + (7 - user.roundpoints));
         }
       }
+      usersnicks.push(user.nickname);
     });
 
     if (!found && pvtmsgto) {
@@ -1134,6 +1167,20 @@
       fn: unignorePlayer,
       minargs: 1,
       usage: 'usage: /unignore &lt;player&gt;'
+    },
+    private: {
+      checkrecipient: true,
+      fn: privateMessage,
+      minargs: 1,
+      usage: 'usage: /private &lt;player&gt;',
+    },
+    reply: {
+      fn: replyToPrivate,
+      minargs: 0,
+    },
+    unprivate: {
+      fn: clearPrivate,
+      minargs: 0,
     }
   };
 
