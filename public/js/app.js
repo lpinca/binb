@@ -962,23 +962,23 @@
   // Send a private message to a user
   var privateMessage = function(args, $outcome) {
     if ($.inArray(args[0], usersnicks) === -1) {
-      $outcome.text('(From binb): There\'s noone here by that name.');
+      $outcome.text('(From binb): There\'s no one here by that name.');
       return addChatEntry($outcome);
     }
-    return addPrivate(args[0]);
+    addPrivate(args[0]);
   };
 
   // Reply to the last player who sent you a private message
   var replyToPrivate = function(args, $outcome) {
     if (!replyto) {
-      $outcome.text('(From binb): There\'s noone to reply to.');
+      $outcome.text('(From binb): There\'s no one to reply to.');
       return addChatEntry($outcome);
     }
     if ($.inArray(replyto, usersnicks) === -1) {
       $outcome.text('(From binb):' + replyto + ' isn\'t here anymore.');
       return addChatEntry($outcome);
     }
-    return addPrivate(replyto);
+    addPrivate(replyto);
   };
 
   // Unban a player
