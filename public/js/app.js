@@ -34,8 +34,8 @@
     , subscriber = false
     , timer
     , urlregex = /(https?:\/\/[\-A-Za-z0-9+&@#\/%?=~_()|!:,.;]*[\-A-Za-z0-9+&@#\/%=~_()|])/
-    , userscounters = {}
-    , usersnicks = [];
+    , users = []
+    , userscounters = {};
 
   var amstrings = [
     'Do you also know the title?'
@@ -495,7 +495,7 @@
         meantime = (meantime / 1000).toFixed(1) + ' s';
       }
 
-      html.push('<td>' +meantime + '</td>');
+      html.push('<td>' + meantime + '</td>');
       html.push('</tr>');
     });
 
@@ -961,7 +961,7 @@
 
   // Send a private message to a user
   var privateMessage = function(args, $outcome) {
-    if ($.inArray(args[0], usersnicks) === -1) {
+    if (!~users.indexOf(args[0])) {
       $outcome.text('(From binb): There\'s no one here by that name.');
       return addChatEntry($outcome);
     }
@@ -974,8 +974,8 @@
       $outcome.text('(From binb): There\'s no one to reply to.');
       return addChatEntry($outcome);
     }
-    if ($.inArray(replyto, usersnicks) === -1) {
-      $outcome.text('(From binb):' + replyto + ' isn\'t here anymore.');
+    if (!~users.indexOf(replyto)) {
+      $outcome.text('(From binb): ' + replyto + ' isn\'t here anymore.');
       return addChatEntry($outcome);
     }
     addPrivate(replyto);
@@ -1010,23 +1010,18 @@
 
   // Update the list of players
   var updateUsers = function(usersData) {
-    var users = [];
-
-    usersnicks = [];
     $users.empty();
 
-    for (var key in usersData) {
-      users.push(usersData[key]);
-      usersnicks.push(key);
-    }
-    users.sort(function(a, b) {
-      return b.points - a.points;
+    users = Object.keys(usersData).sort(function(a, b) {
+      return usersData[b].points - usersData[a].points;
     });
 
     // Flag to test if our private recipient is in the list of active users
     var found = false;
 
     users.forEach(function(user, index) {
+      user = usersData[user];
+
       var $guesstime = $('<span class="guess-time"></span>')
         , $li = $('<li></li>')
         , $pnts = $('<span class="points">(' + user.points + ')</span>')
