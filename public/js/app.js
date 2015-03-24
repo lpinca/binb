@@ -1010,11 +1010,14 @@
 
   // Update the list of players
   var updateUsers = function(usersData) {
+    var users = [];
+
+    usersnicks = [];
     $users.empty();
 
-    var users = [];
     for (var key in usersData) {
       users.push(usersData[key]);
+      usersnicks.push(key);
     }
     users.sort(function(a, b) {
       return b.points - a.points;
@@ -1022,8 +1025,6 @@
 
     // Flag to test if our private recipient is in the list of active users
     var found = false;
-
-    usersnicks = [];
 
     users.forEach(function(user, index) {
       var $guesstime = $('<span class="guess-time"></span>')
@@ -1075,7 +1076,6 @@
           $roundrank.addClass('icons round-rank stand' + (7 - user.roundpoints));
         }
       }
-      usersnicks.push(user.nickname);
     });
 
     if (!found && pvtmsgto) {
