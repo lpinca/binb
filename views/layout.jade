@@ -43,9 +43,6 @@ html
             src="//platform.twitter.com/widgets/tweet_button.html?url=http%3A%2F%2Fbinb.nodejitsu.com")
           iframe#github-button(allowtransparency="true", frameborder="0", scrolling="0",
             src="//ghbtns.com/github-btn.html?user=lpinca&repo=binb&type=watch&count=true")
-          span.footer-info . Optimized for Google Chrome.
-          a#nodejitsu-logo.icons(target="_blank", href="http://nodejitsu.com/")
-          span.footer-info Powered by 
     block media
     block scripts
       script(src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js")
@@ -55,8 +52,7 @@ html
       (function() {
         var uv = document.createElement('script');
         uv.type = 'text/javascript'; uv.async = true;
-        uv.src = ('https:' == document.location.protocol ? 'https://' : 'http://') +
-          'widget.uservoice.com/LSMjFAQRifhD6BjOG2KWw.js';
+        uv.src ='//widget.uservoice.com/LSMjFAQRifhD6BjOG2KWw.js';
         var s = document.getElementsByTagName('script')[0];
         s.parentNode.insertBefore(uv, s);
       })();
