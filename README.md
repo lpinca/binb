@@ -1,8 +1,8 @@
-![binb](http://dl.dropbox.com/u/58444696/binb-logo.png)
+![binb](https://dl.dropbox.com/u/58444696/binb-logo.png)
 
 binb is a simple, realtime, multiplayer, competitive music listening game.
 
-To play the game: [http://binb.nodejitsu.com](http://binb.nodejitsu.com)
+To play the game: [https://binb.co](https://binb.co)
 
 ## Installation
 
@@ -59,7 +59,6 @@ compatibility.
 ## Shout-Outs
 
 - Thanks to [beatquest.fm](http://beatquest.fm) for inspiration.
-- Thanks to [nodejitsu](http://nodejitsu.com/) for hosting the application.
 
 ## Bug tracker
 
