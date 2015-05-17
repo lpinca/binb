@@ -1,5 +1,20 @@
 {
-  "analyze": false,
+  "name": "binb",
+  "version": "0.5.6-2",
+  "description": "Competitive, multiplayer, realtime, guess the song game",
+  "homepage": "https://binb.co",
+  "bugs": "https://github.com/lpinca/binb/issues",
+  "license": "MIT",
+  "author": "Luigi Pinca",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lpinca/binb.git"
+  },
+  "scripts": {
+    "minify": "for f in public/js/{app,home,leaderboards}; do uglifyjs $f.js -o $f.min.js; done",
+    "import-data":"node util/load_sample_tracks.js",
+    "start": "node app.js"
+  },
   "dependencies": {
     "async": "0.9.x",
     "body-parser": "1.12.x",
@@ -21,19 +36,5 @@
   },
   "devDependencies": {
     "JSONStream": "0.10.x"
-  },
-  "engines": {
-    "node": "0.10.x"
-  },
-  "name": "binb",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/lpinca/binb.git"
-  },
-  "scripts": {
-    "predeploy": "make minify",
-    "start": "node app.js"
-  },
-  "subdomain": "binb",
-  "version": "0.5.6-2"
+  }
 }
