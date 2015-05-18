@@ -9,7 +9,7 @@ html
     meta(property="og:image", content="https://dl.dropbox.com/u/58444696/binb-logo-200.png")
     meta(property="og:title", content="binb")
     meta(property="og:type", content="game")
-    meta(property="og:url", content="http://binb.nodejitsu.com/")
+    meta(property="og:url", content="https://binb.co/")
     link(href="/static/css/bootstrap.min.css", rel="stylesheet")
     link(href="/static/css/style.css", rel="stylesheet")
     script.
@@ -38,14 +38,11 @@ html
         #footer-inner
           #copy &copy; 2012-2015 Luigi Pinca
           iframe#facebook-button(allowTransparency="true", frameborder="0", scrolling="no",
-            src!="//www.facebook.com/plugins/like.php?action=like&amp;colorscheme=light&amp;href=http%3A%2F%2Fbinb.nodejitsu.com&amp;layout=button_count&amp;locale=en_US&amp;share=true&amp;show_faces=false")
+            src!="//www.facebook.com/plugins/like.php?action=like&amp;colorscheme=light&amp;href=https%3A%2F%2Fbinb.co&amp;layout=button_count&amp;locale=en_US&amp;share=true&amp;show_faces=false")
           iframe#twitter-button(allowtransparency="true", frameborder="0", scrolling="no",
-            src="//platform.twitter.com/widgets/tweet_button.html?url=http%3A%2F%2Fbinb.nodejitsu.com")
+            src="//platform.twitter.com/widgets/tweet_button.html?url=https%3A%2F%2Fbinb.co")
           iframe#github-button(allowtransparency="true", frameborder="0", scrolling="0",
             src="//ghbtns.com/github-btn.html?user=lpinca&repo=binb&type=watch&count=true")
-          span.footer-info . Optimized for Google Chrome.
-          a#nodejitsu-logo.icons(target="_blank", href="http://nodejitsu.com/")
-          span.footer-info Powered by 
     block media
     block scripts
       script(src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js")
@@ -55,8 +52,7 @@ html
       (function() {
         var uv = document.createElement('script');
         uv.type = 'text/javascript'; uv.async = true;
-        uv.src = ('https:' == document.location.protocol ? 'https://' : 'http://') +
-          'widget.uservoice.com/LSMjFAQRifhD6BjOG2KWw.js';
+        uv.src ='//widget.uservoice.com/LSMjFAQRifhD6BjOG2KWw.js';
         var s = document.getElementsByTagName('script')[0];
         s.parentNode.insertBefore(uv, s);
       })();

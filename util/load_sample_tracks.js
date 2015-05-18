@@ -74,7 +74,7 @@ parser.on('data', function(track) {
   songId++;
 });
 
-parser.on('root', function() {
+parser.on('end', function() {
   rc.quit();
   process.stdout.write('OK\n');
 });

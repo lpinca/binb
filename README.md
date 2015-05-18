@@ -1,8 +1,8 @@
-![binb](http://dl.dropbox.com/u/58444696/binb-logo.png)
+![binb](https://dl.dropbox.com/u/58444696/binb-logo.png)
 
 binb is a simple, realtime, multiplayer, competitive music listening game.
 
-To play the game: [http://binb.nodejitsu.com](http://binb.nodejitsu.com)
+To play the game: [https://binb.co](https://binb.co)
 
 ## Installation
 
@@ -14,21 +14,27 @@ Unless previously installed you'll need the following packages:
 
 Please use their sites to get detailed installation instructions.
 
-You also need `UglifyJS` installed globally:
-
-```shell
-npm install uglify-js -g
-```
-
 ### Install binb
 
-Once you have redis server up and running type:
+The first step is to install the dependencies:
 
 ```shell
-make install
+npm install
 ```
 
-Then run `npm start` or `node app.js` to start the app.
+Then you need to minify the assets:
+
+```shell
+npm run minify
+```
+
+Now make sure that the Redis server is running and load some sample tracks:
+
+```shell
+npm run import-data
+```
+
+Finally run `npm start` or `node app.js` to start the app.
 
 Point your browser to `http://127.0.0.1:8138` and have fun!
 
@@ -38,16 +44,16 @@ Some package managers name the Node.js binary `nodejs`. In this case you'll get
 the following error:
 
 ```shell
-/usr/bin/env: node: No such file or directory
+sh: node: command not found
 ```
 
-To make it work you can create a symbolic link:
+To fix this issue, you can create a symbolic link:
 
 ```shell
 sudo ln -s /usr/bin/nodejs /usr/bin/node
 ```
 
-and run `make install` again.
+and try again.
 
 ## Browser compatibiliy
 
@@ -56,10 +62,9 @@ binb requires a browser that supports the WebSocket protocol.
 Refer to this [table](http://caniuse.com/websockets) for details on
 compatibility.
 
-## Shout-Outs
+## Shout out to
 
-- Thanks to [beatquest.fm](http://beatquest.fm) for inspiration.
-- Thanks to [nodejitsu](http://nodejitsu.com/) for hosting the application.
+- [beatquest.fm](http://beatquest.fm) for inspiration.
 
 ## Bug tracker
 
@@ -69,4 +74,4 @@ what browser it occurred.
 
 ## Copyright and license
 
-binb is released under the MIT license. See LICENSE for details.
+binb is released under the MIT license. See [LICENSE](LICENSE) for details.
