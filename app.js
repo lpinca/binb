@@ -22,6 +22,7 @@ var banHandler = require('./lib/middleware/ban-handler')
  */
 
 var app = express()
+  , production = process.env.NODE_ENV === 'production'
   , pub = __dirname + '/public' // Path to public directory
   , sessionstore = new RedisStore({client: usersdb})
   , server = http.createServer(app); // HTTP server object
@@ -34,8 +35,12 @@ app.use(banHandler);
 app.use(urlencoded({extended: false}));
 app.use(cookieParser);
 app.use(session({
-  cookie: {maxAge: 14400000}, // 4 h = 14400000 ms
-  resave: true,
+  cookie: {
+    secure: production,
+    maxAge: 14400000 // 4 h = 14400000 ms
+  },
+  proxy: production,
+  resave: false,
   rolling: true,
   saveUninitialized: true,
   secret: secret,
