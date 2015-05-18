@@ -1,7 +1,0 @@
-db/
-node_modules/
-util/
-.git/
-.DS_Store
-Makefile
-.gitignore
