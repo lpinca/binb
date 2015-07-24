@@ -1,3 +1,5 @@
+'use strict';
+
 /**
  * Expose an object with some iTunes artist IDs.
  */

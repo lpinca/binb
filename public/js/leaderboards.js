@@ -1,4 +1,6 @@
 (function() {
+  'use strict';
+
   var appendResults = function(data, $leaderboard, offset, type) {
     for (var i = 0; i < data.length; i += 2) {
       var col1 = '<td>' + (++offset) + '</td>'

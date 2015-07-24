@@ -1,4 +1,5 @@
 (function() {
+  'use strict';
 
   var $cassettewheels = $('#cassette .wheel')
     , $chat = $('#chat')

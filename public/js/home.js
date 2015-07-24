@@ -1,4 +1,6 @@
 (function() {
+  'use strict';
+
   $.get('/artworks', function(data) {
     $('.thumbnail').each(function() {
       var urls = data[$(this).attr('href')];
