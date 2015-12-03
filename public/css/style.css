@@ -281,7 +281,7 @@ form .clearfix {
   }
   100% {
     -o-transform: scale(0.7);
-    opacity: 0.1; 
+    opacity: 0.1;
   }
 }
 @-moz-keyframes bounce {
@@ -806,6 +806,9 @@ footer {
   width: 140px;
   height: 21px
 }
-#twitter-button, #github-button {
+#twitter-button {
+  width: 80px;
+}
+#github-button {
   width: 100px;
 }
