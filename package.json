@@ -17,24 +17,24 @@
   },
   "dependencies": {
     "async": "1.5.x",
-    "body-parser": "1.14.x",
+    "body-parser": "1.15.x",
     "canvas": "1.3.x",
     "connect-redis": "3.0.x",
     "cookie-parser": "1.4.x",
     "express": "4.13.x",
-    "express-session": "1.12.x",
-    "faye-websocket": "0.10.x",
+    "express-session": "1.13.x",
+    "faye-websocket": "0.11.x",
     "forwarded-for": "1.0.x",
     "jade": "1.11.x",
-    "nodemailer": "1.10.x",
-    "primus": "4.0.x",
+    "nodemailer": "2.3.x",
+    "primus": "5.0.x",
     "primus-emitter": "3.1.x",
-    "primus-rooms": "3.3.x",
+    "primus-rooms": "3.4.x",
     "redis": "2.4.x",
     "serve-favicon": "2.3.x",
     "uglify-js": "2.6.x"
   },
   "devDependencies": {
-    "JSONStream": "1.0.x"
+    "JSONStream": "1.1.x"
   }
 }
