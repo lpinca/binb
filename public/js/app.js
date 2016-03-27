@@ -1168,15 +1168,15 @@
       checkrecipient: true,
       fn: privateMessage,
       minargs: 1,
-      usage: 'usage: /private &lt;player&gt;',
+      usage: 'usage: /private &lt;player&gt;'
     },
     reply: {
       fn: replyToPrivate,
-      minargs: 0,
+      minargs: 0
     },
     unprivate: {
       fn: clearPrivate,
-      minargs: 0,
+      minargs: 0
     }
   };
 
