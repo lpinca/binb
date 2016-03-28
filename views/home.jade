@@ -48,11 +48,11 @@ block sections
     .row
       .span16
         ul.thumbnails
-          - each item in rooms
+          - each room in rooms
             li.span4
-              a.thumbnail.relative(href=item)
-                .room #{item} - 
-                  span(id=item)
+              a.thumbnail.relative(href=room.name)
+                .room #{room.name} - 
+                  span(id=room.name) #{room.players}
                   |  Players
 
 append scripts

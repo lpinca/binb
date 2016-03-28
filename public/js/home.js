@@ -10,15 +10,9 @@
     });
   });
 
-  var primus = Primus.connect({ strategy: false });
-  primus.on('open', function() {
-    primus.send('getoverview', function(data) {
-      for (var prop in data) {
-        $('#' + prop).text(data[prop]);
-      }
-    });
-    primus.on('updateoverview', function(room, players) {
-      $('#' + room).text(players);
-    });
+  var primus = new Primus({ strategy: false });
+
+  primus.on('updateoverview', function(room, players) {
+    $('#' + room).text(players);
   });
 })();

@@ -17,13 +17,12 @@ block nav
       a.dropdown-toggle(data-toggle="dropdown",href="#") #{roomname} 
         b.caret
       ul.dropdown-menu
-        - each item in rooms
-          - if (item !== roomname)
-            li
-              a(href=item)
-                span.room-name #{item}
-                i.icon-user.pull-right
-                span.users-counter
+        - each room in rooms
+          li
+            a(href=room.name)
+              span.room-name #{room.name}
+              i.icon-user.pull-right
+              span.users-counter #{room.players}
     - if (locals.loggedin)
       li.dropdown
         a.dropdown-toggle(data-toggle="dropdown", href="#") Logged in as #{loggedin} 

@@ -895,17 +895,6 @@
     primus.send('getstatus', setStatus);
   };
 
-  // Show the number of players inside each room
-  var roomsOverview = function(data) {
-    $('.users-counter').each(function() {
-      var room = $(this).prevAll('.room-name').text();
-      userscounters[room] = $(this);
-      $(this).text(data[room]);
-    });
-
-    primus.on('updateoverview', updateRoomsOverview);
-  };
-
   var setStatus = function(data) {
     if (data.status === 0) {
       isplaying = true;
@@ -1188,8 +1177,13 @@
 
   $togglechat.click(hideChat);
 
+  $('.users-counter').each(function() {
+    userscounters[$(this).prevAll('.room-name').text()] = $(this);
+  });
+
   // Open the realtime connection
-  primus = Primus.connect({ strategy: false });
+  primus = new Primus({ strategy: false });
+
   primus.on('open', function() {
     $jplayer = $('#player').jPlayer({
       ready: jplayerReady,
@@ -1198,11 +1192,10 @@
       preload: 'auto',
       volume: 1
     });
+    primus.on('updateoverview', updateRoomsOverview);
+    primus.on('invalidnickname', invalidNickName);
     primus.on('alreadyinaroom', alreadyInARoom);
     primus.on('close', disconnect);
-    primus.on('invalidnickname', invalidNickName);
     primus.on('ready', ready);
-    primus.send('getoverview', roomsOverview);
   });
-
 })();

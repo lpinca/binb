@@ -66,7 +66,9 @@ exports.changePasswd = function(req, res) {
 exports.home = function(req, res) {
   res.render('home', {
     loggedin: req.session.user,
-    rooms: config.rooms,
+    rooms: config.rooms.map(function(room) {
+      return { name: room, players: rooms[room].totusers };
+    }),
     slogan: randomSlogan()
   });
 };
@@ -96,15 +98,22 @@ exports.resetPasswd = function(req, res) {
 };
 
 exports.room = function(req, res) {
-  if (~config.rooms.indexOf(req.params.room)) {
-    return res.render('room', {
-      loggedin: req.session.user,
-      roomname: req.params.room,
-      rooms: config.rooms,
-      slogan: randomSlogan()
-    });
+  var stations = config.rooms.filter(function(room) {
+    return room !== req.params.room;
+  });
+
+  if (stations.length === config.rooms.length) {
+    return res.status(404).send(http.STATUS_CODES[404]);
   }
-  res.status(404).send(http.STATUS_CODES[404]);
+
+  res.render('room', {
+    loggedin: req.session.user,
+    roomname: req.params.room,
+    rooms: stations.map(function(room) {
+      return { name: room, players: rooms[room].totusers };
+    }),
+    slogan: randomSlogan()
+  });
 };
 
 exports.signup = function(req, res) {
