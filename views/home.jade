@@ -50,9 +50,9 @@ block sections
         ul.thumbnails
           - each room in rooms
             li.span4
-              a.thumbnail.relative(href=room.name)
-                .room #{room.name} - 
-                  span(id=room.name) #{room.players}
+              a.thumbnail.relative(href=room)
+                .room #{room} - 
+                  span(id=room)
                   |  Players
 
 append scripts
