@@ -438,6 +438,65 @@
     timer = setInterval(step, 50);
   };
 
+  // Prompt for name and send it
+  var chooseNickname = function(msg) {
+    msg = msg
+      ? '<span class="label label-important">' + msg + '</span><br/>Try with another one:'
+      : 'What\'s your name?';
+
+    if ($modal.hasClass('in')) {
+      $('.modal-body p').html(msg);
+      return $('#login').focus();
+    }
+
+    var html = [
+      '<div class="modal-header">'
+      , '<h3>You are joining the ' + roomname + ' room</h3>'
+      , '</div>'
+      , '<div class="modal-body">'
+      , '<p>' + msg + '</p>'
+      , '</div>'
+      , '<div class="modal-footer relative">'
+      , '<input id="login" maxlength="15" type="text" name="nickname" />'
+      , '<button id="join" class="btn btn-success">'
+      , '<i class="icon-user icon-white"></i> Join the game'
+      , '</button>'
+      , '<span class="divider">'
+      , '<span>or</span>'
+      , '</span>'
+      , '<a class="btn btn-primary" href="/login?followup=/' + roomname + '">'
+      , '<i class="icon-lock icon-white"></i> Login'
+      , '</a>'
+      , '</div>'
+    ].join('');
+
+    $(html).appendTo($modal);
+
+    var $button = $('#join')
+      , $login = $('#login');
+
+    $button.on('click', function() {
+      var value = $login.val();
+      $login.val('');
+
+      if (value.trim()) {
+        return primus.send('nickname', value);
+      }
+
+      chooseNickname('Nickname can\'t be empty.');
+    });
+
+    $login.on('keyup', function(event) {
+      if (event.keyCode === 13) {
+        $button.click();
+      }
+    });
+
+    $modal.modal('show').on('shown', function() {
+      $login.focus();
+    });
+  };
+
   var clearPrivate = function() {
     var width = $recipient.outerWidth(true) + 1;
     $recipient.css('margin-right', '0');
@@ -584,85 +643,6 @@
     });
   };
 
-  // Submitted name was invalid
-  var invalidNickName = function(feedback) {
-    feedback = '<span class="label label-important">' + feedback + '</span>';
-    joinUnauthenticated(feedback + '<br/>Try with another one:');
-  };
-
-  // Prompt for name and send it
-  var joinUnauthenticated = function(msg) {
-    if (/nickname\s*\=/.test(document.cookie) && !msg) {
-      nickname = document.cookie.replace(/.*nickname\s*\=\s*([^;]*);?.*/, '$1');
-      return primus.send('joinunauthenticated', nickname, roomname);
-    }
-
-    if ($modal.hasClass('in')) {
-      $('.modal-body p').html(msg);
-      return $('#login').focus();
-    }
-
-    var html = [
-      '<div class="modal-header">'
-      , '<h3>You are joining the ' + roomname + ' room</h3>'
-      , '</div>'
-      , '<div class="modal-body">'
-      , '<p>' + (msg || 'What\'s your name?') + '</p>'
-      , '</div>'
-      , '<div class="modal-footer relative">'
-      , '<input id="login" maxlength="15" type="text" name="nickname" />'
-      , '<button id="join" class="btn btn-success">'
-      , '<i class="icon-user icon-white"></i> Join the game'
-      , '</button>'
-      , '<span class="divider">'
-      , '<span>or</span>'
-      , '</span>'
-      , '<a class="btn btn-primary" href="/login?followup=/' + roomname + '">'
-      , '<i class="icon-lock icon-white"></i> Login'
-      , '</a>'
-      , '</div>'
-    ].join('');
-
-    $(html).appendTo($modal);
-
-    var $button = $('#join')
-      , $login = $('#login');
-
-    $button.on('click', function() {
-      var value = $login.val();
-      $login.val('');
-
-      if ($.trim(value)) {
-        nickname = value;
-        return primus.send('joinunauthenticated', nickname, roomname);
-      }
-
-      invalidNickName('Nickname can\'t be empty.');
-    });
-
-    $login.on('keyup', function(event) {
-      if (event.keyCode === 13) {
-        $button.click();
-      }
-    });
-
-    $modal.modal('show').on('shown', function() {
-      $login.focus();
-    });
-  };
-
-  var open = function() {
-    primus.send('loggedin', function(isloggedin, loggedinas) {
-      if (isloggedin) {
-        nickname = loggedinas;
-        subscriber = true;
-        return primus.send('joinauthenticated', roomname);
-      }
-
-      joinUnauthenticated();
-    });
-  };
-
   var loadTrack = function(previewUrl) {
     audio.src = previewUrl;
   };
@@ -803,9 +783,13 @@
   };
 
   // Successfully joined the room
-  var ready = function(usersData, trackscount, loggedin) {
-    if (!loggedin && !/nickname\s*\=/.test(document.cookie)) {
+  var ready = function(usersData, trackscount, username, loggedin) {
+    nickname = username;
+
+    if (!loggedin) {
       document.cookie = 'nickname=' + nickname + ';path=/;';
+    } else {
+      subscriber = true;
     }
 
     $modal.modal('hide').empty();
@@ -817,7 +801,7 @@
 
     $messagebox.on('keydown', function(event) {
       if (event.keyCode === 13) {
-        var value = $.trim($messagebox.val());
+        var value = $messagebox.val().trim();
         $messagebox.val('');
 
         if (value) {
@@ -837,7 +821,7 @@
     $guessbox.on('keydown', function(event) {
       switch (event.keyCode) {
         case 13: // return
-          var guess = $.trim($guessbox.val());
+          var guess = $guessbox.val().trim();
           $guessbox.val('');
 
           if (guess) {
@@ -1191,13 +1175,15 @@
     ? addCassetteBackdrop()
     : addVolumeControl();
 
-  primus = new Primus({ strategy: false });
+  primus = new Primus({
+    url: location.protocol + '//' + location.host + '?room=' + roomname,
+    strategy: false
+  });
 
   primus.on('updateoverview', updateRoomsOverview);
-  primus.on('invalidnickname', invalidNickName);
   primus.on('alreadyinaroom', alreadyInARoom);
+  primus.on('nickname', chooseNickname);
   primus.on('overview', roomsOverview);
   primus.on('end', disconnect);
   primus.on('ready', ready);
-  primus.on('open', open);
 })();
