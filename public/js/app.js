@@ -7,7 +7,6 @@
     , $countdown = $('#countdown')
     , $feedback = $('#feedback')
     , $guessbox = $('#guess')
-    , $jplayer
     , $messagebox = $('#message')
     , $modal = $('#modal')
     , $points = $('#summary .points')
@@ -21,6 +20,7 @@
     , $track = $('#summary .track')
     , $tracks = $('#tracks')
     , $users = $('#users')
+    , audio
     , elapsedtime = 0
     , historycursor = 0
     , historyvalues = []
@@ -98,6 +98,29 @@
 
   String.prototype.encodeEntities = function() {
     return this.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  };
+
+  var addCassetteBackdrop = function() {
+    var html = [
+      '<div id="touch-backdrop">'
+      , '<button id="touch-play" class="btn btn-danger disabled">'
+      , '<i class="icon-play icon-white"></i> Wait'
+      , '</button>'
+      , '</div>'
+    ].join('');
+
+    var $touchbackdrop = $(html);
+    $touchbackdrop.appendTo('#cassette');
+
+    $touchplay = $('#touch-play');
+    $touchplay.on('click', function() {
+      if (!$(this).hasClass('btn-danger')) {
+        audio.currentTime = elapsedtime;
+        audio.play();
+        $touchbackdrop.remove();
+        $touchplay = null;
+      }
+    });
   };
 
   // Add a chat entry, whether message, notification, etc.
@@ -281,7 +304,7 @@
 
     var setVolume = function(volume) {
       handleIcon(volume);
-      $jplayer.jPlayer('volume', volume);
+      audio.volume = volume;
       oldvalue = volume;
       setCookie(volume);
     };
@@ -292,7 +315,7 @@
 
         if (oldvalue !== 0) {
           handleIcon(0);
-          $jplayer.jPlayer('volume', 0);
+          audio.volume = 0;
           positionVolumeHandle(0);
         }
         return;
@@ -302,7 +325,7 @@
 
       if (oldvalue !== 0) {
         handleIcon(oldvalue);
-        $jplayer.jPlayer('volume', oldvalue);
+        audio.volume = oldvalue;
         positionVolumeHandle(oldvalue);
       }
     });
@@ -452,7 +475,7 @@
   // Let the user know when he/she has disconnected
   var disconnect = function() {
     clearInterval(timer);
-    $jplayer.jPlayer('stop');
+    audio.pause();
     addChatEntry($('<span class="error">ERROR: You have disconnected.</span>'));
     addFeedback('Something wrong happened');
     $users.empty();
@@ -628,7 +651,7 @@
     });
   };
 
-  var jplayerReady = function() {
+  var open = function() {
     primus.send('loggedin', function(isloggedin, loggedinas) {
       if (isloggedin) {
         nickname = loggedinas;
@@ -638,35 +661,10 @@
 
       joinUnauthenticated();
     });
-
-    if (!$.jPlayer.platform.mobile && !$.jPlayer.platform.tablet) {
-      return addVolumeControl();
-    }
-
-    var html = [
-      '<div id="touch-backdrop">'
-      , '<button id="touch-play" class="btn btn-danger disabled">'
-      , '<i class="icon-play icon-white"></i> Wait'
-      , '</button>'
-      , '</div>'
-    ].join('');
-
-    var $touchbackdrop = $(html);
-    $touchbackdrop.appendTo('#cassette');
-
-    $touchplay = $('#touch-play');
-    $touchplay.on('click', function() {
-      if (!$(this).hasClass('btn-danger')) {
-        $jplayer.jPlayer('play', elapsedtime);
-        $touchbackdrop.remove();
-        $touchplay = null;
-      }
-    });
   };
 
   var loadTrack = function(previewUrl) {
-    $jplayer.jPlayer('mute');
-    $jplayer.jPlayer('setMedia', { m4a: previewUrl });
+    audio.src = previewUrl;
   };
 
   /**
@@ -738,8 +736,7 @@
       $touchplay.removeClass('btn-danger disabled').addClass('btn-success');
     }
 
-    $jplayer.jPlayer('unmute');
-    $jplayer.jPlayer('play');
+    audio.play();
     $guessbox.val('');
     isplaying = true;
     clearInterval(timer);
@@ -1186,22 +1183,21 @@
 
   $togglechat.click(hideChat);
 
-  // Open the realtime connection
+  audio = new Audio();
+  audio.preload = 'auto';
+  audio.volume = 1;
+
+  /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+    ? addCassetteBackdrop()
+    : addVolumeControl();
+
   primus = new Primus({ strategy: false });
 
-  primus.on('open', function() {
-    $jplayer = $('#player').jPlayer({
-      ready: jplayerReady,
-      swfPath: '//cdn.jsdelivr.net/jplayer/2.8/Jplayer.swf',
-      supplied: 'm4a',
-      preload: 'auto',
-      volume: 1
-    });
-    primus.on('updateoverview', updateRoomsOverview);
-    primus.on('invalidnickname', invalidNickName);
-    primus.on('alreadyinaroom', alreadyInARoom);
-    primus.on('overview', roomsOverview);
-    primus.on('close', disconnect);
-    primus.on('ready', ready);
-  });
+  primus.on('updateoverview', updateRoomsOverview);
+  primus.on('invalidnickname', invalidNickName);
+  primus.on('alreadyinaroom', alreadyInARoom);
+  primus.on('overview', roomsOverview);
+  primus.on('end', disconnect);
+  primus.on('ready', ready);
+  primus.on('open', open);
 })();
