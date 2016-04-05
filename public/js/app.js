@@ -96,10 +96,6 @@
     , 'Yes, you guessed the title. Who is the artist?'
   ];
 
-  String.prototype.encodeEntities = function() {
-    return this.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  };
-
   var addCassetteBackdrop = function() {
     var html = [
       '<div id="touch-backdrop">'
@@ -538,6 +534,10 @@
     addChatEntry($('<span class="error">ERROR: You have disconnected.</span>'));
     addFeedback('Something wrong happened');
     $users.empty();
+  };
+
+  var encodeEntities = function(str) {
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   };
 
   var gameOver = function(podium) {
@@ -1077,7 +1077,7 @@
         , splits = text.split(urlregex);
 
       for (var i = 0; i < splits.length; i++) {
-        var escapedsplit = splits[i].encodeEntities();
+        var escapedsplit = encodeEntities(splits[i]);
 
         if (urlregex.test(splits[i])) {
           html += '<a target="_blank" href="' + escapedsplit + '">' +
@@ -1091,7 +1091,7 @@
       return html;
     }
 
-    return text.encodeEntities();
+    return encodeEntities(text);
   };
 
   // A new player has joined the game
