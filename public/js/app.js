@@ -783,21 +783,21 @@
   };
 
   // Successfully joined the room
-  var ready = function(usersData, trackscount, username, loggedin) {
-    nickname = username;
+  var ready = function(data) {
+    nickname = data.nickname;
 
-    if (!loggedin) {
+    if (!data.loggedin) {
       document.cookie = 'nickname=' + nickname + ';path=/;';
     } else {
       subscriber = true;
     }
 
     $modal.modal('hide').empty();
-    $('#total-tracks span').text(trackscount);
+    $('#total-tracks span').text(data.trackscount);
 
     var $entry = $('<span class="join">' + nickname + ' joined the game</span>');
     addChatEntry($entry);
-    updateUsers(usersData);
+    updateUsers(data.usersData);
 
     $messagebox.on('keydown', function(event) {
       if (event.keyCode === 13) {
@@ -873,7 +873,8 @@
     primus.on('trackinfo', addTrackInfo);
     primus.on('updateusers', updateUsers);
     primus.on('userleft', userLeft);
-    primus.send('getstatus', setStatus);
+
+    setStatus(data.state);
   };
 
   // Show the number of players inside each room
