@@ -1047,8 +1047,10 @@
 
         $username.addClass('correct');
 
-        if (user.roundpoints > 3) {
+        if (user.roundpoints > 2) {
           $guesstime.text((user.guesstime / 1000).toFixed(1) +' s');
+        }
+        if (user.roundpoints > 3) {
           $roundrank.addClass('icons round-rank stand' + (7 - user.roundpoints));
         }
       }
