@@ -4,11 +4,11 @@
  * Module dependencies.
  */
 
-var async = require('async')
-  , Captcha = require('../lib/captcha')
+var Captcha = require('../lib/captcha')
   , config = require('../config')
   , db = require('../lib/redis-clients').songs
   , http = require('http')
+  , parallel = require('async/parallel')
   , randInt = require('../lib/prng').randInt
   , randomSlogan = require('../lib/utils').randomSlogan
   , rooms = require('../lib/rooms').rooms;
@@ -41,10 +41,10 @@ exports.artworks = function(req, res, next) {
       for (var i = 0; i < 6; i++) {
         subtasks.push(subTask(room));
       }
-      async.parallel(subtasks, callback);
+      parallel(subtasks, callback);
     };
   });
-  async.parallel(tasks, function(err, results) {
+  parallel(tasks, function(err, results) {
     if (err) {
       return next(err);
     }
