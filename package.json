@@ -4,12 +4,9 @@
   "description": "Competitive, multiplayer, realtime, guess the song game",
   "homepage": "https://binb.co",
   "bugs": "https://github.com/lpinca/binb/issues",
-  "license": "MIT",
+  "repository": "lpinca/binb",
   "author": "Luigi Pinca",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/lpinca/binb.git"
-  },
+  "license": "MIT",
   "scripts": {
     "minify": "for f in public/js/{app,home,leaderboards}; do uglifyjs $f.js -o $f.min.js; done",
     "import-data": "node util/load_sample_tracks.js",
@@ -27,7 +24,7 @@
     "forwarded-for": "1.0.x",
     "jade": "1.11.x",
     "nodemailer": "2.5.x",
-    "primus": "5.2.x",
+    "primus": "6.0.x",
     "primus-emitter": "3.1.x",
     "primus-rooms": "3.4.x",
     "redis": "2.6.x",
