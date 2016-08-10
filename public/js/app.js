@@ -175,6 +175,7 @@
       $touchplay.html('<i class="icon-play icon-white"></i> Wait');
     }
 
+    audio.pause();
     isplaying = false;
     clearInterval(timer);
     cassetteAnimation(Date.now() + 5000, false);
@@ -657,10 +658,6 @@
     });
   };
 
-  var loadTrack = function(previewUrl) {
-    audio.src = previewUrl;
-  };
-
   /**
    * Given a string, parse the string extracting fields separated by whitespace
    * and optionally enclosed within double quotes (which are stripped off), and
@@ -729,6 +726,7 @@
       $touchplay.removeClass('btn-danger disabled').addClass('btn-success');
     }
 
+    audio.src = data.previewUrl;
     audio.play();
     $guessbox.val('');
     isplaying = true;
@@ -876,7 +874,6 @@
     primus.on('bothmatched', randomFeedback(bmstrings, 'correct'));
     primus.on('chatmsg', getChatMessage);
     primus.on('gameover', gameOver);
-    primus.on('loadtrack', loadTrack);
     primus.on('newuser', userJoin);
     primus.on('nomatch', randomFeedback(nmstrings, 'wrong'));
     primus.on('playtrack', playTrack);
@@ -888,7 +885,7 @@
     primus.on('updateusers', updateUsers);
     primus.on('userleft', userLeft);
 
-    setStatus(data.state);
+    setState(data.state);
   };
 
   // Show the number of players inside each room
@@ -902,15 +899,13 @@
     });
   };
 
-  var setStatus = function(data) {
-    if (data.status === 0) {
+  var setState = function(state) {
+    if (state.value === 0) {
       isplaying = true;
-      cassetteAnimation(Date.now() + data.timeleft, true);
-    } else if (data.status === 1) {
-      loadTrack(data.previewUrl);
+      cassetteAnimation(Date.now() + state.timeleft, true);
     }
 
-    addFeedback(states[data.status]);
+    addFeedback(states[state.value]);
   };
 
   var showChat = function() {
