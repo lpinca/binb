@@ -13,17 +13,17 @@
     "start": "node app.js"
   },
   "dependencies": {
-    "async": "2.0.x",
+    "async": "2.1.x",
     "body-parser": "1.15.x",
-    "canvas": "1.4.x",
-    "connect-redis": "3.1.x",
+    "canvas": "1.6.x",
+    "connect-redis": "3.2.x",
     "cookie-parser": "1.4.x",
     "express": "4.14.x",
     "express-session": "1.14.x",
     "faye-websocket": "0.11.x",
     "forwarded-for": "1.0.x",
     "jade": "1.11.x",
-    "nodemailer": "2.5.x",
+    "nodemailer": "2.7.x",
     "primus": "6.0.x",
     "primus-emitter": "3.1.x",
     "primus-rooms": "3.4.x",
@@ -32,6 +32,6 @@
     "uglify-js": "2.7.x"
   },
   "devDependencies": {
-    "JSONStream": "1.1.x"
+    "JSONStream": "1.3.x"
   }
 }
