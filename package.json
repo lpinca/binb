@@ -12,6 +12,9 @@
     "import-data": "node util/load_sample_tracks.js",
     "start": "node app.js"
   },
+  "engines": {
+    "node": ">=6.0.0"
+  },
   "dependencies": {
     "async": "2.1.x",
     "body-parser": "1.17.x",
