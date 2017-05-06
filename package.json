@@ -8,7 +8,7 @@
   "author": "Luigi Pinca",
   "license": "MIT",
   "scripts": {
-    "minify": "for f in public/js/{app,home,leaderboards}; do uglifyjs $f.js -o $f.min.js; done",
+    "minify": "for f in *.js; do short=${f%.js}; uglifyjs $f > $short.min.js; done",
     "import-data": "node util/load_sample_tracks.js",
     "start": "node app.js"
   },
