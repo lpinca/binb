@@ -14,10 +14,10 @@ block nav
         i.icon-list-alt.icon-white
         |  Leaderboards
     li.active.dropdown
-      a.dropdown-toggle(data-toggle="dropdown",href="#") #{roomname} 
+      a.dropdown-toggle(data-toggle="dropdown", href="#") #{roomname} 
         b.caret
       ul.dropdown-menu
-        - each room in rooms
+        each room in rooms
           - if (room !== roomname)
             li
               a(href=room)
@@ -30,16 +30,16 @@ block nav
           span.caret
         ul.dropdown-menu
           li
-            a(href="/user/#{loggedin}", target="_blank") Profile
+            a(href=`/user/${loggedin}`, target="_blank") Profile
           li
-            a(href="/changepasswd?followup=/#{roomname}") Change password
+            a(href=`/changepasswd?followup=/${roomname}`) Change password
           li
             a(href="/logout") Logout
     - else
       li
-        a(href="/signup?followup=/#{roomname}") Sign up
+        a(href=`/signup?followup=/${roomname}`) Sign up
       li
-        a(href="/login?followup=/#{roomname}") Login
+        a(href=`/login?followup=/${roomname}`) Login
 
 block sections
   section

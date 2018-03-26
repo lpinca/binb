@@ -12,7 +12,7 @@ block nav
         span.caret
       ul.dropdown-menu
         li
-          a(href="/user/#{loggedin}", target="_blank") Profile
+          a(href=`/user/${loggedin}`, target="_blank") Profile
         li
           a(href="/logout") Logout
 
@@ -21,7 +21,7 @@ block sections
     .row
       .span12.offset2
         form.form-horizontal.well(method="post",
-          action="/changepasswd?followup=#{followup}")
+          action=`/changepasswd?followup=${followup}`)
           fieldset
             - if (locals.errors)
               - if (errors.oldpassword)

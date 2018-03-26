@@ -20,11 +20,11 @@ block sections
         .leaderboard-wrapper
           table.table.table-striped.table-bordered.leaderboard
             tbody
-              - each user, i in pointsleaderboard
+              each user, i in pointsleaderboard
                 tr
                   td #{i+1}
                   td
-                    a(href="/user/#{user.username}") #{user.username}
+                    a(href=`/user/${user.username}`) #{user.username}
                   td #{user.totpoints}
           .loading
             .loading-block
@@ -35,11 +35,11 @@ block sections
         .leaderboard-wrapper
           table.table.table-striped.table-bordered.leaderboard
             tbody
-              - each user, i in timesleaderboard
+              each user, i in timesleaderboard
                 tr
                   td #{i+1}
                   td
-                    a(href="/user/#{user.username}") #{user.username}
+                    a(href=`/user/${user.username}`) #{user.username}
                   td
                     i.icon-time
                     |  #{user.bestguesstime} sec

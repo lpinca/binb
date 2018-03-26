@@ -25,11 +25,11 @@
     "express-session": "1.15.x",
     "faye-websocket": "0.11.x",
     "forwarded-for": "1.0.x",
-    "jade": "1.11.x",
     "nodemailer": "4.4.x",
     "primus": "7.1.x",
     "primus-emitter": "3.1.x",
     "primus-rooms": "3.4.x",
+    "pug": "2.0.x",
     "redis": "2.8.x",
     "serve-favicon": "2.4.x",
     "uglify-js": "3.3.x"

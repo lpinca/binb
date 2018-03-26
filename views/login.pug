@@ -8,16 +8,16 @@ block nav
     li
       a(href="/") Home
     li
-      a(href="/signup?followup=#{followup}") Sign up
+      a(href=`/signup?followup=${followup}`) Sign up
     li.active
-      a(href="/login?followup=#{followup}") Login
+      a(href=`/login?followup=${followup}`) Login
 
 block sections
   section
     .row
       .span3
         h3 New user?
-        a(href="/signup?followup=#{followup}") Click here to create an account.
+        a(href=`/signup?followup=${followup}`) Click here to create an account.
       .span13
         - if (locals.errors && errors.alert)
           .alert.alert-error
@@ -29,7 +29,7 @@ block sections
             a.close(data-dismiss="alert") &times;
             strong Well done!
             |  #{success}
-        form.form-horizontal.well(method="post", action="/login?followup=#{followup}")
+        form.form-horizontal.well(method="post", action=`/login?followup=${followup}`)
           fieldset
             - if (locals.errors)
               - if (errors.username)
@@ -71,5 +71,5 @@ block sections
             button.submit-button.btn.btn-primary(type="submit")
               i.icon-lock.icon-white
               |  Login
-            a.forgot-passwd(href="/recoverpasswd?followup=#{followup}")
+            a.forgot-passwd(href=`/recoverpasswd?followup=${followup}`)
               | Forgot your password?

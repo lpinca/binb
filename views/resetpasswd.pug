@@ -16,7 +16,7 @@ block sections
             a.close(data-dismiss="alert") &times;
             strong Oh snap!
             |  #{errors.alert}
-        form.form-horizontal.well(method="post", action="/resetpasswd?token=#{token}")
+        form.form-horizontal.well(method="post", action=`/resetpasswd?token=${token}`)
           fieldset
             - if (locals.errors && errors.password)
               .control-group.error

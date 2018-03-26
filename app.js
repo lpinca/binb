@@ -30,7 +30,7 @@ var app = express()
   , server = http.createServer(app); // HTTP server object
 
 // Configuration
-app.set('view engine', 'jade');
+app.set('view engine', 'pug');
 app.use('/static', express.static(pub, {maxAge: 2419200000})); // 4 weeks = 2419200000 ms
 app.use(favicon(pub + '/img/favicon.ico', {maxAge: 2419200000}));
 app.use(banHandler);

@@ -8,16 +8,16 @@ block nav
     li
       a(href="/") Home
     li.active
-      a(href="/signup?followup=#{followup}") Sign up
+      a(href=`/signup?followup=${followup}`) Sign up
     li
-      a(href="/login?followup=#{followup}") Login
+      a(href=`/login?followup=${followup}`) Login
 
 block sections
   section
     .row
       .span3
         h3 Not a new user?
-        a(href="/login?followup=#{followup}") Click here to log in.
+        a(href=`/login?followup=${followup}`) Click here to log in.
       .span13
         h3 Why sign up?
         p Registration is optional, but if you are a regular user consider creating 
@@ -31,7 +31,7 @@ block sections
             a.close(data-dismiss="alert") &times;
             strong Oh snap!
             |  #{errors.alert}
-        form.form-horizontal.well(method="post",action="/signup?followup=#{followup}")
+        form.form-horizontal.well(method="post", action=`/signup?followup=${followup}`)
           fieldset
             - if (locals.errors)
               - if (errors.username)
