@@ -19,20 +19,20 @@
     "async": "2.6.x",
     "body-parser": "1.18.x",
     "canvas": "2.1.x",
-    "connect-redis": "3.3.x",
+    "connect-redis": "3.4.x",
     "cookie-parser": "1.4.x",
     "express": "4.16.x",
     "express-session": "1.15.x",
     "faye-websocket": "0.11.x",
     "forwarded-for": "1.0.x",
-    "nodemailer": "4.6.x",
-    "primus": "7.1.x",
+    "nodemailer": "4.7.x",
+    "primus": "7.3.x",
     "primus-emitter": "3.1.x",
     "primus-rooms": "3.4.x",
     "pug": "2.0.x",
     "redis": "2.8.x",
-    "serve-favicon": "2.4.x",
-    "uglify-js": "3.3.x"
+    "serve-favicon": "2.5.x",
+    "uglify-js": "3.4.x"
   },
   "devDependencies": {
     "JSONStream": "1.3.x"
