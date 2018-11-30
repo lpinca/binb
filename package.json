@@ -18,7 +18,7 @@
   "dependencies": {
     "async": "2.6.x",
     "body-parser": "1.18.x",
-    "canvas": "1.6.x",
+    "canvas": "2.1.x",
     "connect-redis": "3.3.x",
     "cookie-parser": "1.4.x",
     "express": "4.16.x",
