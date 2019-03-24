@@ -1,108 +1,108 @@
 (function() {
   'use strict';
 
-  var $cassettewheels = $('#cassette .wheel')
-    , $chat = $('#chat')
-    , $chatwrapper = $('#chat-outer-wrapper')
-    , $countdown = $('#countdown')
-    , $feedback = $('#feedback')
-    , $guessbox = $('#guess')
-    , $messagebox = $('#message')
-    , $modal = $('#modal')
-    , $points = $('#summary .points')
-    , $progress = $('#progress')
-    , $rank = $('#summary .rank')
-    , $recipient = $('#recipient')
-    , $tapeleft = $('#tape-left')
-    , $taperight = $('#tape-right')
-    , $togglechat = $('#toggle-chat')
-    , $touchplay
-    , $track = $('#summary .track')
-    , $tracks = $('#tracks')
-    , $users = $('#users')
-    , audio
-    , elapsedtime = 0
-    , historycursor = 0
-    , historyvalues = []
-    , ignoredplayers = {}
-    , isplaying
-    , nickname
-    , primus
-    , pvtmsgto
-    , replyto
-    , roomname = location.pathname.replace(/\//g, '')
-    , roundpoints = 0
-    , subscriber = false
-    , timer
-    , urlregex = /(https?:\/\/[\-A-Za-z0-9+&@#\/%?=~_()|!:,.;]*[\-A-Za-z0-9+&@#\/%=~_()|])/
-    , users = []
-    , userscounters = {};
+  var $cassettewheels = $('#cassette .wheel');
+  var $chat = $('#chat');
+  var $chatwrapper = $('#chat-outer-wrapper');
+  var $countdown = $('#countdown');
+  var $feedback = $('#feedback');
+  var $guessbox = $('#guess');
+  var $messagebox = $('#message');
+  var $modal = $('#modal');
+  var $points = $('#summary .points');
+  var $progress = $('#progress');
+  var $rank = $('#summary .rank');
+  var $recipient = $('#recipient');
+  var $tapeleft = $('#tape-left');
+  var $taperight = $('#tape-right');
+  var $togglechat = $('#toggle-chat');
+  var $touchplay;
+  var $track = $('#summary .track');
+  var $tracks = $('#tracks');
+  var $users = $('#users');
+  var audio;
+  var elapsedtime = 0;
+  var historycursor = 0;
+  var historyvalues = [];
+  var ignoredplayers = {};
+  var isplaying;
+  var nickname;
+  var primus;
+  var pvtmsgto;
+  var replyto;
+  var roomname = location.pathname.replace(/\//g, '');
+  var roundpoints = 0;
+  var subscriber = false;
+  var timer;
+  var urlregex = /(https?:\/\/[-A-Za-z0-9+&@#/%?=~_()|!:,.;]*[-A-Za-z0-9+&@#/%=~_()|])/;
+  var users = [];
+  var userscounters = {};
 
   var amstrings = [
-    'Do you also know the title?'
-    , 'Exactly, now tell me the title!'
-    , 'Yes, that\'s the artist. What about the title?'
+    'Do you also know the title?',
+    'Exactly, now tell me the title!',
+    "Yes, that's the artist. What about the title?"
   ];
 
   var bmstrings = [
-    'Congratulations'
-    , 'Exactly'
-    , 'Excellent'
-    , 'Good job!'
-    , 'Great!'
-    , 'I\'m proud of you'
-    , 'Keep it up!'
-    , 'Perfect'
-    , 'Super duper'
-    , 'That\'s it!'
-    , 'Very well done'
-    , 'Woohoo!'
-    , 'Yeah true, do you like this track?'
-    , 'Yes, you\'re right'
-    , 'You make it look easy'
-    , 'You remembered'
-    , 'You rock!'
+    'Congratulations',
+    'Exactly',
+    'Excellent',
+    'Good job!',
+    'Great!',
+    "I'm proud of you",
+    'Keep it up!',
+    'Perfect',
+    'Super duper',
+    "That's it!",
+    'Very well done',
+    'Woohoo!',
+    'Yeah true, do you like this track?',
+    "Yes, you're right",
+    'You make it look easy',
+    'You remembered',
+    'You rock!'
   ];
 
   var nmstrings = [
-    'Are you kidding?'
-    , 'Don\'t give up'
-    , 'Fail'
-    , 'Haha, what?!'
-    , 'Incorrect answer'
-    , 'It is not that hard'
-    , 'Keep trying'
-    , 'No way!'
-    , 'No'
-    , 'Nope'
-    , 'Nope, sorry!'
-    , 'Oh, come on!'
-    , 'That\'s wrong'
-    , 'Try again'
-    , 'What?!'
-    , 'Wrong'
+    'Are you kidding?',
+    "Don't give up",
+    'Fail',
+    'Haha, what?!',
+    'Incorrect answer',
+    'It is not that hard',
+    'Keep trying',
+    'No way!',
+    'No',
+    'Nope',
+    'Nope, sorry!',
+    'Oh, come on!',
+    "That's wrong",
+    'Try again',
+    'What?!',
+    'Wrong'
   ];
 
   var states = [
-    'A song is already playing, please wait for the next one...'
-    , 'Game is about to start...'
-    , 'Game is over'
-    , 'New game will start soon...'
+    'A song is already playing, please wait for the next one...',
+    'Game is about to start...',
+    'Game is over',
+    'New game will start soon...'
   ];
 
   var tmstrings = [
-    'Correct, do you also know the artist?'
-    , 'Now tell me the artist!'
-    , 'Yes, you guessed the title. Who is the artist?'
+    'Correct, do you also know the artist?',
+    'Now tell me the artist!',
+    'Yes, you guessed the title. Who is the artist?'
   ];
 
   var addCassetteBackdrop = function() {
     var html = [
-      '<div id="touch-backdrop">'
-      , '<button id="touch-play" class="btn btn-danger disabled">'
-      , '<i class="icon-play icon-white"></i> Wait'
-      , '</button>'
-      , '</div>'
+      '<div id="touch-backdrop">',
+      '<button id="touch-play" class="btn btn-danger disabled">',
+      '<i class="icon-play icon-white"></i> Wait',
+      '</button>',
+      '</div>'
     ].join('');
 
     var $touchbackdrop = $(html);
@@ -157,7 +157,7 @@
     $recipient.text('To ' + usrname + ':');
     var width = $recipient.outerWidth(true) + 1;
     $recipient.hide();
-    $messagebox.animate({ 'width': '-=' + width + 'px' }, 'fast', function() {
+    $messagebox.animate({ width: '-=' + width + 'px' }, 'fast', function() {
       $recipient.show();
     });
 
@@ -179,10 +179,10 @@
     clearInterval(timer);
     cassetteAnimation(Date.now() + 5000, false);
 
-    var artistName = data.artistName.replace(/"/g, '&quot;')
-      , trackName = data.trackName.replace(/"/g, '&quot;')
-      , attrs = ''
-      , rp = '';
+    var artistName = data.artistName.replace(/"/g, '&quot;');
+    var trackName = data.trackName.replace(/"/g, '&quot;');
+    var attrs = '';
+    var rp = '';
 
     if (roundpoints > 0) {
       rp = '+' + roundpoints;
@@ -193,16 +193,18 @@
     }
 
     var html = [
-      '<li class="bordered">'
-      , '<img class="artwork" src="' + data.artworkUrl + '"/>'
-      , '<div class="info">'
-      , '<div class="artist" title="' + artistName + '">' + artistName + '</div>'
-      , '<div class="title" title="' + trackName + '">' + trackName + '</div>'
-      , '</div>'
-      , '<div ' + attrs + '></div>'
-      , '<div class="round-points">' + rp + '</div>'
-      , '<a class="icons" target="itunes_store" href="' + data.trackViewUrl + '"></a>'
-      , '</li>'
+      '<li class="bordered">',
+      '<img class="artwork" src="' + data.artworkUrl + '"/>',
+      '<div class="info">',
+      '<div class="artist" title="' + artistName + '">' + artistName + '</div>',
+      '<div class="title" title="' + trackName + '">' + trackName + '</div>',
+      '</div>',
+      '<div ' + attrs + '></div>',
+      '<div class="round-points">' + rp + '</div>',
+      '<a class="icons" target="itunes_store" href="' +
+        data.trackViewUrl +
+        '"></a>',
+      '</li>'
     ].join('');
 
     $tracks.prepend(html);
@@ -210,65 +212,61 @@
 
   var addVolumeControl = function() {
     var html = [
-      '<div id="volume-button">'
-      , '<a class="button">'
-      , '<div id="icon" class="icons volume-high"></div>'
-      , '</a>'
-      , '<div id="volume-slider">'        // Outer background
-      , '<div id="volume-total"></div>'   // Rail
-      , '<div id="volume-current"></div>' // Current volume
-      , '<div id="volume-handle"></div>'  // Handle
-      , '</div>'
-      , '</div>'
+      '<div id="volume-button">',
+      '<a class="button">',
+      '<div id="icon" class="icons volume-high"></div>',
+      '</a>',
+      '<div id="volume-slider">', // Outer background
+      '<div id="volume-total"></div>', // Rail
+      '<div id="volume-current"></div>', // Current volume
+      '<div id="volume-handle"></div>', // Handle
+      '</div>',
+      '</div>'
     ].join('');
 
-    var $volumebutton = $(html)
-      , $icon = $volumebutton.find('#icon')
-      , $volumecurrent = $volumebutton.find('#volume-current')
-      , $volumehandle = $volumebutton.find('#volume-handle')
-      , $volumeslider = $volumebutton.find('#volume-slider')
-      , $volumetotal = $volumebutton.find('#volume-total')
-      , clicked = false
-      , mouseisdown = false
-      , mouseisover = false
-      , oldvalue = 1;
+    var $volumebutton = $(html);
+    var $icon = $volumebutton.find('#icon');
+    var $volumecurrent = $volumebutton.find('#volume-current');
+    var $volumehandle = $volumebutton.find('#volume-handle');
+    var $volumeslider = $volumebutton.find('#volume-slider');
+    var $volumetotal = $volumebutton.find('#volume-total');
+    var clicked = false;
+    var mouseisdown = false;
+    var mouseisover = false;
+    var oldvalue = 1;
 
     $volumebutton.appendTo('#volume');
 
     var handleIcon = function(volume) {
       if (volume === 0) {
         $icon.removeClass().addClass('icons volume-none');
-      }
-      else if (volume <= 0.33) {
+      } else if (volume <= 0.33) {
         $icon.removeClass().addClass('icons volume-low');
-      }
-      else if (volume <= 0.66) {
+      } else if (volume <= 0.66) {
         $icon.removeClass().addClass('icons volume-medium');
-      }
-      else {
+      } else {
         $icon.removeClass().addClass('icons volume-high');
       }
     };
 
     var handleVolumeMove = function(e) {
-      var railheight = $volumetotal.height()
-        , totaloffset = $volumetotal.offset()
-        , totalTop = parseInt($volumetotal.css('top').replace(/px/, ''), 10)
-        , newy = e.pageY - totaloffset.top
-        , volume = (railheight - newy) / railheight;
+      var railheight = $volumetotal.height();
+      var totaloffset = $volumetotal.offset();
+      var totalTop = parseInt($volumetotal.css('top').replace(/px/, ''), 10);
+      var newy = e.pageY - totaloffset.top;
+      var volume = (railheight - newy) / railheight;
 
       clicked = false;
 
       if (newy < 0) {
         newy = 0;
-      }
-      else if (newy > railheight) {
+      } else if (newy > railheight) {
         newy = railheight;
       }
 
       $volumecurrent.height(railheight - newy);
       $volumecurrent.css('top', newy + totalTop);
-      $volumehandle.css('top', totalTop + newy - ($volumehandle.height() / 2));
+      $volumehandle.css('top', totalTop + newy - $volumehandle.height() / 2);
 
       volume = Math.max(0, volume);
       volume = Math.min(volume, 1);
@@ -283,19 +281,23 @@
         return $volumeslider.hide();
       }
 
-      var totalheight = $volumetotal.height()
-        , totalposition = $volumetotal.position()
-        , newtop = totalheight - (totalheight * volume);
+      var totalheight = $volumetotal.height();
+      var totalposition = $volumetotal.position();
+      var newtop = totalheight - totalheight * volume;
 
-      $volumecurrent.height(totalheight - newtop );
+      $volumecurrent.height(totalheight - newtop);
       $volumecurrent.css('top', totalposition.top + newtop);
-      $volumehandle.css('top', totalposition.top + newtop - ($volumehandle.height() / 2));
+      $volumehandle.css(
+        'top',
+        totalposition.top + newtop - $volumehandle.height() / 2
+      );
     };
 
     var setCookie = function(volume) {
       var d = new Date();
       d.setTime(d.getTime() + 31536000000); // One year in milliseconds
-      document.cookie = 'volume=' + volume + ';path=/;expires=' + d.toGMTString() + ';';
+      document.cookie =
+        'volume=' + volume + ';path=/;expires=' + d.toGMTString() + ';';
     };
 
     var setVolume = function(volume) {
@@ -326,38 +328,45 @@
       }
     });
 
-    $volumebutton.hover(function() {
-      mouseisover = true;
-      $volumeslider.show();
-    }, function() {
-      mouseisover = false;
-      if (!mouseisdown) {
-        $volumeslider.hide();
+    $volumebutton.hover(
+      function() {
+        mouseisover = true;
+        $volumeslider.show();
+      },
+      function() {
+        mouseisover = false;
+        if (!mouseisdown) {
+          $volumeslider.hide();
+        }
       }
-    });
+    );
 
-    $volumeslider.on('mouseover', function() {
-      mouseisover = true;
-    }).on('mousedown', function(e) {
-      handleVolumeMove(e);
-      mouseisdown = true;
-      return false;
-    });
-
-    $(document).on('mouseup', function() {
-      mouseisdown = false;
-      if (!mouseisover) {
-        $volumeslider.hide();
-      }
-    }).on('mousemove', function(e) {
-      if (mouseisdown) {
+    $volumeslider
+      .on('mouseover', function() {
+        mouseisover = true;
+      })
+      .on('mousedown', function(e) {
         handleVolumeMove(e);
-      }
-    });
+        mouseisdown = true;
+        return false;
+      });
+
+    $(document)
+      .on('mouseup', function() {
+        mouseisdown = false;
+        if (!mouseisover) {
+          $volumeslider.hide();
+        }
+      })
+      .on('mousemove', function(e) {
+        if (mouseisdown) {
+          handleVolumeMove(e);
+        }
+      });
 
     (function() {
-      if (/volume\s*\=/.test(document.cookie)) {
-        var value = document.cookie.replace(/.*volume\s*\=\s*([^;]*);?.*/, '$1');
+      if (/volume\s*=/.test(document.cookie)) {
+        var value = document.cookie.replace(/.*volume\s*=\s*([^;]*);?.*/, '$1');
         value = parseFloat(value);
         positionVolumeHandle(value);
         return setVolume(value);
@@ -370,16 +379,16 @@
   // Called when a registered user already in a room, tries to enter in another room
   var alreadyInARoom = function() {
     var html = [
-      '<div class="modal-header">'
-      , '<h3>Already in a room</h3>'
-      , '</div>'
-      , '<div class="modal-body">'
-      , '<div class="alert alert-error alert-block">'
-      , '<h4 class="alert-heading">Warning!</h4>'
-      , 'You are already in a room.<br/>'
-      , 'Leave the other room and refresh this page or close this one.'
-      , '</div>'
-      , '</div>'
+      '<div class="modal-header">',
+      '<h3>Already in a room</h3>',
+      '</div>',
+      '<div class="modal-body">',
+      '<div class="alert alert-error alert-block">',
+      '<h4 class="alert-heading">Warning!</h4>',
+      'You are already in a room.<br/>',
+      'Leave the other room and refresh this page or close this one.',
+      '</div>',
+      '</div>'
     ].join('');
 
     $(html).appendTo($modal);
@@ -388,14 +397,14 @@
 
   // Start cassette animation
   var cassetteAnimation = function(endtime, forward) {
-    var deg
-      , factor
-      , millisleft
-      , offsetleft
-      , offsetright
-      , secleft
-      , step
-      , width;
+    var deg;
+    var factor;
+    var millisleft;
+    var offsetleft;
+    var offsetright;
+    var secleft;
+    var step;
+    var width;
 
     (step = function() {
       millisleft = endtime - Date.now();
@@ -415,8 +424,7 @@
         deg = -360 + 360 * factor;
         offsetleft = 20 + 24 * factor;
         offsetright = 106 + 24 * factor;
-      }
-      else {
+      } else {
         $countdown.text(Math.round(secleft));
         factor = secleft / 5;
         width = 148 * factor;
@@ -437,8 +445,10 @@
   // Prompt for name and send it
   var chooseNickname = function(msg) {
     msg = msg
-      ? '<span class="label label-important">' + msg + '</span><br/>Try with another one:'
-      : 'What\'s your name?';
+      ? '<span class="label label-important">' +
+        msg +
+        '</span><br/>Try with another one:'
+      : "What's your name?";
 
     if ($modal.hasClass('in')) {
       $('.modal-body p').html(msg);
@@ -446,30 +456,30 @@
     }
 
     var html = [
-      '<div class="modal-header">'
-      , '<h3>You are joining the ' + roomname + ' room</h3>'
-      , '</div>'
-      , '<div class="modal-body">'
-      , '<p>' + msg + '</p>'
-      , '</div>'
-      , '<div class="modal-footer relative">'
-      , '<input id="login" maxlength="15" type="text" name="nickname" />'
-      , '<button id="join" class="btn btn-success">'
-      , '<i class="icon-user icon-white"></i> Join the game'
-      , '</button>'
-      , '<span class="divider">'
-      , '<span>or</span>'
-      , '</span>'
-      , '<a class="btn btn-primary" href="/login?followup=/' + roomname + '">'
-      , '<i class="icon-lock icon-white"></i> Login'
-      , '</a>'
-      , '</div>'
+      '<div class="modal-header">',
+      '<h3>You are joining the ' + roomname + ' room</h3>',
+      '</div>',
+      '<div class="modal-body">',
+      '<p>' + msg + '</p>',
+      '</div>',
+      '<div class="modal-footer relative">',
+      '<input id="login" maxlength="15" type="text" name="nickname" />',
+      '<button id="join" class="btn btn-success">',
+      '<i class="icon-user icon-white"></i> Join the game',
+      '</button>',
+      '<span class="divider">',
+      '<span>or</span>',
+      '</span>',
+      '<a class="btn btn-primary" href="/login?followup=/' + roomname + '">',
+      '<i class="icon-lock icon-white"></i> Login',
+      '</a>',
+      '</div>'
     ].join('');
 
     $(html).appendTo($modal);
 
-    var $button = $('#join')
-      , $login = $('#login');
+    var $button = $('#join');
+    var $login = $('#login');
 
     $button.on('click', function() {
       var value = $login.val();
@@ -479,7 +489,7 @@
         return primus.send('nickname', value);
       }
 
-      chooseNickname('Nickname can\'t be empty.');
+      chooseNickname("Nickname can't be empty.");
     });
 
     $login.on('keyup', function(event) {
@@ -497,7 +507,7 @@
     var width = $recipient.outerWidth(true) + 1;
     $recipient.css('margin-right', '0');
     $recipient.text('');
-    $messagebox.animate({ 'width': '+=' + width + 'px' }, 'fast');
+    $messagebox.animate({ width: '+=' + width + 'px' }, 'fast');
 
     var $el = $('.name').filter(function() {
       return $(this).text() === pvtmsgto;
@@ -513,8 +523,8 @@
 
   // Game over countdown
   var countDown = function(endtime) {
-    var millisleft = endtime - Date.now()
-      , secleft = millisleft / 1000;
+    var millisleft = endtime - Date.now();
+    var secleft = millisleft / 1000;
 
     $('.modal-footer span').text(Math.round(secleft));
 
@@ -537,34 +547,39 @@
   };
 
   var encodeEntities = function(str) {
-    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
   };
 
   var gameOver = function(podium) {
     var html = [
-      '<div class="modal-header">'
-      , '<h3>Game Over</h3>'
-      , '</div>'
-      , '<div class="modal-body">'
-      , '<table class="table table-striped scoreboard">'
-      , '<thead>'
-      , '<tr>'
-      , '<th>#</th>'
-      , '<th>Name</th>'
-      , '<th>Points</th>'
-      , '<th><div class="icons cups stand1"></div></th>'
-      , '<th><div class="icons cups stand2"></div></th>'
-      , '<th><div class="icons cups stand3"></div></th>'
-      , '<th>Guessed</th>'
-      , '<th>Mean time</th>'
-      , '</tr>'
-      , '</thead>'
-      , '<tbody>'
+      '<div class="modal-header">',
+      '<h3>Game Over</h3>',
+      '</div>',
+      '<div class="modal-body">',
+      '<table class="table table-striped scoreboard">',
+      '<thead>',
+      '<tr>',
+      '<th>#</th>',
+      '<th>Name</th>',
+      '<th>Points</th>',
+      '<th><div class="icons cups stand1"></div></th>',
+      '<th><div class="icons cups stand2"></div></th>',
+      '<th><div class="icons cups stand3"></div></th>',
+      '<th>Guessed</th>',
+      '<th>Mean time</th>',
+      '</tr>',
+      '</thead>',
+      '<tbody>'
     ];
 
     podium.forEach(function(player, i) {
       html.push('<tr>');
-      html.push('<td><div class="icons medals rank' + (i + 1) + '"></div></td>');
+      html.push(
+        '<td><div class="icons medals rank' + (i + 1) + '"></div></td>'
+      );
       html.push('<td class="name">' + player.nickname + '</td>');
       html.push('<td>' + player.points + '</td>');
       html.push('<td>' + player.golds + '</td>');
@@ -597,15 +612,14 @@
       return;
     }
 
-    var $message = $('<span class="message"></span>')
-      , prefix = from;
+    var $message = $('<span class="message"></span>');
+    var prefix = from;
 
     if (to) {
       // Private Message
-      if (nickname === from ) {
+      if (nickname === from) {
         prefix = '(To ' + to + ')';
-      }
-      else {
+      } else {
         prefix = '(From ' + from + ')';
         replyto = from;
       }
@@ -654,9 +668,9 @@
    */
 
   var parseCommand = function(input) {
-    var inquotes = false
-      , token = ''
-      , tokens = [];
+    var inquotes = false;
+    var token = '';
+    var tokens = [];
 
     for (var i = 0; i < input.length; i++) {
       if (input[i] === '\\') {
@@ -669,7 +683,7 @@
           continue;
         }
 
-        token += '\\'+input[i];
+        token += '\\' + input[i];
         continue;
       }
 
@@ -687,8 +701,7 @@
       if (input[i] === ' ') {
         if (inquotes) {
           token += ' ';
-        }
-        else if (token.length) {
+        } else if (token.length) {
           tokens.push(token);
           token = '';
         }
@@ -744,19 +757,15 @@
 
       if (punishment === 'kick') {
         args.push(tokens[1] || '');
-      }
-      else if (!tokens[1]) {
+      } else if (!tokens[1]) {
         args.push('', '');
-      }
-      else if (!tokens[2]) {
+      } else if (!tokens[2]) {
         if (/^[1-9][0-9]*$/.test(tokens[1])) {
           args.push('', tokens[1]);
-        }
-        else {
+        } else {
           args.push(tokens[1], '');
         }
-      }
-      else {
+      } else {
         args.push(tokens[1], tokens[2]);
       }
 
@@ -775,8 +784,8 @@
     var card = set.length;
 
     return function() {
-      var index =  Math.floor(Math.random() * card)
-        , text = set[index];
+      var index = Math.floor(Math.random() * card);
+      var text = set[index];
 
       addFeedback(text, style);
     };
@@ -795,7 +804,9 @@
     $modal.modal('hide').empty();
     $('#total-tracks span').text(data.trackscount);
 
-    var $entry = $('<span class="join">' + nickname + ' joined the game</span>');
+    var $entry = $(
+      '<span class="join">' + nickname + ' joined the game</span>'
+    );
     addChatEntry($entry);
     updateUsers(data.usersData);
 
@@ -818,45 +829,48 @@
       }
     });
 
-    $guessbox.on('keydown', function(event) {
-      switch (event.keyCode) {
-        case 13: // return
-          var guess = $guessbox.val().trim();
-          $guessbox.val('');
+    $guessbox
+      .on('keydown', function(event) {
+        switch (event.keyCode) {
+          case 13: // return
+            var guess = $guessbox.val().trim();
+            $guessbox.val('');
 
-          if (guess) {
-            historyvalues.push(guess);
-            if (historyvalues.length > 20) {
-              historyvalues.splice(0, 1);
+            if (guess) {
+              historyvalues.push(guess);
+              if (historyvalues.length > 20) {
+                historyvalues.splice(0, 1);
+              }
+              historycursor = historyvalues.length;
+
+              if (isplaying) {
+                return primus.send('guess', guess.toLowerCase());
+              }
+
+              addFeedback('You have to wait the next song...');
             }
+
+            break;
+          case 38: // up-arrow
+            if (historycursor > 0) {
+              $guessbox.val(historyvalues[--historycursor]);
+            }
+
+            // Prevent default action to keep the cursor at the end of the word
+            return false;
+          case 40: // down-arrow
+            if (historycursor < historyvalues.length - 1) {
+              return $guessbox.val(historyvalues[++historycursor]);
+            }
+
             historycursor = historyvalues.length;
-
-            if (isplaying) {
-              return primus.send('guess', guess.toLowerCase());
-            }
-
-            addFeedback('You have to wait the next song...');
-          }
-
-          break;
-        case 38: // up-arrow
-          if (historycursor > 0) {
-            $guessbox.val(historyvalues[--historycursor]);
-          }
-
-          // Prevent default action to keep the cursor at the end of the word
-          return false;
-        case 40: // down-arrow
-          if (historycursor < historyvalues.length - 1) {
-            return $guessbox.val(historyvalues[++historycursor]);
-          }
-
-          historycursor = historyvalues.length;
-          $guessbox.val('');
-      }
-    }).on('paste', function(event) {
-      event.preventDefault();
-    }).focus();
+            $guessbox.val('');
+        }
+      })
+      .on('paste', function(event) {
+        event.preventDefault();
+      })
+      .focus();
 
     primus.on('artistmatched', randomFeedback(amstrings, 'correct'));
     primus.on('bothmatched', randomFeedback(bmstrings, 'correct'));
@@ -880,7 +894,9 @@
   // Show the number of players inside each room
   var roomsOverview = function(data) {
     $('.users-counter').each(function() {
-      var room = $(this).prevAll('.room-name').text();
+      var room = $(this)
+        .prevAll('.room-name')
+        .text();
       userscounters[room] = $(this);
       $(this).text(data[room]);
     });
@@ -890,8 +906,7 @@
     if (data.status === 0) {
       isplaying = true;
       cassetteAnimation(Date.now() + data.timeleft, true);
-    }
-    else if (data.status === 1) {
+    } else if (data.status === 1) {
       loadTrack(data.previewUrl);
     }
 
@@ -908,19 +923,18 @@
   };
 
   var slashCommandHandler = function(line) {
-    var $outcome = $('<span class="message private">(From binb): </span>')
-      , args;
+    var $outcome = $('<span class="message private">(From binb): </span>');
+    var args;
 
     try {
       args = parseCommand(line);
-    }
-    catch (err) {
+    } catch (err) {
       $outcome.append(err.message);
       return addChatEntry($outcome);
     }
 
-    var cmdname = args.shift()
-      , command = slashcommands[cmdname.substr(1)];
+    var cmdname = args.shift();
+    var command = slashcommands[cmdname.substr(1)];
 
     if (command) {
       if (args.length < command.minargs) {
@@ -943,7 +957,7 @@
   // Send a private message to a user
   var privateMessage = function(args, $outcome) {
     if (!~users.indexOf(args[0])) {
-      $outcome.text('(From binb): There\'s no one here by that name.');
+      $outcome.text("(From binb): There's no one here by that name.");
       return addChatEntry($outcome);
     }
     addPrivate(args[0]);
@@ -952,11 +966,11 @@
   // Reply to the last player who sent you a private message
   var replyToPrivate = function(args, $outcome) {
     if (!replyto) {
-      $outcome.text('(From binb): There\'s no one to reply to.');
+      $outcome.text("(From binb): There's no one to reply to.");
       return addChatEntry($outcome);
     }
     if (!~users.indexOf(replyto)) {
-      $outcome.text('(From binb): ' + replyto + ' isn\'t here anymore.');
+      $outcome.text('(From binb): ' + replyto + " isn't here anymore.");
       return addChatEntry($outcome);
     }
     addPrivate(replyto);
@@ -1003,19 +1017,21 @@
     users.forEach(function(user, index) {
       user = usersData[user];
 
-      var $guesstime = $('<span class="guess-time"></span>')
-        , $li = $('<li></li>')
-        , $pnts = $('<span class="points">(' + user.points + ')</span>')
-        , $pvt = $('<span class="private label label-info">P</span>')
-        , $roundpoints = $('<span class="round-points"></span>')
-        , $roundrank = $('<span></span>')
-        , $username = $('<span class="name">' + user.nickname + '</span>');
+      var $guesstime = $('<span class="guess-time"></span>');
+      var $li = $('<li></li>');
+      var $pnts = $('<span class="points">(' + user.points + ')</span>');
+      var $pvt = $('<span class="private label label-info">P</span>');
+      var $roundpoints = $('<span class="round-points"></span>');
+      var $roundrank = $('<span></span>');
+      var $username = $('<span class="name">' + user.nickname + '</span>');
 
       $li.append($pvt, $username, $pnts, $roundrank, $roundpoints, $guesstime);
 
       if (user.registered) {
         var href = 'href="/user/' + user.nickname + '"';
-        $pvt.after('<a class="icons registered" target="_blank" ' + href + '></a>');
+        $pvt.after(
+          '<a class="icons registered" target="_blank" ' + href + '></a>'
+        );
       }
 
       $users.append($li);
@@ -1024,8 +1040,7 @@
         $pvt.show();
         $username.on('click', clearPrivate);
         found = true;
-      }
-      else {
+      } else {
         $username.on('click', function() {
           addPrivate($(this).text());
         });
@@ -1048,10 +1063,12 @@
         $username.addClass('correct');
 
         if (user.roundpoints > 2) {
-          $guesstime.text((user.guesstime / 1000).toFixed(1) +' s');
+          $guesstime.text((user.guesstime / 1000).toFixed(1) + ' s');
         }
         if (user.roundpoints > 3) {
-          $roundrank.addClass('icons round-rank stand' + (7 - user.roundpoints));
+          $roundrank.addClass(
+            'icons round-rank stand' + (7 - user.roundpoints)
+          );
         }
       }
     });
@@ -1062,7 +1079,7 @@
       var width = $recipient.outerWidth(true) + 1;
       $recipient.css('margin-right', '0');
       $recipient.text('');
-      $messagebox.animate({ 'width': '+=' + width + 'px' }, 'fast');
+      $messagebox.animate({ width: '+=' + width + 'px' }, 'fast');
     }
   };
 
@@ -1075,15 +1092,19 @@
   // Convert any URLs in text into clickable links
   var urlize = function(text) {
     if (urlregex.test(text)) {
-      var html = ''
-        , splits = text.split(urlregex);
+      var html = '';
+      var splits = text.split(urlregex);
 
       for (var i = 0; i < splits.length; i++) {
         var escapedsplit = encodeEntities(splits[i]);
 
         if (urlregex.test(splits[i])) {
-          html += '<a target="_blank" href="' + escapedsplit + '">' +
-            escapedsplit + '</a>';
+          html +=
+            '<a target="_blank" href="' +
+            escapedsplit +
+            '">' +
+            escapedsplit +
+            '</a>';
           continue;
         }
 
@@ -1098,14 +1119,16 @@
 
   // A new player has joined the game
   var userJoin = function(username, usersData) {
-    var $entry = $('<span class="join">' + username +' joined the game</span>');
+    var $entry = $(
+      '<span class="join">' + username + ' joined the game</span>'
+    );
     addChatEntry($entry);
     updateUsers(usersData);
   };
 
   // A player has left the game
   var userLeft = function(username, usersData) {
-    var $entry = $('<span class="left">' + username +' left the game</span>');
+    var $entry = $('<span class="left">' + username + ' left the game</span>');
     addChatEntry($entry);
     updateUsers(usersData);
   };

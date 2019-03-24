@@ -1,25 +1,21 @@
 'use strict';
 
-/**
- * Module dependencies.
- */
-
-var Captcha = require('../lib/captcha')
-  , config = require('../config')
-  , db = require('../lib/redis-clients').songs
-  , http = require('http')
-  , parallel = require('async/parallel')
-  , randInt = require('../lib/prng').randInt
-  , randomSlogan = require('../lib/utils').randomSlogan
-  , rooms = require('../lib/rooms').rooms;
+const Captcha = require('../lib/captcha');
+const config = require('../config');
+const db = require('../lib/redis-clients').songs;
+const http = require('http');
+const parallel = require('async/parallel');
+const randInt = require('../lib/prng').randInt;
+const randomSlogan = require('../lib/utils').randomSlogan;
+const rooms = require('../lib/rooms').rooms;
 
 /**
  * Generate a sub-task.
  */
 
-var subTask = function(genre) {
+const subTask = function(genre) {
   return function(callback) {
-    var index = randInt(rooms[genre].trackscount);
+    const index = randInt(rooms[genre].trackscount);
     db.zrange([genre, index, index], function(err, res) {
       if (err) {
         return callback(err);
@@ -34,11 +30,11 @@ var subTask = function(genre) {
  */
 
 exports.artworks = function(req, res, next) {
-  var tasks = {};
+  const tasks = {};
   config.rooms.forEach(function(room) {
     tasks[room] = function(callback) {
-      var subtasks = [];
-      for (var i = 0; i < 6; i++) {
+      const subtasks = [];
+      for (let i = 0; i < 6; i++) {
         subtasks.push(subTask(room));
       }
       parallel(subtasks, callback);
@@ -79,7 +75,7 @@ exports.login = function(req, res) {
 };
 
 exports.recoverPasswd = function(req, res) {
-  var captcha = new Captcha();
+  const captcha = new Captcha();
   req.session.captchacode = captcha.getCode();
   res.render('recoverpasswd', {
     captchaurl: captcha.toDataURL(),
@@ -108,7 +104,7 @@ exports.room = function(req, res) {
 };
 
 exports.signup = function(req, res) {
-  var captcha = new Captcha();
+  const captcha = new Captcha();
   req.session.captchacode = captcha.getCode();
   res.render('signup', {
     captchaurl: captcha.toDataURL(),

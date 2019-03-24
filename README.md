@@ -68,9 +68,9 @@ compatibility.
 
 ## Bug tracker
 
-Have a bug? Please create an [issue](https://github.com/lpinca/binb/issues)
-here on GitHub, with a description of the problem, how to reproduce it and in
-what browser it occurred.
+Have a bug? Please create an [issue](https://github.com/lpinca/binb/issues) here
+on GitHub, with a description of the problem, how to reproduce it and in what
+browser it occurred.
 
 ## Copyright and license
 

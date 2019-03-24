@@ -1,24 +1,20 @@
 'use strict';
 
-/**
- * Module dependencies.
- */
-
-var crypto = require('crypto')
-  , db = require('../lib/redis-clients').users
-  , http = require('http')
-  , mailer = require('../lib/email/mailer')
-  , rooms = require('../config').rooms
-  , User = require('../lib/user')
-  , utils = require('../lib/utils');
+const crypto = require('crypto');
+const db = require('../lib/redis-clients').users;
+const http = require('http');
+const mailer = require('../lib/email/mailer');
+const rooms = require('../config').rooms;
+const User = require('../lib/user');
+const utils = require('../lib/utils');
 
 /**
  * Populate the whitelist of follow-up URLs.
  */
 
-var safeurls = ['/', '/changepasswd'];
-for (var i=0; i<rooms.length; i++) {
-  safeurls.push('/'+rooms[i]);
+const safeurls = ['/', '/changepasswd'];
+for (let i = 0; i < rooms.length; i++) {
+  safeurls.push('/' + rooms[i]);
 }
 
 /**
@@ -34,7 +30,7 @@ exports.leaderboards = function(req, res, next) {
       if (err) {
         return next(err);
       }
-      var leaderboards = utils.buildLeaderboards(pointsresults, timesresults);
+      const leaderboards = utils.buildLeaderboards(pointsresults, timesresults);
       res.locals.slogan = utils.randomSlogan();
       res.render('leaderboards', leaderboards);
     });
@@ -46,12 +42,12 @@ exports.leaderboards = function(req, res, next) {
  */
 
 exports.sliceLeaderboard = function(req, res, next) {
-  var begin = parseInt(req.query.begin, 10)
-    , by = req.query.by;
+  const begin = parseInt(req.query.begin, 10);
+  const by = req.query.by;
   if (isNaN(begin) || begin > 180 || (by !== 'points' && by !== 'times')) {
     return res.status(400).send(http.STATUS_CODES[400]);
   }
-  var end = begin + 29;
+  const end = begin + 29;
   if (by === 'points') {
     db.zrevrange(['users', begin, end, 'withscores'], function(err, results) {
       if (err) {
@@ -74,24 +70,25 @@ exports.sliceLeaderboard = function(req, res, next) {
  */
 
 exports.validateChangePasswd = function(req, res, next) {
-  if (!req.session.user || req.body.oldpassword === undefined ||
-    req.body.newpassword === undefined) {
+  if (
+    !req.session.user ||
+    req.body.oldpassword === undefined ||
+    req.body.newpassword === undefined
+  ) {
     return res.status(400).send(http.STATUS_CODES[400]);
   }
 
-  var errors = {};
+  const errors = {};
 
   if (req.body.oldpassword.trim() === '') {
-    errors.oldpassword = 'can\'t be empty';
+    errors.oldpassword = "can't be empty";
   }
   if (req.body.newpassword.trim() === '') {
-    errors.newpassword = 'can\'t be empty';
-  }
-  else if (req.body.newpassword.length < 6) {
+    errors.newpassword = "can't be empty";
+  } else if (req.body.newpassword.length < 6) {
     errors.newpassword = 'must be at least 6 characters long';
-  }
-  else if(req.body.newpassword === req.body.oldpassword) {
-    errors.newpassword = 'can\'t be changed to the old one';
+  } else if (req.body.newpassword === req.body.oldpassword) {
+    errors.newpassword = "can't be changed to the old one";
   }
 
   if (errors.oldpassword || errors.newpassword) {
@@ -103,17 +100,19 @@ exports.validateChangePasswd = function(req, res, next) {
 };
 
 exports.checkOldPasswd = function(req, res, next) {
-  var key = 'user:' + req.session.user;
+  const key = 'user:' + req.session.user;
   db.hmget([key, 'salt', 'password'], function(err, data) {
     if (err) {
       return next(err);
     }
-    var digest
-      , hash = crypto.createHash('sha256');
-    hash.update(data[0] + req.body.oldpassword);
-    digest = hash.digest('hex');
+
+    const digest = crypto
+      .createHash('sha256')
+      .update(data[0] + req.body.oldpassword)
+      .digest('hex');
+
     if (digest !== data[1]) {
-      req.session.errors = {oldpassword: 'is incorrect'};
+      req.session.errors = { oldpassword: 'is incorrect' };
       return res.redirect(req.url);
     }
     next();
@@ -121,14 +120,17 @@ exports.checkOldPasswd = function(req, res, next) {
 };
 
 exports.changePasswd = function(req, res, next) {
-  var digest
-    , followup = ~safeurls.indexOf(req.query.followup) ? req.query.followup : '/'
-    , user = req.session.user
-    , key = 'user:' + user
-    , hash = crypto.createHash('sha256')
-    , salt = crypto.randomBytes(6).toString('base64');
-  hash.update(salt + req.body.newpassword);
-  digest = hash.digest('hex');
+  const followup = ~safeurls.indexOf(req.query.followup)
+    ? req.query.followup
+    : '/';
+  const user = req.session.user;
+  const key = 'user:' + user;
+  const salt = crypto.randomBytes(6).toString('base64');
+  const digest = crypto
+    .createHash('sha256')
+    .update(salt + req.body.newpassword)
+    .digest('hex');
+
   db.hmset([key, 'salt', salt, 'password', digest], function(err) {
     if (err) {
       return next(err);
@@ -151,16 +153,16 @@ exports.validateLogin = function(req, res, next) {
     return res.status(400).send(http.STATUS_CODES[400]);
   }
 
-  var errors = {};
+  const errors = {};
 
   if (req.body.username.trim() === '') {
-    errors.username = 'can\'t be empty';
+    errors.username = "can't be empty";
   }
   if (req.body.password.trim() === '') {
-    errors.password = 'can\'t be empty';
+    errors.password = "can't be empty";
   }
 
-  req.session.oldvalues = {username: req.body.username};
+  req.session.oldvalues = { username: req.body.username };
   if (errors.username || errors.password) {
     req.session.errors = errors;
     return res.redirect(req.url);
@@ -169,7 +171,7 @@ exports.validateLogin = function(req, res, next) {
 };
 
 exports.checkUser = function(req, res, next) {
-  var key = 'user:' + req.body.username;
+  const key = 'user:' + req.body.username;
   db.exists([key], function(err, exists) {
     if (err) {
       return next(err);
@@ -178,23 +180,29 @@ exports.checkUser = function(req, res, next) {
       // User exists, proceed with authentication
       return next();
     }
-    req.session.errors = {alert: 'The username you specified does not exists.'};
+    req.session.errors = {
+      alert: 'The username you specified does not exists.'
+    };
     res.redirect(req.url);
   });
 };
 
 exports.authenticate = function(req, res, next) {
-  var key = 'user:' + req.body.username;
+  const key = 'user:' + req.body.username;
   db.hmget([key, 'salt', 'password'], function(err, data) {
     if (err) {
       return next(err);
     }
-    var digest
-      , hash = crypto.createHash('sha256');
-    hash.update(data[0] + req.body.password);
-    digest = hash.digest('hex');
+
+    const digest = crypto
+      .createHash('sha256')
+      .update(data[0] + req.body.password)
+      .digest('hex');
+
     if (digest === data[1]) {
-      var followup = ~safeurls.indexOf(req.query.followup) ? req.query.followup : '/';
+      const followup = ~safeurls.indexOf(req.query.followup)
+        ? req.query.followup
+        : '/';
       // Authentication succeeded, regenerate the session
       req.session.regenerate(function() {
         req.session.cookie.maxAge = 604800000; // One week
@@ -203,7 +211,9 @@ exports.authenticate = function(req, res, next) {
       });
       return;
     }
-    req.session.errors = {alert: 'The password you specified is not correct.'};
+    req.session.errors = {
+      alert: 'The password you specified is not correct.'
+    };
     res.redirect(req.url);
   });
 };
@@ -224,26 +234,28 @@ exports.logout = function(req, res) {
  */
 
 exports.validateSignUp = function(req, res, next) {
-  if (req.body.username === undefined || req.body.email === undefined ||
-    req.body.password === undefined || req.body.captcha === undefined) {
+  if (
+    req.body.username === undefined ||
+    req.body.email === undefined ||
+    req.body.password === undefined ||
+    req.body.captcha === undefined
+  ) {
     return res.status(400).send(http.STATUS_CODES[400]);
   }
 
-  var errors = {};
+  const errors = {};
 
   if (req.body.username === 'binb') {
     errors.username = 'is reserved';
-  }
-  else if (!utils.isUsername(req.body.username)) {
+  } else if (!utils.isUsername(req.body.username)) {
     errors.username = 'must contain only alphanumeric characters';
   }
   if (!utils.isEmail(req.body.email)) {
     errors.email = 'is not an email address';
   }
   if (req.body.password.trim() === '') {
-    errors.password = 'can\'t be empty';
-  }
-  else if (req.body.password.length < 6) {
+    errors.password = "can't be empty";
+  } else if (req.body.password.length < 6) {
     errors.password = 'must be at least 6 characters long';
   }
   if (req.body.captcha !== req.session.captchacode) {
@@ -265,14 +277,14 @@ exports.validateSignUp = function(req, res, next) {
 };
 
 exports.userExists = function(req, res, next) {
-  var key = 'user:' + req.body.username;
+  const key = 'user:' + req.body.username;
   db.exists([key], function(err, exists) {
     if (err) {
       return next(err);
     }
     if (exists) {
       // User already exists
-      req.session.errors = {alert: 'A user with that name already exists.'};
+      req.session.errors = { alert: 'A user with that name already exists.' };
       return res.redirect(req.url);
     }
     next();
@@ -280,14 +292,14 @@ exports.userExists = function(req, res, next) {
 };
 
 exports.emailExists = function(req, res, next) {
-  var key = 'email:' + req.body.email;
+  const key = 'email:' + req.body.email;
   db.exists([key], function(err, exists) {
     if (err) {
       return next(err);
     }
     if (exists) {
       // Email already exists
-      req.session.errors = {alert: 'A user with that email already exists.'};
+      req.session.errors = { alert: 'A user with that email already exists.' };
       return res.redirect(req.url);
     }
     next();
@@ -295,21 +307,21 @@ exports.emailExists = function(req, res, next) {
 };
 
 exports.createAccount = function(req, res, next) {
-  var digest
-    , hash = crypto.createHash('sha256')
-    , mailkey = 'email:' + req.body.email
-    , salt = crypto.randomBytes(6).toString('base64')
-    , userkey = 'user:' + req.body.username;
-  hash.update(salt + req.body.password);
-  digest = hash.digest('hex');
-  var date = new Date().toISOString()
-    , user = new User(req.body.username, req.body.email, salt, digest, date);
+  const mailkey = 'email:' + req.body.email;
+  const salt = crypto.randomBytes(6).toString('base64');
+  const userkey = 'user:' + req.body.username;
+  const digest = crypto
+    .createHash('sha256')
+    .update(salt + req.body.password)
+    .digest('hex');
+  const date = new Date().toISOString();
+  const user = new User(req.body.username, req.body.email, salt, digest, date);
 
   // Delete old fields values
   delete req.session.oldvalues;
 
   // Add new user in the db
-  var multi = db.multi();
+  const multi = db.multi();
   multi.hmset(userkey, user);
   multi.set(mailkey, userkey);
   multi.zadd('users', 0, req.body.username);
@@ -321,7 +333,8 @@ exports.createAccount = function(req, res, next) {
     res.render('login', {
       followup: req.query.followup || '/',
       slogan: utils.randomSlogan(),
-      success: 'You successfully created your account. You are now ready to login.'
+      success:
+        'You successfully created your account. You are now ready to login.'
     });
   });
 };
@@ -335,7 +348,7 @@ exports.validateRecoverPasswd = function(req, res, next) {
     return res.status(400).send(http.STATUS_CODES[400]);
   }
 
-  var errors = {};
+  const errors = {};
 
   if (!utils.isEmail(req.body.email)) {
     errors.email = 'is not an email address';
@@ -344,7 +357,7 @@ exports.validateRecoverPasswd = function(req, res, next) {
     errors.captcha = 'no match';
   }
 
-  req.session.oldvalues = {email: req.body.email};
+  req.session.oldvalues = { email: req.body.email };
 
   if (errors.email || errors.captcha) {
     req.session.errors = errors;
@@ -355,7 +368,7 @@ exports.validateRecoverPasswd = function(req, res, next) {
 };
 
 exports.sendEmail = function(req, res, next) {
-  var key = 'email:' + req.body.email;
+  const key = 'email:' + req.body.email;
   db.get([key], function(err, data) {
     if (err) {
       return next(err);
@@ -364,7 +377,7 @@ exports.sendEmail = function(req, res, next) {
       delete req.session.captchacode;
       delete req.session.oldvalues;
       // Email exists, generate a secure random token
-      var token = crypto.randomBytes(48).toString('hex');
+      const token = crypto.randomBytes(48).toString('hex');
       // Token expires after 4 hours
       db.setex(['token:' + token, 14400, data], function(err) {
         if (err) {
@@ -383,7 +396,9 @@ exports.sendEmail = function(req, res, next) {
       });
       return;
     }
-    req.session.errors = {alert: 'The email address you specified could not be found'};
+    req.session.errors = {
+      alert: 'The email address you specified could not be found'
+    };
     res.redirect(req.url);
   });
 };
@@ -397,13 +412,12 @@ exports.resetPasswd = function(req, res, next) {
     return res.status(400).send(http.STATUS_CODES[400]);
   }
 
-  var errors = {};
+  const errors = {};
 
   // Validate new password
   if (req.body.password.trim() === '') {
-    errors.password = 'can\'t be empty';
-  }
-  else if (req.body.password.length < 6) {
+    errors.password = "can't be empty";
+  } else if (req.body.password.length < 6) {
     errors.password = 'must be at least 6 characters long';
   }
   // Check token availability
@@ -416,18 +430,19 @@ exports.resetPasswd = function(req, res, next) {
     return res.redirect(req.url);
   }
 
-  var key = 'token:' + req.query.token;
+  const key = 'token:' + req.query.token;
   db.get([key], function(err, user) {
     if (err) {
       return next(err);
     }
     if (user) {
       db.del(key); // Delete the token
-      var digest
-        , hash = crypto.createHash('sha256')
-        , salt = crypto.randomBytes(6).toString('base64');
-      hash.update(salt + req.body.password);
-      digest = hash.digest('hex');
+      const salt = crypto.randomBytes(6).toString('base64');
+      const digest = crypto
+        .createHash('sha256')
+        .update(salt + req.body.password)
+        .digest('hex');
+
       db.hmset([user, 'salt', salt, 'password', digest], function(err) {
         if (err) {
           return next(err);
@@ -440,7 +455,7 @@ exports.resetPasswd = function(req, res, next) {
       });
       return;
     }
-    req.session.errors = {alert: 'Invalid or expired token.'};
+    req.session.errors = { alert: 'Invalid or expired token.' };
     res.redirect(req.url);
   });
 };
@@ -450,7 +465,7 @@ exports.resetPasswd = function(req, res, next) {
  */
 
 exports.profile = function(req, res, next) {
-  var key = 'user:' + req.params.username;
+  const key = 'user:' + req.params.username;
   db.exists([key], function(err, exists) {
     if (err) {
       return next(err);
@@ -460,7 +475,7 @@ exports.profile = function(req, res, next) {
         if (err) {
           return next(err);
         }
-        var joindate = new Date(user.joindate);
+        const joindate = new Date(user.joindate);
         user.bestguesstime = (user.bestguesstime / 1000).toFixed(1);
         user.joindate = utils.britishFormat(joindate);
         if (user.guessed !== '0') {
