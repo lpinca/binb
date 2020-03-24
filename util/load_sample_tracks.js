@@ -6,7 +6,7 @@ const JSONStream = require('JSONStream');
 const limit = 7; // The number of songs to retrieve for each artist
 const parser = JSONStream.parse(['results', true]);
 const popIds = artistIds.pop;
-const rapIds = artistIds.rap;
+const rapIds = artistIds.nederlands;
 const rc = require('redis').createClient();
 const rockIds = artistIds.rock;
 let rooms = require('../config').rooms;
@@ -38,7 +38,7 @@ const updateRooms = function(artistId) {
     // Set the skip counter (there is no need to update the rooms for the next pop artists)
     skip = popIds.length - 1;
   } else if (artistId === rapIds[0]) {
-    rooms.push('rap');
+    rooms.push('nederlands', 'hits');
     skip = rapIds.length - 1;
   } else {
     rooms.push('oldies', 'rock');
