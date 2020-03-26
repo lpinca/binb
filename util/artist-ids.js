@@ -109,8 +109,17 @@ module.exports = {
     208782509, // Nielson
     24053070, //Shaffy
     14409604, // Jan smit
+    291223472, // Frans bauer
+    17430541, // Renee froger
+    32542478, // Frank boeijen
+    112527433, // Gebroeders KO
+    31316790, // Klein orkest
     204717604, //  Nick en simon
+    135814333, // Baas B
+    29126297, // Clouseau
     28983357, // The scene
+    80707738, // Gerard Joling
+    430314492, // Gers pardoel
     161491921, //Yes-r
     16334606, // Blof
     16339656, // Veldhuis en Kemper

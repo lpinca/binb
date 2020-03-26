@@ -39,61 +39,56 @@
   var userscounters = {};
 
   var amstrings = [
-    'Do you also know the title?',
-    'Exactly, now tell me the title!',
-    "Yes, that's the artist. What about the title?"
+    'Weet je de titel ook?',
+    'Precies, nu de titel nog!',
+    "Kijk, dat is de artiest, weet je ook de titel?"
   ];
 
   var bmstrings = [
-    'Congratulations',
-    'Exactly',
-    'Excellent',
-    'Good job!',
-    'Great!',
-    "I'm proud of you",
-    'Keep it up!',
+    'Gefeliciteerd',
+    'Precies',
+    'Top',
+    'Goed bezig!',
+    'Super!',
+    "Ik ben trots op je",
+    'Ga zo door!',
     'Perfect',
-    'Super duper',
-    "That's it!",
-    'Very well done',
-    'Woohoo!',
-    'Yeah true, do you like this track?',
-    "Yes, you're right",
-    'You make it look easy',
-    'You remembered',
-    'You rock!'
+    'Lekker gewerkt pik',
+    "Lekker bezig ouwe!",
+    'BAM, dat is het!',
+    'Lekker hitje toch?'
   ];
 
   var nmstrings = [
-    'Are you kidding?',
-    "Don't give up",
-    'Fail',
-    'Haha, what?!',
-    'Incorrect answer',
-    'It is not that hard',
-    'Keep trying',
-    'No way!',
-    'No',
+    'Je maakt een grapje toch?',
+    "Geef niet op",
+    'Jammer joh',
+    'Haha, wat?!',
+    'Verkeerde antwoord',
+    'Zo moeilijk is het niet',
+    'Blijf het proberen',
+    'Nee man!',
+    'Nee',
     'Nope',
     'Nope, sorry!',
-    'Oh, come on!',
-    "That's wrong",
-    'Try again',
-    'What?!',
-    'Wrong'
+    'Ah, komop!',
+    "Dat is onjuist",
+    'Probeer het nog eens',
+    'Wat?!',
+    'Fout'
   ];
 
   var states = [
-    'A song is already playing, please wait for the next one...',
-    'Game is about to start...',
+    'Er speelt al een liedje, ogenblikje alstjeblieft',
+    'Het spel gaat bijna beginnen...',
     'Game is over',
-    'New game will start soon...'
+    'Het volgende spel gaat bijna beginnen...'
   ];
 
   var tmstrings = [
-    'Correct, do you also know the artist?',
-    'Now tell me the artist!',
-    'Yes, you guessed the title. Who is the artist?'
+    'Correct, weet je de artiest ook?',
+    'En nu de artiest!',
+    'Top, dat is de titel, nu de artiest nog!'
   ];
 
   var addCassetteBackdrop = function() {
@@ -742,7 +737,7 @@
     }
 
     $track.text(data.counter + '/' + data.tot);
-    addFeedback('What is this song?');
+    addFeedback('Welk liedje is dit?');
   };
 
   // Return a function that will kick or ban a player
