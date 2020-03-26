@@ -22,7 +22,7 @@ const options = {
     '/lookup?id=' +
     popIds.concat(rapIds, rockIds).join() +
     '&entity=song&limit=' +
-    limit,
+    limit + '&country=NL&sort=popular',
   port: 80
 };
 
@@ -48,6 +48,7 @@ const updateRooms = function(artistId) {
 
 parser.on('data', function(track) {
   if (track.wrapperType === 'artist') {
+    console.log('\x1b[36m%s\x1b[0m', track.artistName);
     if (skip) {
       skip--;
       return;
@@ -56,6 +57,7 @@ parser.on('data', function(track) {
     return;
   }
 
+  console.log(track.trackName);
   rc.hmset(
     'song:' + songId,
     'artistName',
