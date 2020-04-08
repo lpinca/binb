@@ -1,0 +1,17 @@
+version: '3'
+services:
+  redis:
+    container_name: db
+    image: redis:6.0-rc-alpine
+  nodejs:
+    container_name: app
+    build: .
+    environment:
+      - REDIS_URL=db
+      - REDIS_PORT=6379
+    ports:
+      - 8138:8138
+    depends_on:
+      - redis
+    command:
+        bash -c "npm run import-data && npm start"

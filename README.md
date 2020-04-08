@@ -14,6 +14,13 @@ Unless previously installed you'll need the following packages:
 
 Please use their sites to get detailed installation instructions.
 
+If you don't want to install anything (and have the docker engine), you can also fast forward and use the following two commands
+
+```
+docker-compose build
+docker-compose up
+```
+
 ### Install binb
 
 The first step is to install the dependencies:

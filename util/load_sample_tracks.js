@@ -1,5 +1,9 @@
 'use strict';
 
+//Add environment vars or use standard values
+var db = process.env.REDIS_URL || 'localhost'
+var port = process.env.REDIS_PORT || 6379
+
 const artistIds = require('./artist-ids');
 const http = require('http');
 const JSONStream = require('JSONStream');
@@ -7,7 +11,7 @@ const limit = 7; // The number of songs to retrieve for each artist
 const parser = JSONStream.parse(['results', true]);
 const popIds = artistIds.pop;
 const rapIds = artistIds.nederlands;
-const rc = require('redis').createClient();
+const rc = require('redis').createClient({ host: db, port: port })
 const rockIds = artistIds.rock;
 let rooms = require('../config').rooms;
 let score;
