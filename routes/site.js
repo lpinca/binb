@@ -5,7 +5,7 @@ const config = require('../config');
 const db = require('../lib/redis-clients').songs;
 const http = require('http');
 const parallel = require('async/parallel');
-const randInt = require('../lib/prng').randInt;
+const randomInt = require('crypto').randomInt;
 const randomSlogan = require('../lib/utils').randomSlogan;
 const rooms = require('../lib/rooms').rooms;
 
@@ -15,7 +15,7 @@ const rooms = require('../lib/rooms').rooms;
 
 const subTask = function(genre) {
   return function(callback) {
-    const index = randInt(rooms[genre].trackscount);
+    const index = randomInt(rooms[genre].trackscount);
     db.zrange(genre, index, index, function(err, res) {
       if (err) {
         return callback(err);
