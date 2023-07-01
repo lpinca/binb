@@ -16,11 +16,11 @@ const rooms = require('../lib/rooms').rooms;
 const subTask = function(genre) {
   return function(callback) {
     const index = randInt(rooms[genre].trackscount);
-    db.zrange([genre, index, index], function(err, res) {
+    db.zrange(genre, index, index, function(err, res) {
       if (err) {
         return callback(err);
       }
-      db.hget(['song:' + res[0], 'artworkUrl100'], callback);
+      db.hget('song:' + res[0], 'artworkUrl100', callback);
     });
   };
 };

@@ -29,7 +29,7 @@
     "primus-emitter": "^3.1.1",
     "primus-rooms": "^3.4.1",
     "pug": "^3.0.2",
-    "redis": "^3.0.2",
+    "ioredis": "^5.3.2",
     "serve-favicon": "^2.5.0",
     "uglify-js": "^3.5.4",
     "ws": "^7.2.1"

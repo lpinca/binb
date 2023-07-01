@@ -22,7 +22,7 @@ for (let i = 0; i < rooms.length; i++) {
  */
 
 exports.leaderboards = function(req, res, next) {
-  db.zrevrange(['users', 0, 29, 'withscores'], function(err, pointsresults) {
+  db.zrevrange('users', 0, 29, 'withscores', function(err, pointsresults) {
     if (err) {
       return next(err);
     }
@@ -49,7 +49,7 @@ exports.sliceLeaderboard = function(req, res, next) {
   }
   const end = begin + 29;
   if (by === 'points') {
-    db.zrevrange(['users', begin, end, 'withscores'], function(err, results) {
+    db.zrevrange('users', begin, end, 'withscores', function(err, results) {
       if (err) {
         return next(err);
       }
@@ -101,7 +101,7 @@ exports.validateChangePasswd = function(req, res, next) {
 
 exports.checkOldPasswd = function(req, res, next) {
   const key = 'user:' + req.session.user;
-  db.hmget([key, 'salt', 'password'], function(err, data) {
+  db.hmget(key, 'salt', 'password', function(err, data) {
     if (err) {
       return next(err);
     }
@@ -131,7 +131,7 @@ exports.changePasswd = function(req, res, next) {
     .update(salt + req.body.newpassword)
     .digest('hex');
 
-  db.hmset([key, 'salt', salt, 'password', digest], function(err) {
+  db.hmset(key, 'salt', salt, 'password', digest, function(err) {
     if (err) {
       return next(err);
     }
@@ -172,7 +172,7 @@ exports.validateLogin = function(req, res, next) {
 
 exports.checkUser = function(req, res, next) {
   const key = 'user:' + req.body.username;
-  db.exists([key], function(err, exists) {
+  db.exists(key, function(err, exists) {
     if (err) {
       return next(err);
     }
@@ -189,7 +189,7 @@ exports.checkUser = function(req, res, next) {
 
 exports.authenticate = function(req, res, next) {
   const key = 'user:' + req.body.username;
-  db.hmget([key, 'salt', 'password'], function(err, data) {
+  db.hmget(key, 'salt', 'password', function(err, data) {
     if (err) {
       return next(err);
     }
@@ -278,7 +278,7 @@ exports.validateSignUp = function(req, res, next) {
 
 exports.userExists = function(req, res, next) {
   const key = 'user:' + req.body.username;
-  db.exists([key], function(err, exists) {
+  db.exists(key, function(err, exists) {
     if (err) {
       return next(err);
     }
@@ -293,7 +293,7 @@ exports.userExists = function(req, res, next) {
 
 exports.emailExists = function(req, res, next) {
   const key = 'email:' + req.body.email;
-  db.exists([key], function(err, exists) {
+  db.exists(key, function(err, exists) {
     if (err) {
       return next(err);
     }
@@ -369,7 +369,7 @@ exports.validateRecoverPasswd = function(req, res, next) {
 
 exports.sendEmail = function(req, res, next) {
   const key = 'email:' + req.body.email;
-  db.get([key], function(err, data) {
+  db.get(key, function(err, data) {
     if (err) {
       return next(err);
     }
@@ -379,7 +379,7 @@ exports.sendEmail = function(req, res, next) {
       // Email exists, generate a secure random token
       const token = crypto.randomBytes(48).toString('hex');
       // Token expires after 4 hours
-      db.setex(['token:' + token, 14400, data], function(err) {
+      db.setex('token:' + token, 14400, data, function(err) {
         if (err) {
           return next(err);
         }
@@ -431,7 +431,7 @@ exports.resetPasswd = function(req, res, next) {
   }
 
   const key = 'token:' + req.query.token;
-  db.get([key], function(err, user) {
+  db.get(key, function(err, user) {
     if (err) {
       return next(err);
     }
@@ -443,7 +443,7 @@ exports.resetPasswd = function(req, res, next) {
         .update(salt + req.body.password)
         .digest('hex');
 
-      db.hmset([user, 'salt', salt, 'password', digest], function(err) {
+      db.hmset(user, 'salt', salt, 'password', digest, function(err) {
         if (err) {
           return next(err);
         }
@@ -466,12 +466,12 @@ exports.resetPasswd = function(req, res, next) {
 
 exports.profile = function(req, res, next) {
   const key = 'user:' + req.params.username;
-  db.exists([key], function(err, exists) {
+  db.exists(key, function(err, exists) {
     if (err) {
       return next(err);
     }
     if (exists) {
-      db.hgetall([key], function(err, user) {
+      db.hgetall(key, function(err, user) {
         if (err) {
           return next(err);
         }

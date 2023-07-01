@@ -7,7 +7,8 @@ const limit = 7; // The number of songs to retrieve for each artist
 const parser = JSONStream.parse(['results', true]);
 const popIds = artistIds.pop;
 const rapIds = artistIds.rap;
-const rc = require('redis').createClient();
+const Redis = require('ioredis');
+const rc = new Redis();
 const rockIds = artistIds.rock;
 let rooms = require('../config').rooms;
 let score;
