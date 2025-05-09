@@ -1,7 +1,7 @@
 'use strict';
 
 const artistIds = require('./artist-ids');
-const http = require('http');
+const https = require('https');
 const JSONStream = require('JSONStream');
 const limit = 7; // The number of songs to retrieve for each artist
 const parser = JSONStream.parse(['results', true]);
@@ -24,7 +24,7 @@ const options = {
     popIds.concat(rapIds, rockIds).join() +
     '&entity=song&limit=' +
     limit,
-  port: 80
+  port: 443
 };
 
 /**
@@ -92,7 +92,7 @@ rc.del(rooms, function(err) {
     throw err;
   }
   process.stdout.write('Loading sample tracks... ');
-  http.get(options, function(res) {
+  https.get(options, function(res) {
     res.pipe(parser);
   });
 });
