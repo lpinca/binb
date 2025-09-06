@@ -16,7 +16,6 @@
     "node": ">=16.0.0"
   },
   "dependencies": {
-    "@sendgrid/mail": "^7.3.0",
     "async": "^3.1.1",
     "body-parser": "^1.18.3",
     "canvas": "^2.4.1",
@@ -25,11 +24,12 @@
     "express": "^4.16.4",
     "express-session": "^1.16.1",
     "forwarded-for": "^1.0.1",
+    "ioredis": "^5.3.2",
     "primus": "^8.0.1",
     "primus-emitter": "^3.1.1",
     "primus-rooms": "^3.4.1",
     "pug": "^3.0.2",
-    "ioredis": "^5.3.2",
+    "resend": "^6.0.2",
     "serve-favicon": "^2.5.0",
     "uglify-js": "^3.5.4",
     "ws": "^8.13.0"
