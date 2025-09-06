@@ -17,8 +17,8 @@
   },
   "dependencies": {
     "async": "^3.1.1",
-    "body-parser": "^1.18.3",
-    "canvas": "^2.4.1",
+    "body-parser": "^2.2.0",
+    "canvas": "^3.2.0",
     "connect-redis": "^7.1.0",
     "cookie-parser": "^1.4.4",
     "express": "^4.16.4",
